@@ -2,7 +2,7 @@
   "Id": "NoStopMod",
   "Author": "Luxus",
   "Version": "1.0.0",
-  "ManagerVersion": "1.0.0",
+  "ManagerVersion": "1.0.1",
   "AssemblyName": "NoStopMod.dll",
   "EntryMethod": "NoStopMod.NoStopMod.Load"
 }
