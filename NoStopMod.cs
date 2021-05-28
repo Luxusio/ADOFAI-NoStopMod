@@ -87,6 +87,7 @@ namespace NoStopMod
                     //NoStopMod.mod.Logger.Log("enablegc");
                     GarbageCollector.GCMode = GarbageCollector.Mode.Enabled;
                     System.Runtime.GCSettings.LatencyMode = System.Runtime.GCLatencyMode.Interactive;
+                    GC.Collect();
                 } catch (NotImplementedException e)
                 {
                     NoStopMod.mod.Logger.Log("Exception occur");

@@ -52,6 +52,25 @@ namespace NoStopMod.Patches
             }
         }
 
+        [HarmonyPatch(typeof(scrController), "FailAction")]
+        public static class scrController_FailAction_Patch
+        {
+            private static void Prefix(scrController __instance)
+            {
+                NoStopMod.EnableGC();
+            }
+        }
+
+        [HarmonyPatch(typeof(scrController), "QuitToMainMenu")]
+        internal static class scrController_QuitToMainMenu_Patch
+        {
+            private static void Postfix(scrController __instance)
+            {
+                //NoStopMod.mod.Logger.Log("StartLoadingScene");
+                NoStopMod.EnableGC();
+            }
+        }
+
         [HarmonyPatch(typeof(scrController), "ResetCustomLevel")]
         internal static class scrController_ResetCustomLevel_Patch
         {
@@ -81,6 +100,9 @@ namespace NoStopMod.Patches
                 NoStopMod.EnableGC();
             }
         }
+
+
+        
 
         [HarmonyPatch(typeof(scrUIController), "WipeToBlack")]
         public static class scrUIController_WipeToBlack_Patch
