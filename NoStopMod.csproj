@@ -82,10 +82,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncInput\AsyncInputManager.cs" />
-    <Compile Include="AsyncInput\Patches.cs" />
+    <Compile Include="AsyncInput\AsyncInputPatches.cs" />
     <Compile Include="GarbageCollection\GCManager.cs" />
-    <Compile Include="GarbageCollection\Patches.cs" />
-    <Compile Include="HyperRabbit\HyperRabbitManager.cs" />
+    <Compile Include="GarbageCollection\GCPatches.cs" />
+    <Compile Include="HyperRabbit\HyperRabbitPatches.cs" />
     <Compile Include="NoStopMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

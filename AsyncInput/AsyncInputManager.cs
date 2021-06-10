@@ -22,7 +22,7 @@ namespace NoStopMod.AsyncInput
         //public double sum = 0;
         //public int count = 0;
 
-        private long pauseStart = 0;
+        public long pauseStart = 0;
         public bool jumpToOtherClass = false;
         
         private bool[] mask;
@@ -126,56 +126,12 @@ namespace NoStopMod.AsyncInput
             }
         }
 
-        public static string s(double d, int to=6)
-        {
-            try
-            { 
-                return ("" + d).Substring(0, to);
-            }
-            catch
-            {
-                return "" + d;
-            }
-        }
+        
         // Update()
 
-        [HarmonyPatch(typeof(scrConductor), "Update")]
-        private static class scrConductor_Update_Patch_Time
-        {
-            public static void Prefix(scrConductor __instance)
-            {
-                NoStopMod.asyncInputManager.currTick = DateTime.Now.Ticks;
-            }
-        }
-
-        [HarmonyPatch(typeof(scrController), "TogglePauseGame")]
-        private static class scrController_TogglePauseGame_Patch
-        {
-            public static void Postfix(scrController __instance)
-            {
-                if (__instance.paused)
-                {
-                    NoStopMod.asyncInputManager.pauseStart = NoStopMod.asyncInputManager.currTick;
-                }
-                else if (NoStopMod.asyncInputManager.pauseStart != 0)
-                {
-                    NoStopMod.asyncInputManager.offsetTick += NoStopMod.asyncInputManager.currTick - NoStopMod.asyncInputManager.pauseStart;
-                    NoStopMod.asyncInputManager.pauseStart = 0;
-                }
-            }
-        }
         
-        [HarmonyPatch(typeof(scrController), "Awake_Rewind")]
-        private static class scrController_Awake_Rewind_Patch
-        {
-            public static void Postfix(scrController __instance)
-            {
-                NoStopMod.asyncInputManager.offsetTick = NoStopMod.asyncInputManager.currTick;
-                NoStopMod.asyncInputManager.pauseStart = 0;
-                NoStopMod.asyncInputManager.Start();
-                NoStopMod.mod.Logger.Log(NoStopMod.asyncInputManager.currTick + " Awake_Rewind");
-            }
-        }
+
+        
 
         [HarmonyPatch(typeof(scrController), "CountValidKeysPressed")]
         private static class scrController_CountValidKeysPressed_Patch
@@ -264,8 +220,7 @@ namespace NoStopMod.AsyncInput
                 return true;
                 //long diff = 
                 
-                //__instance.angle = ___snappedLastAngle + (__instance.conductor.songposition_minusi - __instance.conductor.lastHit) / __instance.conductor.crotchet 
-                //    * 3.1415927410125732 * __instance.controller.speed * (double)(__instance.controller.isCW ? 1 : -1);
+                
 
 
                 //NoStopMod.asyncInputManager.currTick = 0;
@@ -283,9 +238,11 @@ namespace NoStopMod.AsyncInput
                     double diff = nowTick - NoStopMod.asyncInputManager.lastHitTick;
                     diff /= 10000000;
 
+                    //__instance.angle = ___snappedLastAngle + (__instance.conductor.songposition_minusi - __instance.conductor.lastHit) / __instance.conductor.crotchet 
+                    //    * 3.1415927410125732 * __instance.controller.speed * (double)(__instance.controller.isCW ? 1 : -1);
 
                     //NoStopMod.mod.Logger.Log("Update_RefreshAngles " + __instance.conductor.lastHit + ", " + NoStopMod.asyncInputManager.lastHitTick + " : " + (NoStopMod.asyncInputManager.lastHitTick / __instance.conductor.lastHit));
-                    
+
                     //NoStopMod.mod.Logger.Log(__instance.conductor.dspTime);
                     //NoStopMod.mod.Logger.Log((__instance.conductor.songposition_minusi - __instance.conductor.lastHit) + ":" + diff + "=>" + (diff / (__instance.conductor.songposition_minusi - __instance.conductor.lastHit)));
 
@@ -327,7 +284,7 @@ namespace NoStopMod.AsyncInput
         {
             if (!GCS.d_oldConductor && !GCS.d_webglConductor)
             {
-                return ((nowTick / 10000000 - scrConductor.calibration_i) * __instance.song.pitch) - __instance.addoffset;
+                return ((nowTick / 10000000.0 - scrConductor.calibration_i) * __instance.song.pitch) - __instance.addoffset;
             }
             else
             {

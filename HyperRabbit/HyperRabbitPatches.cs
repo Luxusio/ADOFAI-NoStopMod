@@ -2,7 +2,7 @@
 
 namespace NoStopMod.HyperRabbit
 {
-    class HyperRabbitManager
+    class HyperRabbitPatches
     {
         
         [HarmonyPatch(typeof(scrPlanet), "SwitchChosen")]
