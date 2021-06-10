@@ -12,15 +12,15 @@ namespace NoStopMod.AsyncInput
 
         private Thread thread;
         public Queue<Tuple<long, List<KeyCode>>> keyQueue = new Queue<Tuple<long, List<KeyCode>>>();
-        public double dspTimeSong;
+        //public double dspTimeSong;
 
         public long offsetTick;
         public long currTick;
         public long lastHitTick;
         public long currHitTick;
 
-        public double sum = 0;
-        public int count = 0;
+        //public double sum = 0;
+        //public int count = 0;
 
         private long pauseStart = 0;
         public bool jumpToOtherClass = false;
@@ -156,16 +156,12 @@ namespace NoStopMod.AsyncInput
                 if (__instance.paused)
                 {
                     NoStopMod.asyncInputManager.pauseStart = NoStopMod.asyncInputManager.currTick;
-                    NoStopMod.mod.Logger.Log(NoStopMod.asyncInputManager.pauseStart + " TogglePauseGame start");
                 }
                 else if (NoStopMod.asyncInputManager.pauseStart != 0)
                 {
                     NoStopMod.asyncInputManager.offsetTick += NoStopMod.asyncInputManager.currTick - NoStopMod.asyncInputManager.pauseStart;
-                    NoStopMod.mod.Logger.Log(NoStopMod.asyncInputManager.currTick + " TogglePauseGame end (" + (NoStopMod.asyncInputManager.currTick - NoStopMod.asyncInputManager.pauseStart) + "ticks");
                     NoStopMod.asyncInputManager.pauseStart = 0;
                 }
-
-
             }
         }
         
@@ -239,6 +235,7 @@ namespace NoStopMod.AsyncInput
                         //__instance.chosenplanet.Update_RefreshAngles();
                         //__instance.Hit();
                     }
+                    
 
                     // this.snappedLastAngle + (this.conductor.songposition_minusi - this.conductor.lastHit) /
                     // this.conductor.crotchet * 3.1415927410125732 * this.controller.speed * (double) (this.controller.isCW ? 1 : -1);
@@ -321,6 +318,11 @@ namespace NoStopMod.AsyncInput
             }
         }
 
+        public void adjustOffsetTick(scrConductor __instance, double ___dspTimeSong)
+        {
+            NoStopMod.asyncInputManager.offsetTick = NoStopMod.asyncInputManager.currTick - (long)((__instance.dspTime - ___dspTimeSong) * 10000000);
+        }
+
         public double getSongPosition(scrConductor __instance, long nowTick)
         {
             if (!GCS.d_oldConductor && !GCS.d_webglConductor)
@@ -334,124 +336,7 @@ namespace NoStopMod.AsyncInput
         }
 
         // Update()
-        [HarmonyPatch(typeof(scrConductor), "Update")]
-        private static class scrConductor_Update_Patch
-        {
-            public static void Postfix(scrConductor __instance, double ___dspTimeSong)
-            {
-                double nowTick = NoStopMod.asyncInputManager.currTick - NoStopMod.asyncInputManager.offsetTick;
-                double diff = nowTick - NoStopMod.asyncInputManager.lastHitTick;
-                diff /= 10000000.0;
-
-                if (NoStopMod.asyncInputManager.pauseStart != 0)
-                {
-                    nowTick -= NoStopMod.asyncInputManager.currTick - NoStopMod.asyncInputManager.pauseStart;
-                }
-
-                double nowSec = nowTick / 10000000;
-                double calculated;
-
-                if (!GCS.d_oldConductor && !GCS.d_webglConductor)
-                {
-                    NoStopMod.asyncInputManager.sum += (nowSec - (__instance.dspTime - ___dspTimeSong));
-                    NoStopMod.asyncInputManager.count++;
-                    //calculated = (double)((float)(__instance.dspTime - ___dspTimeSong - scrConductor.calibration_i) * __instance.song.pitch) - __instance.addoffset;
-
-                    NoStopMod.mod.Logger.Log("New Update " + s(__instance.dspTime) + ", " + s(___dspTimeSong) + ", " + s(nowSec) + " : " + s(nowSec - (__instance.dspTime - ___dspTimeSong)) + " mean : " + (NoStopMod.asyncInputManager.sum / NoStopMod.asyncInputManager.count));
-                }
-                else
-                {
-                    calculated = (double)(__instance.song.time - scrConductor.calibration_i) - __instance.addoffset / (double)__instance.song.pitch;
-                    NoStopMod.mod.Logger.Log("Old Update " + (__instance.song.time) + ", " + nowTick + " : " + (nowTick - (__instance.song.time)));
-                }
-
-            }
-        }
-
         
-        [HarmonyPatch(typeof(scrController), "OnMusicScheduled")]
-        private static class scrController_Rewind_Patch
-        {
-            public static void Postfix(scrController __instance)
-            {
-                NoStopMod.asyncInputManager.sum = 0;
-                NoStopMod.asyncInputManager.count = 0;
-
-                NoStopMod.asyncInputManager.jumpToOtherClass = true;
-                __instance.conductor.Start();
-                
-                NoStopMod.mod.Logger.Log("OnMusicScheduled");
-            }
-        }
-
-        [HarmonyPatch(typeof(scrConductor), "Start")]
-        private static class scrConductor_Start_Patch
-        {
-            public static bool Prefix(scrConductor __instance, double ___dspTimeSong)
-            {
-                if (NoStopMod.asyncInputManager.jumpToOtherClass)
-                {
-                    NoStopMod.asyncInputManager.jumpToOtherClass = false;
-                    NoStopMod.asyncInputManager.offsetTick = NoStopMod.asyncInputManager.currTick - (long)((__instance.dspTime - ___dspTimeSong) * 10000000);
-
-                    return false;
-                }
-                return true;
-            }
-        }
-
-        [HarmonyPatch(typeof(scrConductor), "Rewind")]
-        private static class scrConductor_Rewind_Patch
-        {
-            public static void Postfix(scrConductor __instance, double ___dspTimeSong)
-            {
-                NoStopMod.asyncInputManager.sum = 0;
-                NoStopMod.asyncInputManager.count = 0;
-
-                NoStopMod.asyncInputManager.dspTimeSong = ___dspTimeSong;
-                NoStopMod.asyncInputManager.offsetTick = NoStopMod.asyncInputManager.currTick;
-                NoStopMod.mod.Logger.Log("Rewind " + ___dspTimeSong);
-            }
-        }
-
-        [HarmonyPatch(typeof(scrConductor), "StartMusicCo")]
-        private static class scrConductor_StartMusicCo_Patch
-        {
-            public static void Prefix(scrConductor __instance, double ___dspTimeSong, double ___buffer)
-            {
-                NoStopMod.asyncInputManager.sum = 0;
-                NoStopMod.asyncInputManager.count = 0;
-                
-                NoStopMod.asyncInputManager.dspTimeSong = ___dspTimeSong;
-                NoStopMod.asyncInputManager.offsetTick = NoStopMod.asyncInputManager.currTick;
-                NoStopMod.mod.Logger.Log("StartMusicCo " + ___dspTimeSong);
-            }
-        }
-
-        [HarmonyPatch(typeof(scrConductor), "ScrubMusicToTile")]
-        private static class scrConductor_ScrubMusicToTile_Patch
-        {
-            public static void Postfix(scrConductor __instance)
-            {
-                NoStopMod.asyncInputManager.sum = 0;
-                NoStopMod.asyncInputManager.count = 0;
-                
-                NoStopMod.asyncInputManager.lastHitTick = 0;
-                NoStopMod.asyncInputManager.offsetTick = NoStopMod.asyncInputManager.currTick - NoStopMod.asyncInputManager.lastHitTick;
-            }
-        }
-
-        [HarmonyPatch(typeof(scrConductor), "DesyncFix")]
-        private static class scrConductor_DesyncFix_Patch
-        {
-            public static void Postfix(scrConductor __instance)
-            {
-                NoStopMod.asyncInputManager.sum = 0;
-                NoStopMod.asyncInputManager.count = 0;
-                
-                NoStopMod.asyncInputManager.offsetTick = NoStopMod.asyncInputManager.currTick;
-            }
-        }
 
 
     }
