@@ -4,35 +4,35 @@ using UnityEngine;
 
 namespace NoStopMod.Patches
 {
-    internal static class Patches
+    public static class Patches
     {
         [HarmonyPatch(typeof(CustomLevel), "Play")]
-        public static class CustomLevel_Play_Patch
+        private static class CustomLevel_Play_Patch
         {
             private static void Prefix(CustomLevel __instance)
             {
                 //NoStopMod.mod.Logger.Log("Play");
-                NoStopMod.DisableGC();
+                NoStopMod.gcManager.DisableGC();
             }
         }
 
         [HarmonyPatch(typeof(scnEditor), "ResetScene")]
-        public static class scnEditor_ResetScene_Patch
+        private static class scnEditor_ResetScene_Patch
         {
             private static void Postfix(scnEditor __instance)
             {
                 //NoStopMod.mod.Logger.Log("ResetScene");
-                NoStopMod.EnableGC();
+                NoStopMod.gcManager.EnableGC();
             }
         }
 
         [HarmonyPatch(typeof(scnEditor), "SaveBackup")]
-        public static class scnEditor_SaveBackup_Patch
+        private static class scnEditor_SaveBackup_Patch
         {
             private static bool Prefix(scnEditor __instance)
             {
                 //NoStopMod.mod.Logger.Log("SaveBackup");
-                if (NoStopMod.GetDisableAutoSave())
+                if (NoStopMod.gcManager.GetDisableAutoSave())
                 {
                     //NoStopMod.mod.Logger.Log("Cancel AutoSave");
                     return false;
@@ -43,74 +43,72 @@ namespace NoStopMod.Patches
         }
 
         [HarmonyPatch(typeof(scrController), "Awake")]
-        public static class scrController_Awake_Patch
+        private static class scrController_Awake_Patch
         {
             public static void Postfix(scrController __instance)
             {
                 //NoStopMod.mod.Logger.Log("Awake");
-                NoStopMod.EnableGC();
+                NoStopMod.gcManager.EnableGC();
             }
         }
 
         [HarmonyPatch(typeof(scrController), "FailAction")]
-        public static class scrController_FailAction_Patch
+        private static class scrController_FailAction_Patch
         {
             private static void Prefix(scrController __instance)
             {
-                NoStopMod.EnableGC();
+                NoStopMod.gcManager.EnableGC();
             }
         }
 
         [HarmonyPatch(typeof(scrController), "QuitToMainMenu")]
-        internal static class scrController_QuitToMainMenu_Patch
+        private static class scrController_QuitToMainMenu_Patch
         {
             private static void Postfix(scrController __instance)
             {
                 //NoStopMod.mod.Logger.Log("StartLoadingScene");
-                NoStopMod.EnableGC();
+                NoStopMod.gcManager.EnableGC();
             }
         }
 
         [HarmonyPatch(typeof(scrController), "ResetCustomLevel")]
-        internal static class scrController_ResetCustomLevel_Patch
+        private static class scrController_ResetCustomLevel_Patch
         {
             private static void Postfix(scrController __instance)
             {
                 //NoStopMod.mod.Logger.Log("ResetCustomLevel");
-                NoStopMod.EnableGC();
+                NoStopMod.gcManager.EnableGC();
             }
         }
 
         [HarmonyPatch(typeof(scrController), "Restart")]
-        public static class scrController_Restart_Patch
+        private static class scrController_Restart_Patch
         {
             private static void Prefix(scrController __instance)
             {
                 //NoStopMod.mod.Logger.Log("Restart");
-                NoStopMod.EnableGC();
+                NoStopMod.gcManager.EnableGC();
             }
         }
 
         [HarmonyPatch(typeof(scrController), "StartLoadingScene")]
-        internal static class scrController_StartLoadingScene_Patch
+        private static class scrController_StartLoadingScene_Patch
         {
             private static void Postfix(scrController __instance)
             {
                 //NoStopMod.mod.Logger.Log("StartLoadingScene");
-                NoStopMod.EnableGC();
+                NoStopMod.gcManager.EnableGC();
             }
         }
-
-
         
 
         [HarmonyPatch(typeof(scrUIController), "WipeToBlack")]
-        public static class scrUIController_WipeToBlack_Patch
+        private static class scrUIController_WipeToBlack_Patch
         {
             private static void Postfix(scrUIController __instance)
             {
                 //NoStopMod.mod.Logger.Log("WipeToBlack");
-                NoStopMod.EnableGC();
+                NoStopMod.gcManager.EnableGC();
             }
         }
 
