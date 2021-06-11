@@ -1,6 +1,8 @@
 ﻿using DG.Tweening;
 using HarmonyLib;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace NoStopMod.AsyncInput
@@ -19,6 +21,26 @@ namespace NoStopMod.AsyncInput
                 return "" + d;
             }
         }
+        
+        [HarmonyPatch(typeof(scrController), "Awake")]
+        private static class scrController_Awake_Patch
+        {
+            public static void Postfix(scrController __instance)
+            {
+                NoStopMod.asyncInputManager.jumpToOtherClass = true;
+                __instance.conductor.Start();
+                NoStopMod.asyncInputManager.Start();
+            }
+        }
+        
+        [HarmonyPatch(typeof(scrController), "OnApplicationQuit")]
+        private static class scrController_OnApplicationQuit_Patch
+        {
+            public static void Prefix(scrController __instance)
+            {
+                NoStopMod.asyncInputManager.Stop();
+            }
+        }
 
         [HarmonyPatch(typeof(scrConductor), "Update")]
         private static class scrConductor_Update_Patch_Time
@@ -30,28 +52,28 @@ namespace NoStopMod.AsyncInput
             }
         }
 
-        //[HarmonyPatch(typeof(scrController), "PlayerControl_Update")]
-        //private static class scrController_PlayerControl_Update_Patch
-        //{ 
-        //    public static void Postfix(scrController __instance)
-        //    {
-        //        while (NoStopMod.asyncInputManager.keyQueue.Any())
-        //        {
-        //            long tick;
-        //            List<KeyCode> keyCodes;
-        //            NoStopMod.asyncInputManager.keyQueue.Dequeue().Deconstruct(out tick, out keyCodes);
+        [HarmonyPatch(typeof(scrController), "PlayerControl_Update")]
+        private static class scrController_PlayerControl_Update_Patch
+        {
+            public static void Postfix(scrController __instance)
+            {
+                while (NoStopMod.asyncInputManager.keyQueue.Any())
+                {
+                    long tick;
+                    List<KeyCode> keyCodes;
+                    NoStopMod.asyncInputManager.keyQueue.Dequeue().Deconstruct(out tick, out keyCodes);
 
-        //            //if (!scrController.isGameWorld) continue;
+                    if (AudioListener.pause) continue;
 
-        //            for (int i=0;i< keyCodes.Count(); i++)
-        //            {
-        //                __instance.chosenplanet.Update_RefreshAngles();
-        //                __instance.Hit();
-        //            }
+                    for (int i = 0; i < keyCodes.Count(); i++)
+                    {
+                        __instance.chosenplanet.Update_RefreshAngles();
+                        __instance.Hit();
+                    }
 
-        //        }
-        //    }
-        //}
+                }
+            }
+        }
 
         [HarmonyPatch(typeof(scrController), "CountValidKeysPressed")]
         private static class scrController_CountValidKeysPressed_Patch
@@ -60,7 +82,7 @@ namespace NoStopMod.AsyncInput
             {
                 if (__result != 0)
                 {
-                    //__result = 0;
+                    __result = 0;
                 }
             }
         }
@@ -68,8 +90,10 @@ namespace NoStopMod.AsyncInput
         [HarmonyPatch(typeof(scrPlanet), "Update_RefreshAngles")]
         private static class scrPlanet_Update_RefreshAngles_Patch
         {
-            public static bool Prefix(scrPlanet __instance, double ___snappedLastAngle)
+            public static bool Prefix(scrPlanet __instance, ref double ___snappedLastAngle)
             {
+                if (!__instance.isChosen || __instance.conductor.crotchet == 0.0) return false;
+
                 if (NoStopMod.asyncInputManager.jumpToOtherClass)
                 {
                     NoStopMod.asyncInputManager.jumpToOtherClass = false;
@@ -125,36 +149,7 @@ namespace NoStopMod.AsyncInput
                 return false;
             }
         }
-
-
-
-        //[HarmonyPatch(typeof(scrController), "TogglePauseGame")]
-        //private static class scrController_TogglePauseGame_Patch
-        //{
-        //    public static void Postfix(scrController __instance)
-        //    {
-        //        if (__instance.paused)
-        //        {
-        //            NoStopMod.asyncInputManager.pauseStart = NoStopMod.asyncInputManager.currTick;
-        //        }
-        //        else if (NoStopMod.asyncInputManager.pauseStart != 0)
-        //        {
-        //            NoStopMod.asyncInputManager.offsetTick += NoStopMod.asyncInputManager.currTick - NoStopMod.asyncInputManager.pauseStart;
-        //            NoStopMod.asyncInputManager.pauseStart = 0;
-        //        }
-        //    }
-        //}
-
-        [HarmonyPatch(typeof(scrController), "Awake_Rewind")]
-        private static class scrController_Awake_Rewind_Patch
-        {
-            public static void Postfix(scrController __instance)
-            {
-                NoStopMod.asyncInputManager.jumpToOtherClass = true;
-                __instance.conductor.Start();
-                //NoStopMod.asyncInputManager.Start();
-            }
-        }
+        
         
         [HarmonyPatch(typeof(scrConductor), "Update")]
         private static class scrConductor_Update_Patch

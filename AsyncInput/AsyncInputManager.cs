@@ -11,20 +11,13 @@ namespace NoStopMod.AsyncInput
 
         private Thread thread;
         public Queue<Tuple<long, List<KeyCode>>> keyQueue = new Queue<Tuple<long, List<KeyCode>>>();
-        //public double dspTimeSong;
 
-        public long offsetTick;
         public long currTick;
         public long prevTick;
 
-        //public long lastHitTick;
-        //public double lastHitSec;
+        public long offsetTick;
         public long currPressTick;
-
-        //public double sum = 0;
-        //public int count = 0;
-
-        public long pauseStart = 0;
+        
         public bool jumpToOtherClass = false;
         
         private bool[] mask;
@@ -36,7 +29,6 @@ namespace NoStopMod.AsyncInput
 
             prevTick = DateTime.Now.Ticks;
             currTick = prevTick;
-
         }
 
         private void OnToggle(bool enabled)
@@ -54,8 +46,8 @@ namespace NoStopMod.AsyncInput
         public void Start()
         {
             Stop();
-            //thread = new Thread(Run);
-            //thread.Start();
+            thread = new Thread(Run);
+            thread.Start();
         }
 
         public void Stop()
@@ -150,7 +142,7 @@ namespace NoStopMod.AsyncInput
 
         public double getAngle(scrPlanet __instance, double ___snappedLastAngle, long nowTick)
         {
-            return ___snappedLastAngle + (NoStopMod.asyncInputManager.getSongPosition(__instance.conductor, nowTick) - __instance.conductor.lastHit) / __instance.conductor.crotchet
+            return ___snappedLastAngle + (this.getSongPosition(__instance.conductor, nowTick) - __instance.conductor.lastHit) / __instance.conductor.crotchet
                 * 3.141592653598793238 * __instance.controller.speed * (double)(__instance.controller.isCW ? 1 : -1);
         }
         
