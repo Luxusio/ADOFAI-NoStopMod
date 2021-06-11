@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using System;
+using UnityEngine;
 
 namespace NoStopMod.AsyncInput
 {
@@ -26,6 +27,7 @@ namespace NoStopMod.AsyncInput
         {
             public static void Prefix(scrConductor __instance)
             {
+                NoStopMod.asyncInputManager.prevTick = NoStopMod.asyncInputManager.currTick;
                 NoStopMod.asyncInputManager.currTick = DateTime.Now.Ticks;
             }
         }
@@ -65,14 +67,69 @@ namespace NoStopMod.AsyncInput
         {
             public static void Postfix(scrConductor __instance, double ___dspTimeSong)
             {
-                if (__instance.isGameWorld)
+                if (AudioListener.pause)
                 {
-                    long nowTick = NoStopMod.asyncInputManager.currTick - NoStopMod.asyncInputManager.offsetTick;
-                    
-                    double calculated = NoStopMod.asyncInputManager.getSongPosition(__instance, nowTick);
-                    //NoStopMod.mod.Logger.Log("New Update " + s(__instance.songposition_minusi) + ", " + s(calculated) + " : " + s(calculated - __instance.songposition_minusi));
-                    __instance.songposition_minusi = calculated;
+                    NoStopMod.asyncInputManager.adjustOffsetTick(__instance, ___dspTimeSong);
                 }
+
+                {
+
+                    //long nowTick = NoStopMod.asyncInputManager.currTick - NoStopMod.asyncInputManager.offsetTick;
+                    //double calculated = NoStopMod.asyncInputManager.getSongPosition(__instance, nowTick);
+                    //NoStopMod.mod.Logger.Log("New Update " + s(__instance.dspTime) + ", " + s(___dspTimeSong) + "," + s(__instance.songposition_minusi) + ", " + s(calculated) + " : " + s(calculated - __instance.songposition_minusi));
+                    //__instance.songposition_minusi = calculated;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(scrPlanet), "MoveToNextFloor")]
+        private static class scrPlanet_Rewind_Patch
+        {
+            public static void Postfix(scrPlanet __instance)
+            {
+                long nowTick = (NoStopMod.asyncInputManager.currTick - NoStopMod.asyncInputManager.offsetTick);
+                NoStopMod.asyncInputManager.lastHitSec = NoStopMod.asyncInputManager.getSongPosition(__instance.conductor, nowTick);
+
+                // diffTime (from last angle to current)
+                // ___snappedLastAngle + (diffTime) 
+                //  ;
+
+                // ((nowTick / 10000000.0 - scrConductor.calibration_i) * __instance.song.pitch) - __instance.addoffset;
+
+                //this.conductor.lastHit = this.conductor.lastHit + (exitAngle - (exitAngle % 2)) 
+                // (x % m + m) % m;
+                //     ;
+
+
+                // diffTime (from last angle to current)
+                // ___snappedLastAngle + (diffTime) / __instance.conductor.crotchet
+                // *3.141592653598793238 * __instance.controller.speed * (double)(__instance.controller.isCW ? 1 : -1);
+
+                // ((nowTick / 10000000.0 - scrConductor.calibration_i) * __instance.song.pitch) - __instance.addoffset;
+
+                //this.conductor.lastHit += ((double)exitAngle - this.scrMisc.mod((double)(exitAngle + 3.1415927f), 6.2831854820251465)) * (double)(this.controller.isCW ? 1 : -1) 
+                //    / 3.1415927410125732 * this.conductor.crotchet / this.controller.speed;
+
+                /*
+                
+                if (scrController.isGameWorld)
+
+                num2 = this.targetExitAngle;
+
+
+                else
+
+
+
+
+
+                 */
+
+                //NoStopMod.asyncInputManager.lastHitTick = (NoStopMod.asyncInputManager.currTick - NoStopMod.asyncInputManager.offsetTick);
+
+                //double lastHitSec = NoStopMod.asyncInputManager.lastHitTick / 10000000;
+                //NoStopMod.mod.Logger.Log("MoveToNextFloor " + __instance.conductor.lastHit + ", " + lastHitSec + " , err: " + (lastHitSec - __instance.conductor.lastHit));
+
             }
         }
 
@@ -107,6 +164,9 @@ namespace NoStopMod.AsyncInput
             public static void Postfix(scrConductor __instance, double ___dspTimeSong)
             {
                 NoStopMod.asyncInputManager.adjustOffsetTick(__instance, ___dspTimeSong);
+                NoStopMod.asyncInputManager.lastHitTick = 0;
+                NoStopMod.mod.Logger.Log("Rewind");
+
             }
         }
 
@@ -116,6 +176,7 @@ namespace NoStopMod.AsyncInput
             public static void Prefix(scrConductor __instance, double ___dspTimeSong)
             {
                 NoStopMod.asyncInputManager.adjustOffsetTick(__instance, ___dspTimeSong);
+                NoStopMod.mod.Logger.Log("StartMusicCo");
             }
         }
 
@@ -125,6 +186,8 @@ namespace NoStopMod.AsyncInput
             public static void Postfix(scrConductor __instance, double ___dspTimeSong)
             {
                 NoStopMod.asyncInputManager.adjustOffsetTick(__instance, ___dspTimeSong);
+                NoStopMod.asyncInputManager.lastHitTick = (long) (__instance.lastHit * 10000000.0);
+                NoStopMod.mod.Logger.Log("ScrubMusicToTile");
             }
         }
 
@@ -134,6 +197,7 @@ namespace NoStopMod.AsyncInput
             public static void Postfix(scrConductor __instance, double ___dspTimeSong)
             {
                 NoStopMod.asyncInputManager.adjustOffsetTick(__instance, ___dspTimeSong);
+                NoStopMod.mod.Logger.Log("DesyncFix");
             }
         }
 

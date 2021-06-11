@@ -16,7 +16,10 @@ namespace NoStopMod.AsyncInput
 
         public long offsetTick;
         public long currTick;
+        public long prevTick;
+
         public long lastHitTick;
+        public double lastHitSec;
         public long currHitTick;
 
         //public double sum = 0;
@@ -31,7 +34,10 @@ namespace NoStopMod.AsyncInput
         {
             NoStopMod.onToggleListeners.Add(OnToggle);
             mask = Enumerable.Repeat(false, 1024).ToArray();
-            
+
+            prevTick = DateTime.Now.Ticks;
+            currTick = prevTick;
+
         }
 
         private void OnToggle(bool enabled)
@@ -49,8 +55,8 @@ namespace NoStopMod.AsyncInput
         public void Start()
         {
             Stop();
-            thread = new Thread(Run);
-            thread.Start();
+            //thread = new Thread(Run);
+            //thread.Start();
         }
 
         public void Stop()
@@ -230,49 +236,47 @@ namespace NoStopMod.AsyncInput
 
             public static void Postfix(scrPlanet __instance, double ___snappedLastAngle)
             {
-
-
+                
                 if (__instance.isChosen)
                 {
                     long nowTick = NoStopMod.asyncInputManager.currTick - NoStopMod.asyncInputManager.offsetTick;
-                    double diff = nowTick - NoStopMod.asyncInputManager.lastHitTick;
-                    diff /= 10000000;
+                    __instance.angle = NoStopMod.asyncInputManager.getAngle(__instance, ___snappedLastAngle, nowTick);
 
-                    //__instance.angle = ___snappedLastAngle + (__instance.conductor.songposition_minusi - __instance.conductor.lastHit) / __instance.conductor.crotchet 
-                    //    * 3.1415927410125732 * __instance.controller.speed * (double)(__instance.controller.isCW ? 1 : -1);
+                    //NoStopMod.mod.Logger.Error("aa" + ___snappedLastAngle + ", " + NoStopMod.asyncInputManager.getSongPosition(__instance.conductor, nowTick) + ", " + nowTick + ", " + __instance.conductor.crotchet);
 
-                    //NoStopMod.mod.Logger.Log("Update_RefreshAngles " + __instance.conductor.lastHit + ", " + NoStopMod.asyncInputManager.lastHitTick + " : " + (NoStopMod.asyncInputManager.lastHitTick / __instance.conductor.lastHit));
-
-                    //NoStopMod.mod.Logger.Log(__instance.conductor.dspTime);
-                    //NoStopMod.mod.Logger.Log((__instance.conductor.songposition_minusi - __instance.conductor.lastHit) + ":" + diff + "=>" + (diff / (__instance.conductor.songposition_minusi - __instance.conductor.lastHit)));
-
-                    // TODO : change constant.
-                    //__instance.angle = ___snappedLastAngle + (diff / __instance.conductor.crotchet * 3.14159265358979 * 1.0 * 
-                    //    __instance.controller.speed * (double)(__instance.controller.isCW ? 1 : -1)); 
-
-                    //NoStopMod.mod.Logger.Log(__instance.angle + ":" + ___snappedLastAngle + ", " + __instance.conductor.songposition_minusi + ", " + 
-                    //    __instance.conductor.lastHit + " & " + diff);
+                    //NoStopMod.mod.Logger.Log(__instance.conductor.lastHit + ", " + (NoStopMod.asyncInputManager.lastHitSec)  + ":" + (__instance.conductor.lastHit - NoStopMod.asyncInputManager.lastHitSec));
+                    //string str = ___snappedLastAngle + ", " + (NoStopMod.asyncInputManager.getSongPosition(__instance.conductor, nowTick)) + ", " + (__instance.conductor.lastHit) + ", " + __instance.conductor.crotchet +
+                    //    ", " + __instance.controller.speed + ", " +  (double)(__instance.controller.isCW ? 1 : -1);
+                    //double r = ___snappedLastAngle + (NoStopMod.asyncInputManager.getSongPosition(__instance.conductor, nowTick) - NoStopMod.asyncInputManager.lastHitSec) / __instance.conductor.crotchet
+                    //    * 3.141592653598793238 * __instance.controller.speed * (double)(__instance.controller.isCW ? 1 : -1);
+                    //str += ", result:" + r + ", real:" + __instance.angle + ", " + AudioListener.pause;
+                    //NoStopMod.mod.Logger.Log(str);
+                    //__instance.angle = r;
 
                 }
-
-
-                //NoStopMod.asyncInputManager.offsetTick = DateTime.Now.Ticks;
-                //NoStopMod.mod.Logger.Log("Update_RefreshAngles " + ___dspTimeSong);
             }
         }
 
 
-        [HarmonyPatch(typeof(scrPlanet), "MoveToNextFloor")]
-        private static class scrPlanet_Rewind_Patch
+        
+
+        // Update LastHitTick
+        // scrConductor.Rewind
+        // scrConductor.ScrubMusicToTile
+        // scrPlanet.MoveToNextFloor
+
+        public void adjustLastHitTick(scrConductor __instance, long tick)
         {
-            public static void Postfix(scrPlanet __instance)
-            {
-                NoStopMod.asyncInputManager.lastHitTick = NoStopMod.asyncInputManager.currTick - NoStopMod.asyncInputManager.offsetTick;
 
-                double lastHitSec = NoStopMod.asyncInputManager.lastHitTick / 10000000;
-                NoStopMod.mod.Logger.Log("MoveToNextFloor " + __instance.conductor.lastHit + ", " + lastHitSec + " , err: " + (lastHitSec - __instance.conductor.lastHit));
+            // scrConductor.Rewind
+            // conductor.lastHit = 0.0f
 
-            }
+            // scrConductor.ScrubMusicToTile
+            // this.lastHit = base.lm.listFloors[tileID].entryTime;
+
+            // scrPlanet.MoveToNextFloor
+            // this.conductor.lastHit += ((double)exitAngle - this.snappedLastAngle) * (double)(this.controller.isCW ? 1 : -1) / 3.1415927410125732 * this.conductor.crotchet / this.controller.speed;
+            
         }
 
         public void adjustOffsetTick(scrConductor __instance, double ___dspTimeSong)
@@ -288,8 +292,14 @@ namespace NoStopMod.AsyncInput
             }
             else
             {
-                return (double)(__instance.song.time - scrConductor.calibration_i) - __instance.addoffset / (double)__instance.song.pitch;
+                return (__instance.song.time - scrConductor.calibration_i) - __instance.addoffset / __instance.song.pitch;
             }
+        }
+
+        public double getAngle(scrPlanet __instance, double ___snappedLastAngle, long nowTick)
+        {
+            return ___snappedLastAngle + (NoStopMod.asyncInputManager.getSongPosition(__instance.conductor, nowTick) - __instance.conductor.lastHit) / __instance.conductor.crotchet
+                * 3.141592653598793238 * __instance.controller.speed * (double)(__instance.controller.isCW ? 1 : -1);
         }
 
         // Update()
