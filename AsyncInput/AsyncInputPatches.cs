@@ -10,17 +10,17 @@ namespace NoStopMod.AsyncInput
     public static class AsyncInputPatches
     {
 
-        public static string s(double d, int to = 6)
-        {
-            try
-            {
-                return ("" + d).Substring(0, to);
-            }
-            catch
-            {
-                return "" + d;
-            }
-        }
+        //public static string s(double d, int to = 6)
+        //{
+        //    try
+        //    {
+        //        return ("" + d).Substring(0, to);
+        //    }
+        //    catch
+        //    {
+        //        return "" + d;
+        //    }
+        //}
         
         [HarmonyPatch(typeof(scrController), "Awake")]
         private static class scrController_Awake_Patch
@@ -50,27 +50,46 @@ namespace NoStopMod.AsyncInput
                 NoStopMod.asyncInputManager.prevTick = NoStopMod.asyncInputManager.currTick;
                 NoStopMod.asyncInputManager.currTick = DateTime.Now.Ticks;
             }
+
+            public static void Postfix(scrConductor __instance, double ___dspTimeSong)
+            {   
+                if (AudioListener.pause)
+                {
+                    NoStopMod.asyncInputManager.adjustOffsetTick(__instance, ___dspTimeSong);
+                }
+
+                if (__instance.controller.GetState().CompareTo(scrController.States.PlayerControl) != 0)
+                {
+                    //NoStopMod.mod.Logger.Log("Update " + __instance.controller.GetState() + ", " + ((Enum)scrController.States.PlayerControl) + " : " + (__instance.controller.GetState() != (Enum)scrController.States.PlayerControl));
+                    NoStopMod.asyncInputManager.keyQueue.Clear();
+                }
+
+            }
         }
 
         [HarmonyPatch(typeof(scrController), "PlayerControl_Update")]
         private static class scrController_PlayerControl_Update_Patch
         {
-            public static void Postfix(scrController __instance)
+            public static void Prefix(scrController __instance)
             {
+                bool pause = AudioListener.pause || RDC.auto;
                 while (NoStopMod.asyncInputManager.keyQueue.Any())
                 {
                     long tick;
                     List<KeyCode> keyCodes;
                     NoStopMod.asyncInputManager.keyQueue.Dequeue().Deconstruct(out tick, out keyCodes);
 
-                    if (AudioListener.pause) continue;
+                    if (pause) continue;
 
+                    NoStopMod.asyncInputManager.currPressTick = tick - NoStopMod.asyncInputManager.offsetTick;
+
+                    scrController controller = __instance.controller;
                     for (int i = 0; i < keyCodes.Count(); i++)
                     {
-                        __instance.chosenplanet.Update_RefreshAngles();
-                        __instance.Hit();
+                        NoStopMod.asyncInputManager.jumpToOtherClass = true;
+                        controller.chosenplanet.Update_RefreshAngles();
+                        controller.Hit();
                     }
-
                 }
             }
         }
@@ -92,7 +111,6 @@ namespace NoStopMod.AsyncInput
         {
             public static bool Prefix(scrPlanet __instance, ref double ___snappedLastAngle)
             {
-                if (!__instance.isChosen || __instance.conductor.crotchet == 0.0) return false;
 
                 if (NoStopMod.asyncInputManager.jumpToOtherClass)
                 {
@@ -101,6 +119,8 @@ namespace NoStopMod.AsyncInput
 
                     return false;
                 }
+
+                if (!__instance.isChosen || __instance.conductor.crotchet == 0.0) return false;
 
                 if (!GCS.d_stationary)
                 {
@@ -149,21 +169,6 @@ namespace NoStopMod.AsyncInput
                 return false;
             }
         }
-        
-        
-        [HarmonyPatch(typeof(scrConductor), "Update")]
-        private static class scrConductor_Update_Patch
-        {
-            public static void Postfix(scrConductor __instance, double ___dspTimeSong)
-            {
-                if (AudioListener.pause)
-                {
-                    NoStopMod.asyncInputManager.adjustOffsetTick(__instance, ___dspTimeSong);
-                }
-            }
-        }
-
-        
 
         [HarmonyPatch(typeof(scrController), "OnMusicScheduled")]
         private static class scrController_Rewind_Patch
@@ -196,8 +201,7 @@ namespace NoStopMod.AsyncInput
             public static void Postfix(scrConductor __instance, double ___dspTimeSong)
             {
                 NoStopMod.asyncInputManager.adjustOffsetTick(__instance, ___dspTimeSong);
-                //NoStopMod.mod.Logger.Log("Rewind");
-
+                NoStopMod.mod.Logger.Log("Rewind");
             }
         }
 
@@ -207,7 +211,7 @@ namespace NoStopMod.AsyncInput
             public static void Prefix(scrConductor __instance, double ___dspTimeSong)
             {
                 NoStopMod.asyncInputManager.adjustOffsetTick(__instance, ___dspTimeSong);
-                //NoStopMod.mod.Logger.Log("StartMusicCo");
+                NoStopMod.mod.Logger.Log("StartMusicCo");
             }
         }
 
@@ -217,7 +221,7 @@ namespace NoStopMod.AsyncInput
             public static void Postfix(scrConductor __instance, double ___dspTimeSong)
             {
                 NoStopMod.asyncInputManager.adjustOffsetTick(__instance, ___dspTimeSong);
-                //NoStopMod.mod.Logger.Log("ScrubMusicToTile");
+                NoStopMod.mod.Logger.Log("ScrubMusicToTile");
             }
         }
 
@@ -227,7 +231,7 @@ namespace NoStopMod.AsyncInput
             public static void Postfix(scrConductor __instance, double ___dspTimeSong)
             {
                 NoStopMod.asyncInputManager.adjustOffsetTick(__instance, ___dspTimeSong);
-                //NoStopMod.mod.Logger.Log("DesyncFix");
+                NoStopMod.mod.Logger.Log("DesyncFix");
             }
         }
 

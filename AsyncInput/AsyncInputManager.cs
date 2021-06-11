@@ -88,7 +88,6 @@ namespace NoStopMod.AsyncInput
 
                 if (currTick > prevTick)
                 {
-
                     prevTick = currTick;
                     List<KeyCode> keyCodes = new List<KeyCode>();
 
@@ -110,14 +109,8 @@ namespace NoStopMod.AsyncInput
                     
                     if (keyCodes.Any())
                     {
-                        keyQueue.Enqueue(new Tuple<long, List<KeyCode>>(DateTime.Now.Ticks, keyCodes));
-                        //string str = DateTime.Now.Ticks + " press ";
-                        //foreach (KeyCode keyCode in keyCodes)
-                        //{
-                        //    str += keyCode.ToString() + ", ";
-                        //}
-                        //str += keyQueue.Count() + "개 " + keyQueue.Any();
-                        //NoStopMod.mod.Logger.Log(str);
+                        keyCodes = keyCodes.GetRange(0, 4);
+                        keyQueue.Enqueue(new Tuple<long, List<KeyCode>>(currTick, keyCodes));
                     }
                 }
             }
