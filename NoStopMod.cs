@@ -17,7 +17,7 @@ namespace NoStopMod
         public static AsyncInputManager asyncInputManager;
         public static List<Action<bool>> onToggleListeners;
 
-        //public static bool isEnabled = false;
+        public static bool isEnabled = false;
         //public static bool ready = false;
 
         public static bool Load(UnityModManager.ModEntry modEntry)
@@ -46,6 +46,7 @@ namespace NoStopMod
                 NoStopMod.harmony.UnpatchAll(NoStopMod.harmony.Id);
             }
 
+            isEnabled = enabled;
             foreach (Action<bool> listener in onToggleListeners)
             {
                 listener.Invoke(enabled);
