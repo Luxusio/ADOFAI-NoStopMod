@@ -19,16 +19,27 @@ namespace NoStopMod.AsyncInput
         public long currPressTick;
         
         public bool jumpToOtherClass = false;
-        
+
         private bool[] mask;
+        private bool[] disable;
 
         public AsyncInputManager()
         {
             NoStopMod.onToggleListeners.Add(OnToggle);
-            mask = Enumerable.Repeat(false, 1024).ToArray();
 
             prevTick = DateTime.Now.Ticks;
             currTick = prevTick;
+            
+            mask = Enumerable.Repeat(false, 1024).ToArray();
+            disable = Enumerable.Repeat(false, 1024).ToArray();
+            disable[(int)KeyCode.BackQuote] = true;
+            disable[(int)KeyCode.Alpha1] = true;
+            disable[(int)KeyCode.Alpha2] = true;
+            disable[(int)KeyCode.Alpha3] = true;
+            disable[(int)KeyCode.Alpha4] = true;
+            disable[(int)KeyCode.Alpha5] = true;
+            disable[(int)KeyCode.Alpha6] = true;
+            disable[(int)KeyCode.Alpha7] = true;
         }
 
         private void OnToggle(bool enabled)
@@ -61,6 +72,7 @@ namespace NoStopMod.AsyncInput
 
         private bool GetKeyDown(int idx)
         {
+            if (disable[idx]) return false;
             if (mask[idx])
             {
                 if (!Input.GetKey((KeyCode)idx))
@@ -109,16 +121,22 @@ namespace NoStopMod.AsyncInput
                     
                     if (keyCodes.Any())
                     {
-                        keyCodes = keyCodes.GetRange(0, 4);
-                        keyQueue.Enqueue(new Tuple<long, List<KeyCode>>(currTick, keyCodes));
+                        //String str = "press " + keyCodes.Count();
+                        //foreach (KeyCode code in keyCodes)
+                        //{
+                        //    str += code + "(" + ((int)code) + "), ";
+                        //}
+                        //NoStopMod.mod.Logger.Log(str);
+                        keyQueue.Enqueue(new Tuple<long, List<KeyCode>>(currTick, keyCodes.GetRange(0, Math.Min(4, keyCodes.Count()))));
                     }
                 }
             }
         }
 
-        public void adjustOffsetTick(scrConductor __instance, double ___dspTimeSong)
+        public double getAngle(scrPlanet __instance, double ___snappedLastAngle, long nowTick)
         {
-            NoStopMod.asyncInputManager.offsetTick = NoStopMod.asyncInputManager.currTick - (long)((__instance.dspTime - ___dspTimeSong) * 10000000);
+            return ___snappedLastAngle + (this.getSongPosition(__instance.conductor, nowTick) - __instance.conductor.lastHit) / __instance.conductor.crotchet
+                * 3.141592653598793238 * __instance.controller.speed * (double)(__instance.controller.isCW ? 1 : -1);
         }
 
         public double getSongPosition(scrConductor __instance, long nowTick)
@@ -133,10 +151,9 @@ namespace NoStopMod.AsyncInput
             }
         }
 
-        public double getAngle(scrPlanet __instance, double ___snappedLastAngle, long nowTick)
+        public void adjustOffsetTick(scrConductor __instance, double ___dspTimeSong)
         {
-            return ___snappedLastAngle + (this.getSongPosition(__instance.conductor, nowTick) - __instance.conductor.lastHit) / __instance.conductor.crotchet
-                * 3.141592653598793238 * __instance.controller.speed * (double)(__instance.controller.isCW ? 1 : -1);
+            NoStopMod.asyncInputManager.offsetTick = NoStopMod.asyncInputManager.currTick - (long)((__instance.dspTime - ___dspTimeSong) * 10000000);
         }
         
     }

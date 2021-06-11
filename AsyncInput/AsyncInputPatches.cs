@@ -201,7 +201,7 @@ namespace NoStopMod.AsyncInput
             public static void Postfix(scrConductor __instance, double ___dspTimeSong)
             {
                 NoStopMod.asyncInputManager.adjustOffsetTick(__instance, ___dspTimeSong);
-                NoStopMod.mod.Logger.Log("Rewind");
+                //NoStopMod.mod.Logger.Log("Rewind");
             }
         }
 
@@ -211,7 +211,7 @@ namespace NoStopMod.AsyncInput
             public static void Prefix(scrConductor __instance, double ___dspTimeSong)
             {
                 NoStopMod.asyncInputManager.adjustOffsetTick(__instance, ___dspTimeSong);
-                NoStopMod.mod.Logger.Log("StartMusicCo");
+                //NoStopMod.mod.Logger.Log("StartMusicCo");
             }
         }
 
@@ -221,7 +221,7 @@ namespace NoStopMod.AsyncInput
             public static void Postfix(scrConductor __instance, double ___dspTimeSong)
             {
                 NoStopMod.asyncInputManager.adjustOffsetTick(__instance, ___dspTimeSong);
-                NoStopMod.mod.Logger.Log("ScrubMusicToTile");
+                //NoStopMod.mod.Logger.Log("ScrubMusicToTile");
             }
         }
 
@@ -231,7 +231,7 @@ namespace NoStopMod.AsyncInput
             public static void Postfix(scrConductor __instance, double ___dspTimeSong)
             {
                 NoStopMod.asyncInputManager.adjustOffsetTick(__instance, ___dspTimeSong);
-                NoStopMod.mod.Logger.Log("DesyncFix");
+                //NoStopMod.mod.Logger.Log("DesyncFix");
             }
         }
 
