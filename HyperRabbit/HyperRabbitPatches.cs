@@ -30,6 +30,7 @@ namespace NoStopMod.HyperRabbit
                 __instance.chosenplanet.Update_RefreshAngles();
                 while (__instance.chosenplanet.AutoShouldHitNow())
                 {
+                    __instance.keyBufferCount = 0;
                     __instance.Hit();
                     __instance.chosenplanet.Update_RefreshAngles();
                 }
