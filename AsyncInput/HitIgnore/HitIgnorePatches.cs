@@ -1,4 +1,6 @@
 ﻿using HarmonyLib;
+using MonsterLove.StateMachine;
+using System;
 
 namespace NoStopMod.AsyncInput.HitIgnore
 {
@@ -24,13 +26,13 @@ namespace NoStopMod.AsyncInput.HitIgnore
             }
         }
 
-        // scrController_endLevelType //////////////////////////
-        [HarmonyPatch(typeof(scrController), "Fail2Action")]
-        private static class scrController_Fail2Action_Patch
+        // scrController_state //////////////////////////
+        [HarmonyPatch(typeof(StateEngine), "ChangeState")]
+        private static class StateEngine_ChangeState_Patch
         {
-            public static void Postfix(scrController __instance)
+            public static void Postfix(StateEngine __instance, Enum newState, StateTransition transition)
             {
-                NoStopMod.asyncInputManager.hitIgnoreManager.scrController_endLevelType = __instance.endLevelType;
+                NoStopMod.asyncInputManager.hitIgnoreManager.scrController_state = (scrController.States) newState;
             }
         }
 
@@ -39,7 +41,7 @@ namespace NoStopMod.AsyncInput.HitIgnore
         {
             public static void Postfix(scrController __instance)
             {
-                NoStopMod.asyncInputManager.hitIgnoreManager.scrController_endLevelType = __instance.endLevelType;
+                NoStopMod.asyncInputManager.hitIgnoreManager.scrController_state = scrController.States.Won;
             }
         }
 

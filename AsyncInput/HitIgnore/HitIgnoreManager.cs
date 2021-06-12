@@ -10,7 +10,7 @@ namespace NoStopMod.AsyncInput.HitIgnore
         private Dictionary<String, bool[]> dictionary;
 
         public bool scnCLS_searchMode;
-        public EndLevelType scrController_endLevelType;
+        public scrController.States scrController_state;
 
         public HitIgnoreManager()
         {
@@ -46,6 +46,7 @@ namespace NoStopMod.AsyncInput.HitIgnore
         public bool shouldBeIgnored(KeyCode keyCode)
         {
             if (keyCode == KeyCode.Escape) return true;
+            if (scrController_state != scrController.States.PlayerControl) return true;
 
             bool[] ignoreScnCLS;
             if (dictionary.TryGetValue(GCS.sceneToLoad, out ignoreScnCLS))
