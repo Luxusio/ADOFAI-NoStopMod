@@ -18,7 +18,7 @@ namespace NoStopMod.HyperRabbit
         }
 
         [HarmonyPatch(typeof(scrController), "PlayerControl_Update")]
-        private static class scrController_PlayerControl_Update_Patch2
+        private static class scrController_PlayerControl_Update_Patch
         {
             public static void Postfix(scrController __instance)
             {
@@ -30,6 +30,7 @@ namespace NoStopMod.HyperRabbit
                 __instance.chosenplanet.Update_RefreshAngles();
                 while (__instance.chosenplanet.AutoShouldHitNow())
                 {
+                    __instance.keyBufferCount = 0;
                     __instance.Hit();
                     __instance.chosenplanet.Update_RefreshAngles();
                 }
