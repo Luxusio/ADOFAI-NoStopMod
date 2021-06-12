@@ -1,5 +1,6 @@
 ﻿using DG.Tweening;
 using HarmonyLib;
+using NoStopMod.AsyncInput.HitDisable;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,20 +73,24 @@ namespace NoStopMod.AsyncInput
         {
             public static void Prefix(scrController __instance)
             {
-                bool pause = AudioListener.pause || RDC.auto;
                 while (NoStopMod.asyncInputManager.keyQueue.Any())
                 {
                     long tick;
                     List<KeyCode> keyCodes;
                     NoStopMod.asyncInputManager.keyQueue.Dequeue().Deconstruct(out tick, out keyCodes);
 
-                    if (pause) continue;
+                    if (AudioListener.pause || RDC.auto) continue;
 
                     NoStopMod.asyncInputManager.currPressTick = tick - NoStopMod.asyncInputManager.offsetTick;
+                    //NoStopMod.mod.Logger.Log("Hit:" + keyCodes.Count() + " : " + GCS.sceneToLoad);
 
                     scrController controller = __instance.controller;
+                    HitDisableManager hitDisableManager = NoStopMod.asyncInputManager.hitDisableManager;
+                    int count = 0;
                     for (int i = 0; i < keyCodes.Count(); i++)
                     {
+                        if (hitDisableManager.shouldBeDisabled(keyCodes[i])) continue;
+                        if (++count > 4) break;
                         NoStopMod.asyncInputManager.jumpToOtherClass = true;
                         controller.chosenplanet.Update_RefreshAngles();
                         controller.Hit();

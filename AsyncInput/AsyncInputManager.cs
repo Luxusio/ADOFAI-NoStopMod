@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NoStopMod.AsyncInput.HitDisable;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -8,6 +9,8 @@ namespace NoStopMod.AsyncInput
 {
     class AsyncInputManager
     {
+
+        public HitDisableManager hitDisableManager;
 
         private Thread thread;
         public Queue<Tuple<long, List<KeyCode>>> keyQueue = new Queue<Tuple<long, List<KeyCode>>>();
@@ -21,7 +24,6 @@ namespace NoStopMod.AsyncInput
         public bool jumpToOtherClass = false;
 
         private bool[] mask;
-        private bool[] disable;
 
         public AsyncInputManager()
         {
@@ -31,15 +33,8 @@ namespace NoStopMod.AsyncInput
             currTick = prevTick;
             
             mask = Enumerable.Repeat(false, 1024).ToArray();
-            disable = Enumerable.Repeat(false, 1024).ToArray();
-            disable[(int)KeyCode.BackQuote] = true;
-            disable[(int)KeyCode.Alpha1] = true;
-            disable[(int)KeyCode.Alpha2] = true;
-            disable[(int)KeyCode.Alpha3] = true;
-            disable[(int)KeyCode.Alpha4] = true;
-            disable[(int)KeyCode.Alpha5] = true;
-            disable[(int)KeyCode.Alpha6] = true;
-            disable[(int)KeyCode.Alpha7] = true;
+
+            hitDisableManager = new HitDisableManager();
         }
 
         private void OnToggle(bool enabled)
@@ -72,7 +67,6 @@ namespace NoStopMod.AsyncInput
 
         private bool GetKeyDown(int idx)
         {
-            if (disable[idx]) return false;
             if (mask[idx])
             {
                 if (!Input.GetKey((KeyCode)idx))
@@ -127,7 +121,7 @@ namespace NoStopMod.AsyncInput
                         //    str += code + "(" + ((int)code) + "), ";
                         //}
                         //NoStopMod.mod.Logger.Log(str);
-                        keyQueue.Enqueue(new Tuple<long, List<KeyCode>>(currTick, keyCodes.GetRange(0, Math.Min(4, keyCodes.Count()))));
+                        keyQueue.Enqueue(new Tuple<long, List<KeyCode>>(currTick, keyCodes));
                     }
                 }
             }
