@@ -115,12 +115,6 @@ namespace NoStopMod.AsyncInput
                     
                     if (keyCodes.Any())
                     {
-                        //String str = "press " + keyCodes.Count();
-                        //foreach (KeyCode code in keyCodes)
-                        //{
-                        //    str += code + "(" + ((int)code) + "), ";
-                        //}
-                        //NoStopMod.mod.Logger.Log(str);
                         keyQueue.Enqueue(new Tuple<long, List<KeyCode>>(currTick, keyCodes));
                     }
                 }

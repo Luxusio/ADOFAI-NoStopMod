@@ -18,7 +18,7 @@ namespace NoStopMod.HyperRabbit
         }
 
         [HarmonyPatch(typeof(scrController), "PlayerControl_Update")]
-        private static class scrController_PlayerControl_Update_Patch2
+        private static class scrController_PlayerControl_Update_Patch
         {
             public static void Postfix(scrController __instance)
             {
