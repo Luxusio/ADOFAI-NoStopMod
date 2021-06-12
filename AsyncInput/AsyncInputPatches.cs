@@ -82,7 +82,7 @@ namespace NoStopMod.AsyncInput
                     if (AudioListener.pause || RDC.auto) continue;
 
                     NoStopMod.asyncInputManager.currPressTick = tick - NoStopMod.asyncInputManager.offsetTick;
-                    //NoStopMod.mod.Logger.Log("Hit:" + keyCodes.Count() + " : " + GCS.sceneToLoad);
+                    //NoStopMod.mod.Logger.Log("Hit:" + keyCodes.Count() + "(" + GCS.sceneToLoad + ")");
 
                     scrController controller = __instance.controller;
                     HitDisableManager hitDisableManager = NoStopMod.asyncInputManager.hitDisableManager;

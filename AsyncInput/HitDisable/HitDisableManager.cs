@@ -45,6 +45,7 @@ namespace NoStopMod.AsyncInput.HitDisable
         public bool shouldBeDisabled(KeyCode keyCode)
         {
             if (keyCode == KeyCode.Escape) return true;
+            if (GCS.sceneToLoad == null) GCS.sceneToLoad = "scnNewIntro";
 
             bool[] disableMasks = dictionary[GCS.sceneToLoad];
             if (disableMasks != null)
