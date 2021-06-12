@@ -78,10 +78,16 @@ namespace NoStopMod.AsyncInput
                         if (hitDisableManager.shouldBeIgnored(keyCodes[i])) continue;
                         if (++count > 4) break;
                         //NoStopMod.mod.Logger.Log("Hit " + keyCodes[i] + ", " + GCS.sceneToLoad + ", ");
+                    }
+                    controller.keyBufferCount += count;
+                    while (controller.keyBufferCount > 0)
+                    {
+                        controller.keyBufferCount--;
                         NoStopMod.asyncInputManager.jumpToOtherClass = true;
                         controller.chosenplanet.Update_RefreshAngles();
                         controller.Hit();
                     }
+
                 }
 
             }
