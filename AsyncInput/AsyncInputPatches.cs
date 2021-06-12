@@ -1,6 +1,6 @@
 ﻿using DG.Tweening;
 using HarmonyLib;
-using NoStopMod.AsyncInput.HitDisable;
+using NoStopMod.AsyncInput.HitIgnore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -61,7 +61,7 @@ namespace NoStopMod.AsyncInput
 
                 if (__instance.controller.GetState().CompareTo(scrController.States.PlayerControl) != 0)
                 {
-                    //NoStopMod.mod.Logger.Log("Update " + __instance.controller.GetState() + ", " + ((Enum)scrController.States.PlayerControl) + " : " + (__instance.controller.GetState() != (Enum)scrController.States.PlayerControl));
+                    //NoStopMod.mod.Logger.Log("Ignore All " + __instance.controller.GetState() + ", " + GCS.sceneToLoad);
                     NoStopMod.asyncInputManager.keyQueue.Clear();
                 }
 
@@ -82,15 +82,20 @@ namespace NoStopMod.AsyncInput
                     if (AudioListener.pause || RDC.auto) continue;
 
                     NoStopMod.asyncInputManager.currPressTick = tick - NoStopMod.asyncInputManager.offsetTick;
-                    //NoStopMod.mod.Logger.Log("Hit:" + keyCodes.Count() + "(" + GCS.sceneToLoad + ")");
+                    NoStopMod.mod.Logger.Log("Hit:" + keyCodes.Count() + "(" + GCS.sceneToLoad + "), " + NoStopMod.asyncInputManager.hitIgnoreManager.scrController_endLevelType);
 
                     scrController controller = __instance.controller;
-                    HitDisableManager hitDisableManager = NoStopMod.asyncInputManager.hitDisableManager;
+                    HitIgnoreManager hitDisableManager = NoStopMod.asyncInputManager.hitIgnoreManager;
                     int count = 0;
                     for (int i = 0; i < keyCodes.Count(); i++)
                     {
-                        if (hitDisableManager.shouldBeDisabled(keyCodes[i])) continue;
+                        if (hitDisableManager.shouldBeIgnored(keyCodes[i]))
+                        {
+                            NoStopMod.mod.Logger.Log("Ignored" + keyCodes[i] + ", " + GCS.sceneToLoad + ", " + __instance.GetState());
+                            continue;
+                        }
                         if (++count > 4) break;
+                        NoStopMod.mod.Logger.Log("Hit " + keyCodes[i] + ", " + GCS.sceneToLoad + ", " + __instance.GetState());
                         NoStopMod.asyncInputManager.jumpToOtherClass = true;
                         controller.chosenplanet.Update_RefreshAngles();
                         controller.Hit();

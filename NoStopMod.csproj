@@ -89,8 +89,8 @@
   <ItemGroup>
     <Compile Include="AsyncInput\AsyncInputManager.cs" />
     <Compile Include="AsyncInput\AsyncInputPatches.cs" />
-    <Compile Include="AsyncInput\HitDisable\HitDisableManager.cs" />
-    <Compile Include="AsyncInput\HitDisable\HitDisablePatches.cs" />
+    <Compile Include="AsyncInput\HitIgnore\HitIgnoreManager.cs" />
+    <Compile Include="AsyncInput\HitIgnore\HitIgnorePatches.cs" />
     <Compile Include="GarbageCollection\GCManager.cs" />
     <Compile Include="GarbageCollection\GCPatches.cs" />
     <Compile Include="HyperRabbit\HyperRabbitManager.cs" />

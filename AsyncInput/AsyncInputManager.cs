@@ -1,4 +1,4 @@
-﻿using NoStopMod.AsyncInput.HitDisable;
+﻿using NoStopMod.AsyncInput.HitIgnore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +10,7 @@ namespace NoStopMod.AsyncInput
     class AsyncInputManager
     {
 
-        public HitDisableManager hitDisableManager;
+        public HitIgnoreManager hitIgnoreManager;
 
         private Thread thread;
         public Queue<Tuple<long, List<KeyCode>>> keyQueue = new Queue<Tuple<long, List<KeyCode>>>();
@@ -34,7 +34,7 @@ namespace NoStopMod.AsyncInput
             
             mask = Enumerable.Repeat(false, 1024).ToArray();
 
-            hitDisableManager = new HitDisableManager();
+            hitIgnoreManager = new HitIgnoreManager();
         }
 
         private void OnToggle(bool enabled)
