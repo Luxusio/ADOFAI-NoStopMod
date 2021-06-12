@@ -28,7 +28,7 @@ namespace NoStopMod.AsyncInput.HitIgnore
         [HarmonyPatch(typeof(scrController), "Fail2Action")]
         private static class scrController_Fail2Action_Patch
         {
-            public static void Postfix(scrController __instance, ref bool ___searchMode)
+            public static void Postfix(scrController __instance)
             {
                 NoStopMod.asyncInputManager.hitIgnoreManager.scrController_endLevelType = __instance.endLevelType;
             }
@@ -37,7 +37,7 @@ namespace NoStopMod.AsyncInput.HitIgnore
         [HarmonyPatch(typeof(scrController), "OnLandOnPortal")]
         private static class scrController_OnLandOnPortal_Patch
         {
-            public static void Postfix(scrController __instance, ref bool ___searchMode)
+            public static void Postfix(scrController __instance)
             {
                 NoStopMod.asyncInputManager.hitIgnoreManager.scrController_endLevelType = __instance.endLevelType;
             }
