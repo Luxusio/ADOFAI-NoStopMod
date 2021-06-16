@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using UnityEngine;
 
@@ -24,6 +25,9 @@ namespace NoStopMod.AsyncInput
         public bool jumpToOtherClass = false;
 
         private bool[] mask;
+
+        //[DllImport("USER32.dll")]
+        //static extern short GetKeyState(VirtualKeyStates nVirtKey);
 
         public AsyncInputManager()
         {

@@ -67,7 +67,6 @@ namespace NoStopMod.AsyncInput
 
                     if (AudioListener.pause || RDC.auto) continue;
 
-                    NoStopMod.asyncInputManager.currPressTick = tick - NoStopMod.asyncInputManager.offsetTick;
                     //NoStopMod.mod.Logger.Log("Hit:" + keyCodes.Count() + "(" + GCS.sceneToLoad + "), " + NoStopMod.asyncInputManager.hitIgnoreManager.scrController_state + ", " + __instance.controller.GetState());
 
                     scrController controller = __instance.controller;
@@ -79,6 +78,7 @@ namespace NoStopMod.AsyncInput
                         if (++count > 4) break;
                         //NoStopMod.mod.Logger.Log("Hit " + keyCodes[i] + ", " + GCS.sceneToLoad + ", ");
                     }
+                    NoStopMod.asyncInputManager.currPressTick = tick - NoStopMod.asyncInputManager.offsetTick;
                     controller.keyBufferCount += count;
                     while (controller.keyBufferCount > 0)
                     {

@@ -6,6 +6,7 @@ using NoStopMod.GarbageCollection;
 using System.Collections.Generic;
 using NoStopMod.AsyncInput;
 using NoStopMod.HyperRabbit;
+using SimpleJSON;
 
 namespace NoStopMod
 {
@@ -23,9 +24,6 @@ namespace NoStopMod
         public static AsyncInputManager asyncInputManager;
         public static HyperRabbitManager hyperRabbitManager;
 
-
-        //public static bool ready = false;
-
         public static bool Load(UnityModManager.ModEntry modEntry)
         {
             modEntry.OnToggle = NoStopMod.OnToggle;
@@ -38,6 +36,8 @@ namespace NoStopMod
             gcManager = new GCManager();
             asyncInputManager = new AsyncInputManager();
             hyperRabbitManager = new HyperRabbitManager();
+
+            
 
             return true;
         }
