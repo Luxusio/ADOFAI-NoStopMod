@@ -10,9 +10,9 @@ namespace NoStopMod.Abstraction
     interface SettingsBase
     {
 
-        void Load(JSONNode json);
+        void Load(ref JSONNode json);
 
-        void Save(JSONNode json);
+        void Save(ref JSONNode json);
         
     }
 }

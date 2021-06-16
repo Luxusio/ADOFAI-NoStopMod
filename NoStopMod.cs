@@ -19,15 +19,18 @@ namespace NoStopMod
 
         public static List<Action<bool>> onToggleListeners;
         public static List<Action<UnityModManager.ModEntry>> onGUIListeners;
-        
+        public static List<Action<scrController>> onApplicationQuitListeners;
+
         public static bool Load(UnityModManager.ModEntry modEntry)
         {
             modEntry.OnToggle = NoStopMod.OnToggle;
-            //modEntry.OnGUI = NoStopMod.OnGUI;
+            modEntry.OnGUI = NoStopMod.OnGUI;
             NoStopMod.harmony = new Harmony(modEntry.Info.Id);
             NoStopMod.mod = modEntry;
+
             NoStopMod.onToggleListeners = new List<Action<bool>>();
             NoStopMod.onGUIListeners = new List<Action<UnityModManager.ModEntry>>();
+            NoStopMod.onApplicationQuitListeners = new List<Action<scrController>>();
 
             GCManager.Init();
             AsyncInputManager.Init();
@@ -50,17 +53,7 @@ namespace NoStopMod
             }
 
             isEnabled = enabled;
-            foreach (Action<bool> listener in onToggleListeners)
-            {
-                try
-                {
-                    listener.Invoke(enabled);
-                }
-                catch (Exception e)
-                {
-                    mod.Logger.Error("Error on OnToggle : " + e.Message);
-                }
-            }
+            executeListeners<bool>(onToggleListeners, enabled, "OnToggle");
 
             return true;
         }
@@ -68,18 +61,34 @@ namespace NoStopMod
         public static void OnGUI(UnityModManager.ModEntry modEntry)
         {
             NoStopMod.mod = modEntry;
-            foreach (Action<UnityModManager.ModEntry> listener in onGUIListeners)
+            executeListeners<UnityModManager.ModEntry>(onGUIListeners, modEntry, "OnGUI");
+        }
+
+
+        [HarmonyPatch(typeof(scrController), "OnApplicationQuit")]
+        private static class scrController_OnApplicationQuit_Patch
+        {
+            public static void Prefix(scrController __instance)
+            {
+                executeListeners<scrController>(onApplicationQuitListeners, __instance, "OnApplicationQuit");
+            }
+        }
+
+        private static void executeListeners<T>(List<Action<T>> listeners, T obj, String guiMessage)
+        {
+            for (int i=0;i< listeners.Count;i++)
             {
                 try
-                { 
-                    listener.Invoke(modEntry);
+                {
+                    listeners[i].Invoke(obj);
                 }
                 catch (Exception e)
                 {
-                    mod.Logger.Error("Error on ONGUI : " + e.Message);
+                    mod.Logger.Error("Error on " + guiMessage + " : " + e.Message + ", " + e.StackTrace);
                 }
             }
         }
+
 
     }
 }

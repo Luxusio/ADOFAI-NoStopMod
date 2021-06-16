@@ -87,16 +87,20 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Abstraction\SettingsBase.cs" />
     <Compile Include="AsyncInput\AsyncInputManager.cs" />
     <Compile Include="AsyncInput\AsyncInputPatches.cs" />
+    <Compile Include="AsyncInput\AsyncInputSettings.cs" />
     <Compile Include="AsyncInput\HitIgnore\HitIgnoreManager.cs" />
     <Compile Include="AsyncInput\HitIgnore\HitIgnorePatches.cs" />
     <Compile Include="GarbageCollection\GCManager.cs" />
     <Compile Include="GarbageCollection\GCPatches.cs" />
     <Compile Include="HyperRabbit\HyperRabbitManager.cs" />
     <Compile Include="HyperRabbit\HyperRabbitPatches.cs" />
+    <Compile Include="lib\SimpleJSON.cs" />
     <Compile Include="NoStopMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

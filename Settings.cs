@@ -17,6 +17,11 @@ namespace NoStopMod
 
         public static List<SettingsBase> settings;
 
+        public static void Init()
+        {
+
+        }
+
         public static void Load()
         {
             TextAsset json = Resources.Load<TextAsset>(Environment.CurrentDirectory + path);
@@ -31,7 +36,7 @@ namespace NoStopMod
             {
                 try
                 {
-                    settings[i].Load(jsonNode);
+                    settings[i].Load(ref jsonNode);
                 }
                 catch (Exception e)
                 {
@@ -47,7 +52,7 @@ namespace NoStopMod
             {
                 try
                 {
-                    settings[i].Save(node);
+                    settings[i].Save(ref node);
                 }
                 catch (Exception e)
                 {

@@ -11,8 +11,8 @@ namespace NoStopMod.AsyncInput
 {
     class AsyncInputManager
     {
-        //public static HitIgnoreManager hitIgnoreManager;
-
+        public static AsyncInputSettings settings;
+        
         private static Thread thread;
         public static Queue<Tuple<long, List<KeyCode>>> keyQueue = new Queue<Tuple<long, List<KeyCode>>>();
 
@@ -32,6 +32,7 @@ namespace NoStopMod.AsyncInput
         public static void Init()
         {
             NoStopMod.onToggleListeners.Add(OnToggle);
+            settings = new AsyncInputSettings();
 
             prevTick = DateTime.Now.Ticks;
             currTick = prevTick;
@@ -56,8 +57,10 @@ namespace NoStopMod.AsyncInput
         public static void Start()
         {
             Stop();
-            thread = new Thread(Run);
-            thread.Start();
+            if (settings.enableAsync) {
+                thread = new Thread(Run);
+                thread.Start();
+            }
         }
 
         public static void Stop()
@@ -67,6 +70,7 @@ namespace NoStopMod.AsyncInput
                 thread.Abort();
                 thread = null;
             }
+            keyQueue.Clear();
         }
 
         private static bool GetKeyDown(int idx)
