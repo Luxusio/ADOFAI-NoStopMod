@@ -1,4 +1,5 @@
-﻿using NoStopMod.AsyncInput.HitIgnore;
+﻿using NoStopMod.Abstraction;
+using NoStopMod.AsyncInput.HitIgnore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,26 +11,25 @@ namespace NoStopMod.AsyncInput
 {
     class AsyncInputManager
     {
+        //public static HitIgnoreManager hitIgnoreManager;
 
-        public HitIgnoreManager hitIgnoreManager;
+        private static Thread thread;
+        public static Queue<Tuple<long, List<KeyCode>>> keyQueue = new Queue<Tuple<long, List<KeyCode>>>();
 
-        private Thread thread;
-        public Queue<Tuple<long, List<KeyCode>>> keyQueue = new Queue<Tuple<long, List<KeyCode>>>();
+        public static long currTick;
+        public static long prevTick;
 
-        public long currTick;
-        public long prevTick;
-
-        public long offsetTick;
-        public long currPressTick;
+        public static long offsetTick;
+        public static long currPressTick;
         
-        public bool jumpToOtherClass = false;
+        public static bool jumpToOtherClass = false;
 
-        private bool[] mask;
+        private static bool[] mask;
 
         //[DllImport("USER32.dll")]
         //static extern short GetKeyState(VirtualKeyStates nVirtKey);
 
-        public AsyncInputManager()
+        public static void Init()
         {
             NoStopMod.onToggleListeners.Add(OnToggle);
 
@@ -38,10 +38,10 @@ namespace NoStopMod.AsyncInput
             
             mask = Enumerable.Repeat(false, 1024).ToArray();
 
-            hitIgnoreManager = new HitIgnoreManager();
+            HitIgnoreManager.Init();
         }
 
-        private void OnToggle(bool enabled)
+        private static void OnToggle(bool enabled)
         {
             if (enabled)
             {
@@ -53,14 +53,14 @@ namespace NoStopMod.AsyncInput
             }
         }
 
-        public void Start()
+        public static void Start()
         {
             Stop();
             thread = new Thread(Run);
             thread.Start();
         }
 
-        public void Stop()
+        public static void Stop()
         {
             if (thread != null)
             {
@@ -69,7 +69,7 @@ namespace NoStopMod.AsyncInput
             }
         }
 
-        private bool GetKeyDown(int idx)
+        private static bool GetKeyDown(int idx)
         {
             if (mask[idx])
             {
@@ -89,7 +89,7 @@ namespace NoStopMod.AsyncInput
             return false;
         }
 
-        private void Run()
+        private static void Run()
         {
             long prevTick = DateTime.Now.Ticks;
             while (true)
@@ -125,13 +125,13 @@ namespace NoStopMod.AsyncInput
             }
         }
 
-        public double getAngle(scrPlanet __instance, double ___snappedLastAngle, long nowTick)
+        public static double getAngle(scrPlanet __instance, double ___snappedLastAngle, long nowTick)
         {
-            return ___snappedLastAngle + (this.getSongPosition(__instance.conductor, nowTick) - __instance.conductor.lastHit) / __instance.conductor.crotchet
+            return ___snappedLastAngle + (getSongPosition(__instance.conductor, nowTick) - __instance.conductor.lastHit) / __instance.conductor.crotchet
                 * 3.141592653598793238 * __instance.controller.speed * (double)(__instance.controller.isCW ? 1 : -1);
         }
 
-        public double getSongPosition(scrConductor __instance, long nowTick)
+        public static double getSongPosition(scrConductor __instance, long nowTick)
         {
             if (!GCS.d_oldConductor && !GCS.d_webglConductor)
             {
@@ -143,10 +143,10 @@ namespace NoStopMod.AsyncInput
             }
         }
 
-        public void adjustOffsetTick(scrConductor __instance, double ___dspTimeSong)
+        public static void adjustOffsetTick(scrConductor __instance, double ___dspTimeSong)
         {
-            NoStopMod.asyncInputManager.offsetTick = NoStopMod.asyncInputManager.currTick - (long)((__instance.dspTime - ___dspTimeSong) * 10000000);
+            offsetTick = currTick - (long)((__instance.dspTime - ___dspTimeSong) * 10000000);
         }
-        
+
     }
 }

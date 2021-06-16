@@ -11,10 +11,8 @@ namespace NoStopMod.HyperRabbit
     class HyperRabbitManager
     {
 
-
-        public bool isEnabled;
-
-
+        public static bool isEnabled;
+        
         enum Status
         {
             OFF,
@@ -22,18 +20,18 @@ namespace NoStopMod.HyperRabbit
             HYPER_RABBIT,
         }
 
-        public HyperRabbitManager()
+        public static void Init()
         {
             NoStopMod.onToggleListeners.Add(OnToggle);
             NoStopMod.onGUIListeners.Add(OnGUI);
         }
 
-        private void OnToggle(bool enabled)
+        private static void OnToggle(bool enabled)
         {
-            this.isEnabled = enabled;
+            isEnabled = enabled;
         }
 
-        private void OnGUI(UnityModManager.ModEntry modEntry)
+        private static void OnGUI(UnityModManager.ModEntry modEntry)
         {
             GUILayout.BeginHorizontal("HyperRabbit");
             GUILayout.TextArea("HyperRabbit Status", 20);

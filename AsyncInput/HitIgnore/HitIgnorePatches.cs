@@ -13,7 +13,7 @@ namespace NoStopMod.AsyncInput.HitIgnore
         {
             public static void Postfix(scnCLS __instance, ref bool ___searchMode)
             {
-                NoStopMod.asyncInputManager.hitIgnoreManager.scnCLS_searchMode = ___searchMode;
+                HitIgnoreManager.scnCLS_searchMode = ___searchMode;
             }
         }
 
@@ -22,7 +22,7 @@ namespace NoStopMod.AsyncInput.HitIgnore
         {
             public static void Postfix(scnCLS __instance, ref bool ___searchMode)
             {
-                NoStopMod.asyncInputManager.hitIgnoreManager.scnCLS_searchMode = ___searchMode;
+                HitIgnoreManager.scnCLS_searchMode = ___searchMode;
             }
         }
 
@@ -32,7 +32,7 @@ namespace NoStopMod.AsyncInput.HitIgnore
         {
             public static void Postfix(StateEngine __instance, Enum newState, StateTransition transition)
             {
-                NoStopMod.asyncInputManager.hitIgnoreManager.scrController_state = (scrController.States) newState;
+                HitIgnoreManager.scrController_state = (scrController.States) newState;
             }
         }
 
@@ -41,7 +41,7 @@ namespace NoStopMod.AsyncInput.HitIgnore
         {
             public static void Postfix(scrController __instance)
             {
-                NoStopMod.asyncInputManager.hitIgnoreManager.scrController_state = scrController.States.Won;
+                HitIgnoreManager.scrController_state = scrController.States.Won;
             }
         }
 

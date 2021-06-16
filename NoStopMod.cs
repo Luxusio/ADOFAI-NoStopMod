@@ -19,11 +19,7 @@ namespace NoStopMod
 
         public static List<Action<bool>> onToggleListeners;
         public static List<Action<UnityModManager.ModEntry>> onGUIListeners;
-
-        public static GCManager gcManager;
-        public static AsyncInputManager asyncInputManager;
-        public static HyperRabbitManager hyperRabbitManager;
-
+        
         public static bool Load(UnityModManager.ModEntry modEntry)
         {
             modEntry.OnToggle = NoStopMod.OnToggle;
@@ -33,11 +29,9 @@ namespace NoStopMod
             NoStopMod.onToggleListeners = new List<Action<bool>>();
             NoStopMod.onGUIListeners = new List<Action<UnityModManager.ModEntry>>();
 
-            gcManager = new GCManager();
-            asyncInputManager = new AsyncInputManager();
-            hyperRabbitManager = new HyperRabbitManager();
-
-            
+            GCManager.Init();
+            AsyncInputManager.Init();
+            HyperRabbitManager.Init();
 
             return true;
         }

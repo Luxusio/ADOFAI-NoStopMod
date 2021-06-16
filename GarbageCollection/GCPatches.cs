@@ -1,6 +1,5 @@
-﻿using System;
-using HarmonyLib;
-using UnityEngine;
+﻿using HarmonyLib;
+using NoStopMod.GarbageCollection;
 
 namespace NoStopMod.Patches
 {
@@ -12,7 +11,7 @@ namespace NoStopMod.Patches
             private static void Prefix(CustomLevel __instance)
             {
                 //NoStopMod.mod.Logger.Log("Play");
-                NoStopMod.gcManager.DisableGC();
+                GCManager.DisableGC();
             }
         }
 
@@ -22,7 +21,7 @@ namespace NoStopMod.Patches
             private static void Postfix(scnEditor __instance)
             {
                 //NoStopMod.mod.Logger.Log("ResetScene");
-                NoStopMod.gcManager.EnableGC();
+                GCManager.EnableGC();
             }
         }
 
@@ -32,7 +31,7 @@ namespace NoStopMod.Patches
             private static bool Prefix(scnEditor __instance)
             {
                 //NoStopMod.mod.Logger.Log("SaveBackup");
-                if (NoStopMod.gcManager.GetDisableAutoSave())
+                if (GCManager.GetDisableAutoSave())
                 {
                     //NoStopMod.mod.Logger.Log("Cancel AutoSave");
                     return false;
@@ -48,7 +47,7 @@ namespace NoStopMod.Patches
             public static void Postfix(scrController __instance)
             {
                 //NoStopMod.mod.Logger.Log("Awake");
-                NoStopMod.gcManager.EnableGC();
+                GCManager.EnableGC();
             }
         }
 
@@ -57,7 +56,7 @@ namespace NoStopMod.Patches
         {
             private static void Prefix(scrController __instance)
             {
-                NoStopMod.gcManager.EnableGC();
+                GCManager.EnableGC();
             }
         }
 
@@ -67,7 +66,7 @@ namespace NoStopMod.Patches
             private static void Postfix(scrController __instance)
             {
                 //NoStopMod.mod.Logger.Log("StartLoadingScene");
-                NoStopMod.gcManager.EnableGC();
+                GCManager.EnableGC();
             }
         }
 
@@ -77,7 +76,7 @@ namespace NoStopMod.Patches
             private static void Postfix(scrController __instance)
             {
                 //NoStopMod.mod.Logger.Log("ResetCustomLevel");
-                NoStopMod.gcManager.EnableGC();
+                GCManager.EnableGC();
             }
         }
 
@@ -87,7 +86,7 @@ namespace NoStopMod.Patches
             private static void Prefix(scrController __instance)
             {
                 //NoStopMod.mod.Logger.Log("Restart");
-                NoStopMod.gcManager.EnableGC();
+                GCManager.EnableGC();
             }
         }
 
@@ -97,7 +96,7 @@ namespace NoStopMod.Patches
             private static void Postfix(scrController __instance)
             {
                 //NoStopMod.mod.Logger.Log("StartLoadingScene");
-                NoStopMod.gcManager.EnableGC();
+                GCManager.EnableGC();
             }
         }
         
@@ -108,7 +107,7 @@ namespace NoStopMod.Patches
             private static void Postfix(scrUIController __instance)
             {
                 //NoStopMod.mod.Logger.Log("WipeToBlack");
-                NoStopMod.gcManager.EnableGC();
+                GCManager.EnableGC();
             }
         }
 

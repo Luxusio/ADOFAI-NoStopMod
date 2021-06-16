@@ -7,12 +7,12 @@ namespace NoStopMod.AsyncInput.HitIgnore
 {
     class HitIgnoreManager
     {
-        private Dictionary<String, bool[]> dictionary;
+        private static Dictionary<String, bool[]> dictionary;
 
-        public bool scnCLS_searchMode;
-        public scrController.States scrController_state;
-
-        public HitIgnoreManager()
+        public static bool scnCLS_searchMode;
+        public static scrController.States scrController_state;
+        
+        public static void Init()
         {
             if (GCS.sceneToLoad == null) GCS.sceneToLoad = "scnNewIntro";
 
@@ -43,7 +43,7 @@ namespace NoStopMod.AsyncInput.HitIgnore
             scnCLS_searchMode = false;
         }
 
-        public bool shouldBeIgnored(KeyCode keyCode)
+        public static bool shouldBeIgnored(KeyCode keyCode)
         {
             if (keyCode == KeyCode.Escape) return true;
             if (scrController_state != scrController.States.PlayerControl) return true;
