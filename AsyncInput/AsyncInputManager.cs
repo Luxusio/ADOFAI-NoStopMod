@@ -1,11 +1,11 @@
-﻿using NoStopMod.Abstraction;
-using NoStopMod.AsyncInput.HitIgnore;
+﻿using NoStopMod.AsyncInput.HitIgnore;
+using NoStopMod.CustomLayout;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using UnityEngine;
+using UnityModManagerNet;
 
 namespace NoStopMod.AsyncInput
 {
@@ -25,14 +25,15 @@ namespace NoStopMod.AsyncInput
         public static bool jumpToOtherClass = false;
 
         private static bool[] mask;
-
-        //[DllImport("USER32.dll")]
-        //static extern short GetKeyState(VirtualKeyStates nVirtKey);
-
+        
         public static void Init()
         {
             NoStopMod.onToggleListeners.Add(OnToggle);
+            NoStopMod.onGUIListeners.Add(OnGUI);
+            NoStopMod.onApplicationQuitListeners.Add(OnApplicationQuit);
+
             settings = new AsyncInputSettings();
+            Settings.settings.Add(settings);
 
             prevTick = DateTime.Now.Ticks;
             currTick = prevTick;
@@ -44,7 +45,19 @@ namespace NoStopMod.AsyncInput
 
         private static void OnToggle(bool enabled)
         {
-            if (enabled)
+            UpdateEnableAsync(enabled);
+        }
+
+        private static void OnGUI(UnityModManager.ModEntry modEntry)
+        {
+            GUILayout.BeginVertical("Input");
+            SimpleGUI.Toggle(ref settings.enableAsync, "Toggle Input Asynchronously", UpdateEnableAsync);
+            GUILayout.EndVertical();
+        }
+
+        private static void UpdateEnableAsync(bool value)
+        {
+            if (value)
             {
                 Start();
             }
@@ -54,9 +67,15 @@ namespace NoStopMod.AsyncInput
             }
         }
 
+        private static void OnApplicationQuit(scrController __instance)
+        {
+            Stop();
+        }
+
         public static void Start()
         {
             Stop();
+            adjustOffsetTick();
             if (settings.enableAsync) {
                 thread = new Thread(Run);
                 thread.Start();
@@ -144,6 +163,15 @@ namespace NoStopMod.AsyncInput
             else
             {
                 return (__instance.song.time - scrConductor.calibration_i) - __instance.addoffset / __instance.song.pitch;
+            }
+        }
+
+        public static void adjustOffsetTick()
+        {
+            if (scrConductor.instance != null)
+            {
+                AsyncInputManager.jumpToOtherClass = true;
+                scrConductor.instance.Start();
             }
         }
 

@@ -15,23 +15,34 @@ namespace NoStopMod
 
         public const String path = "\\Mods\\NoStopMod\\settings.json";
 
-        public static List<SettingsBase> settings;
+        public static List<SettingsBase> settings = new List<SettingsBase>();
 
         public static void Init()
         {
+            NoStopMod.onToggleListeners.Add(onToggle);
+            NoStopMod.onApplicationQuitListeners.Add(onApplicationQuit);
+        }
 
+        private static void onToggle(bool enabled)
+        {
+            Load();
+        }
+
+        private static void onApplicationQuit(scrController __instance)
+        {
+            Save();
         }
 
         public static void Load()
         {
-            TextAsset json = Resources.Load<TextAsset>(Environment.CurrentDirectory + path);
-            if (json == null)
+            string text = File.ReadAllText(Environment.CurrentDirectory + path);
+            if (text == null)
             {
                 Save();
                 return;
             }
 
-            JSONNode jsonNode = JSON.Parse(json.text);
+            JSONNode jsonNode = JSON.Parse(text);
             for (int i = 0; i < settings.Count(); i++)
             {
                 try
@@ -48,7 +59,7 @@ namespace NoStopMod
         public static void Save()
         {
             JSONNode node = JSON.Parse("{}");
-            for (int i = 0;i < settings.Count();i++)
+            for (int i = 0; i < settings.Count();i++)
             {
                 try
                 {

@@ -17,9 +17,9 @@ namespace NoStopMod
         public static Harmony harmony;
         public static bool isEnabled = false;
 
-        public static List<Action<bool>> onToggleListeners;
-        public static List<Action<UnityModManager.ModEntry>> onGUIListeners;
-        public static List<Action<scrController>> onApplicationQuitListeners;
+        public static List<Action<bool>> onToggleListeners = new List<Action<bool>>();
+        public static List<Action<UnityModManager.ModEntry>> onGUIListeners = new List<Action<UnityModManager.ModEntry>>();
+        public static List<Action<scrController>> onApplicationQuitListeners = new List<Action<scrController>>();
 
         public static bool Load(UnityModManager.ModEntry modEntry)
         {
@@ -27,15 +27,12 @@ namespace NoStopMod
             modEntry.OnGUI = NoStopMod.OnGUI;
             NoStopMod.harmony = new Harmony(modEntry.Info.Id);
             NoStopMod.mod = modEntry;
-
-            NoStopMod.onToggleListeners = new List<Action<bool>>();
-            NoStopMod.onGUIListeners = new List<Action<UnityModManager.ModEntry>>();
-            NoStopMod.onApplicationQuitListeners = new List<Action<scrController>>();
-
+            
             GCManager.Init();
             AsyncInputManager.Init();
             HyperRabbitManager.Init();
 
+            Settings.Init();
             return true;
         }
 
@@ -54,7 +51,6 @@ namespace NoStopMod
 
             isEnabled = enabled;
             executeListeners<bool>(onToggleListeners, enabled, "OnToggle");
-
             return true;
         }
 
@@ -88,7 +84,6 @@ namespace NoStopMod
                 }
             }
         }
-
-
+        
     }
 }

@@ -93,6 +93,7 @@
     <Compile Include="AsyncInput\AsyncInputSettings.cs" />
     <Compile Include="AsyncInput\HitIgnore\HitIgnoreManager.cs" />
     <Compile Include="AsyncInput\HitIgnore\HitIgnorePatches.cs" />
+    <Compile Include="CustomLayout\SimpleGUI.cs" />
     <Compile Include="GarbageCollection\GCManager.cs" />
     <Compile Include="GarbageCollection\GCPatches.cs" />
     <Compile Include="HyperRabbit\HyperRabbitManager.cs" />

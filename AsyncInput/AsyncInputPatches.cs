@@ -33,15 +33,6 @@ namespace NoStopMod.AsyncInput
                 AsyncInputManager.Start();
             }
         }
-        
-        [HarmonyPatch(typeof(scrController), "OnApplicationQuit")]
-        private static class scrController_OnApplicationQuit_Patch
-        {
-            public static void Prefix(scrController __instance)
-            {
-                AsyncInputManager.Stop();
-            }
-        }
 
         [HarmonyPatch(typeof(scrConductor), "Update")]
         private static class scrConductor_Update_Patch_Time
