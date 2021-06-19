@@ -22,7 +22,7 @@ namespace NoStopMod.HyperRabbit
 
         public static void Init()
         {
-            NoStopMod.onToggleListeners.Add(OnToggle);
+            NoStopMod.onToggleListener.Add(OnToggle);
             //NoStopMod.onGUIListeners.Add(OnGUI);
         }
 

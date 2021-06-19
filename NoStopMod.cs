@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using NoStopMod.InputFixer;
 using NoStopMod.HyperRabbit;
 using SimpleJSON;
+using NoStopMod.Helper;
 
 namespace NoStopMod
 {
@@ -17,9 +18,9 @@ namespace NoStopMod
         public static Harmony harmony;
         public static bool isEnabled = false;
 
-        public static List<Action<bool>> onToggleListeners = new List<Action<bool>>();
-        public static List<Action<UnityModManager.ModEntry>> onGUIListeners = new List<Action<UnityModManager.ModEntry>>();
-        public static List<Action<scrController>> onApplicationQuitListeners = new List<Action<scrController>>();
+        public static EventListener<bool> onToggleListener = new EventListener<bool>("OnToggle");
+        public static EventListener<UnityModManager.ModEntry> onGUIListener = new EventListener<UnityModManager.ModEntry>("OnGUI");
+        public static EventListener<scrController> onApplicationQuitListener = new EventListener<scrController>("OnApplicationQuit");
 
         public static bool Load(UnityModManager.ModEntry modEntry)
         {
@@ -50,14 +51,14 @@ namespace NoStopMod
             }
 
             isEnabled = enabled;
-            executeListeners<bool>(onToggleListeners, enabled, "OnToggle");
+            onToggleListener.Invoke(enabled);
             return true;
         }
 
         public static void OnGUI(UnityModManager.ModEntry modEntry)
         {
             NoStopMod.mod = modEntry;
-            executeListeners<UnityModManager.ModEntry>(onGUIListeners, modEntry, "OnGUI");
+            onGUIListener.Invoke(modEntry);
         }
 
 
@@ -66,7 +67,7 @@ namespace NoStopMod
         {
             public static void Prefix(scrController __instance)
             {
-                executeListeners<scrController>(onApplicationQuitListeners, __instance, "OnApplicationQuit");
+                onApplicationQuitListener.Invoke(__instance);
             }
         }
 

@@ -10,7 +10,7 @@ namespace NoStopMod.GarbageCollection
         
         public static void Init()
         {
-            NoStopMod.onToggleListeners.Add(OnToggle);
+            NoStopMod.onToggleListener.Add(OnToggle);
         }
 
         private static void OnToggle(bool enabled)

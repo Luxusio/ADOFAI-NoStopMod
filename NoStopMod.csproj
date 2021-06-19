@@ -87,13 +87,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Abstraction\SettingsBase.cs" />
-    <Compile Include="AsyncInput\AsyncInputManager.cs" />
-    <Compile Include="AsyncInput\AsyncInputPatches.cs" />
-    <Compile Include="AsyncInput\AsyncInputSettings.cs" />
-    <Compile Include="AsyncInput\HitIgnore\HitIgnoreManager.cs" />
-    <Compile Include="AsyncInput\HitIgnore\HitIgnorePatches.cs" />
-    <Compile Include="CustomLayout\SimpleGUI.cs" />
+    <Compile Include="Helper\Abstraction\SettingsBase.cs" />
+    <Compile Include="Helper\EventListener.cs" />
+    <Compile Include="Helper\JSONHelper.cs" />
+    <Compile Include="InputFixer\HitIgnore\KeyLimiter\KeyLimiterManager.cs" />
+    <Compile Include="InputFixer\HitIgnore\KeyLimiter\KeyLimiterSettings.cs" />
+    <Compile Include="InputFixer\InputFixerManager.cs" />
+    <Compile Include="InputFixer\InputFixerPatches.cs" />
+    <Compile Include="InputFixer\InputFixerSettings.cs" />
+    <Compile Include="InputFixer\HitIgnore\HitIgnoreManager.cs" />
+    <Compile Include="InputFixer\HitIgnore\HitIgnorePatches.cs" />
+    <Compile Include="Helper\SimpleGUI.cs" />
     <Compile Include="GarbageCollection\GCManager.cs" />
     <Compile Include="GarbageCollection\GCPatches.cs" />
     <Compile Include="HyperRabbit\HyperRabbitManager.cs" />

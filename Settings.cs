@@ -20,8 +20,8 @@ namespace NoStopMod
 
         public static void Init()
         {
-            NoStopMod.onToggleListeners.Add(onToggle);
-            NoStopMod.onApplicationQuitListeners.Add(onApplicationQuit);
+            NoStopMod.onToggleListener.Add(onToggle);
+            NoStopMod.onApplicationQuitListener.Add(onApplicationQuit);
         }
 
         private static void onToggle(bool enabled)

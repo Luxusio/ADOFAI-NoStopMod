@@ -29,9 +29,9 @@ namespace NoStopMod.InputFixer
         
         public static void Init()
         {
-            NoStopMod.onToggleListeners.Add(OnToggle);
-            NoStopMod.onGUIListeners.Add(OnGUI);
-            NoStopMod.onApplicationQuitListeners.Add(OnApplicationQuit);
+            NoStopMod.onToggleListener.Add(OnToggle);
+            NoStopMod.onGUIListener.Add(OnGUI);
+            NoStopMod.onApplicationQuitListener.Add(OnApplicationQuit);
 
             settings = new InputFixerSettings();
             Settings.settings.Add(settings);
