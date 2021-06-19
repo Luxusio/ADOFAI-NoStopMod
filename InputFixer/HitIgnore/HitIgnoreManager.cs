@@ -43,6 +43,11 @@ namespace NoStopMod.InputFixer.HitIgnore
             
             scnCLS_searchMode = false;
 
+            if (scrController.instance != null)
+            {
+                scrController_state = (scrController.States) scrController.instance.GetState();
+            }
+
             KeyLimiterManager.Init();
         }
 
@@ -54,9 +59,12 @@ namespace NoStopMod.InputFixer.HitIgnore
                 KeyLimiterManager.UpdateKeyLimiter(keyCode);
                 return true;
             }
-            
-            if (scrController_state != scrController.States.PlayerControl) return true;
-            
+
+            if (scrController_state != scrController.States.PlayerControl)
+            {
+                return true;
+            }
+
             bool[] ignoreScnCLS;
             if (dictionary.TryGetValue(GCS.sceneToLoad, out ignoreScnCLS))
             {

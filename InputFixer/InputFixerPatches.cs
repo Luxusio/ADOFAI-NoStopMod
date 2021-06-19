@@ -93,14 +93,6 @@ namespace NoStopMod.InputFixer
                 __result = 0;
                 return false;
             }
-
-            //public static void Postfix(scrController __instance, ref int __result)
-            //{
-            //    if (InputFixerManager.settings.enableAsync)
-            //    {
-            //        __result = 0;
-            //    }
-            //}
         }
 
         [HarmonyPatch(typeof(scrPlanet), "Update_RefreshAngles")]
@@ -113,7 +105,6 @@ namespace NoStopMod.InputFixer
                 {
                     InputFixerManager.jumpToOtherClass = false;
                     __instance.angle = InputFixerManager.getAngle(__instance, ___snappedLastAngle, InputFixerManager.currPressTick);
-
                     return false;
                 }
 

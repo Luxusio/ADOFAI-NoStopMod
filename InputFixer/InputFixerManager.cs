@@ -29,9 +29,10 @@ namespace NoStopMod.InputFixer
         
         public static void Init()
         {
-            NoStopMod.onToggleListener.Add(OnToggle);
+            NoStopMod.onToggleListener.Add(UpdateEnableAsync);
             NoStopMod.onGUIListener.Add(OnGUI);
-            NoStopMod.onApplicationQuitListener.Add(OnApplicationQuit);
+            NoStopMod.onApplicationQuitListener.Add(_ => Stop());
+            Settings.settingsLoadListener.Add(_ => UpdateEnableAsync(settings.enableAsync));
 
             settings = new InputFixerSettings();
             Settings.settings.Add(settings);
@@ -42,11 +43,6 @@ namespace NoStopMod.InputFixer
             mask = Enumerable.Repeat(false, 1024).ToArray();
 
             HitIgnoreManager.Init();
-        }
-
-        private static void OnToggle(bool enabled)
-        {
-            UpdateEnableAsync(enabled);
         }
 
         private static void OnGUI(UnityModManager.ModEntry modEntry)
@@ -66,11 +62,6 @@ namespace NoStopMod.InputFixer
             {
                 Stop();
             }
-        }
-
-        private static void OnApplicationQuit(scrController __instance)
-        {
-            Stop();
         }
 
         public static void Start()
@@ -181,6 +172,7 @@ namespace NoStopMod.InputFixer
         {
             if (scrConductor.instance != null)
             {
+                long prevOffset = offsetTick;
                 InputFixerManager.jumpToOtherClass = true;
                 scrConductor.instance.Start();
             }
