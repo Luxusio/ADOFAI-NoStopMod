@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using UnityEngine;
 using UnityModManagerNet;
 
@@ -11,14 +12,25 @@ namespace NoStopMod.InputFixer.HitIgnore.KeyLimiter
 
         public static bool isChangingLimitedKeys = false;
 
+        private static bool[] enableKey = Enumerable.Repeat(false, 1024).ToArray();
+
         public static void Init()
         {
             NoStopMod.onGUIListener.Add(OnGUI);
             NoStopMod.onHideGUIListener.Add(OnHideGUI);
+            Settings.settingsLoadListener.Add(_ => InitEnableKey());
 
             settings = new KeyLimiterSettings();
             Settings.settings.Add(settings);
-            
+        }
+
+        private static void InitEnableKey()
+        {
+            enableKey = Enumerable.Repeat(false, 1024).ToArray();
+            for (int i = 0; i < settings.limitKeys.Count; i++)
+            {
+                enableKey[(int)settings.limitKeys[i]] = true;
+            }
         }
 
         private static void OnGUI(UnityModManager.ModEntry entry)
@@ -61,6 +73,27 @@ namespace NoStopMod.InputFixer.HitIgnore.KeyLimiter
         private static void OnHideGUI(UnityModManager.ModEntry entry)
         {
             isChangingLimitedKeys = false;
+        }
+
+        public static bool IsKeyEnabled(KeyCode keyCode)
+        {
+            return enableKey[(int) keyCode];
+        }
+
+        public static void UpdateKeyLimiter(KeyCode keyCode)
+        {
+            int idx = settings.limitKeys.IndexOf(keyCode);
+            if (idx == -1)
+            {
+                settings.limitKeys.Add(keyCode);
+                enableKey[(int)keyCode] = true;
+            }
+            else
+            {
+                settings.limitKeys.RemoveAt(idx);
+                enableKey[(int)keyCode] = false;
+            }
+
         }
 
     }

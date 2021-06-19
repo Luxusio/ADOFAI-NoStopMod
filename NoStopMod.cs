@@ -1,12 +1,9 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using HarmonyLib;
 using UnityModManagerNet;
 using NoStopMod.GarbageCollection;
-using System.Collections.Generic;
 using NoStopMod.InputFixer;
 using NoStopMod.HyperRabbit;
-using SimpleJSON;
 using NoStopMod.Helper;
 
 namespace NoStopMod

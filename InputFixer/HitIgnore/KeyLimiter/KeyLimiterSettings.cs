@@ -1,11 +1,7 @@
 ﻿using NoStopMod.Helper;
 using NoStopMod.Helper.Abstraction;
 using SimpleJSON;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace NoStopMod.InputFixer.HitIgnore.KeyLimiter

@@ -49,8 +49,14 @@ namespace NoStopMod.InputFixer.HitIgnore
         public static bool shouldBeIgnored(KeyCode keyCode)
         {
             if (keyCode == KeyCode.Escape) return true;
+            if (KeyLimiterManager.isChangingLimitedKeys)
+            {
+                KeyLimiterManager.UpdateKeyLimiter(keyCode);
+                return true;
+            }
+            
             if (scrController_state != scrController.States.PlayerControl) return true;
-
+            
             bool[] ignoreScnCLS;
             if (dictionary.TryGetValue(GCS.sceneToLoad, out ignoreScnCLS))
             {
@@ -58,8 +64,14 @@ namespace NoStopMod.InputFixer.HitIgnore
                 {
                     return true;
                 }
-                return ignoreScnCLS[(int) keyCode];
+                if(ignoreScnCLS[(int) keyCode]) return true;
             }
+            
+            if(KeyLimiterManager.settings.enable)
+            {
+                return !KeyLimiterManager.IsKeyEnabled(keyCode);
+            }
+            
             return false;
         }
 
