@@ -1,18 +1,19 @@
-﻿using System;
+﻿using NoStopMod.InputFixer.HitIgnore.KeyLimiter;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace NoStopMod.AsyncInput.HitIgnore
+namespace NoStopMod.InputFixer.HitIgnore
 {
     class HitIgnoreManager
     {
-        private Dictionary<String, bool[]> dictionary;
+        private static Dictionary<String, bool[]> dictionary;
 
-        public bool scnCLS_searchMode;
-        public scrController.States scrController_state;
-
-        public HitIgnoreManager()
+        public static bool scnCLS_searchMode;
+        public static scrController.States scrController_state;
+        
+        public static void Init()
         {
             if (GCS.sceneToLoad == null) GCS.sceneToLoad = "scnNewIntro";
 
@@ -41,12 +42,28 @@ namespace NoStopMod.AsyncInput.HitIgnore
             ignoreScnCLS[(int)KeyCode.DownArrow] = true;
             
             scnCLS_searchMode = false;
+
+            if (scrController.instance != null)
+            {
+                scrController_state = (scrController.States) scrController.instance.GetState();
+            }
+
+            KeyLimiterManager.Init();
         }
 
-        public bool shouldBeIgnored(KeyCode keyCode)
+        public static bool shouldBeIgnored(KeyCode keyCode)
         {
             if (keyCode == KeyCode.Escape) return true;
-            if (scrController_state != scrController.States.PlayerControl) return true;
+            if (KeyLimiterManager.isChangingLimitedKeys)
+            {
+                KeyLimiterManager.UpdateKeyLimiter(keyCode);
+                return true;
+            }
+
+            if (scrController_state != scrController.States.PlayerControl)
+            {
+                return true;
+            }
 
             bool[] ignoreScnCLS;
             if (dictionary.TryGetValue(GCS.sceneToLoad, out ignoreScnCLS))
@@ -55,8 +72,14 @@ namespace NoStopMod.AsyncInput.HitIgnore
                 {
                     return true;
                 }
-                return ignoreScnCLS[(int) keyCode];
+                if(ignoreScnCLS[(int) keyCode]) return true;
             }
+            
+            if(KeyLimiterManager.settings.enable)
+            {
+                return !KeyLimiterManager.IsKeyEnabled(keyCode);
+            }
+            
             return false;
         }
 

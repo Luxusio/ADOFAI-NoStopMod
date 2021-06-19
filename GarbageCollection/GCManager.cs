@@ -6,24 +6,24 @@ namespace NoStopMod.GarbageCollection
     public class GCManager
     {
 
-        private bool gcEnabled = true;
+        private static bool gcEnabled = true;
         
-        public GCManager()
+        public static void Init()
         {
-            NoStopMod.onToggleListeners.Add(OnToggle);
+            NoStopMod.onToggleListener.Add(OnToggle);
         }
 
-        private void OnToggle(bool enabled)
+        private static void OnToggle(bool enabled)
         {
             EnableGC();
         }
 
-        public bool GetDisableAutoSave()
+        public static bool GetDisableAutoSave()
         {
             return !gcEnabled;
         }
 
-        public void DisableGC()
+        public static void DisableGC()
         {
             try
             {
@@ -39,7 +39,7 @@ namespace NoStopMod.GarbageCollection
             }
         }
 
-        public void EnableGC()
+        public static void EnableGC()
         {
             try
             {

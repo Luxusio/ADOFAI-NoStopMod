@@ -1,11 +1,10 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using HarmonyLib;
 using UnityModManagerNet;
 using NoStopMod.GarbageCollection;
-using System.Collections.Generic;
-using NoStopMod.AsyncInput;
+using NoStopMod.InputFixer;
 using NoStopMod.HyperRabbit;
+using NoStopMod.Helper;
 
 namespace NoStopMod
 {
@@ -16,29 +15,25 @@ namespace NoStopMod
         public static Harmony harmony;
         public static bool isEnabled = false;
 
-        public static List<Action<bool>> onToggleListeners;
-        public static List<Action<UnityModManager.ModEntry>> onGUIListeners;
-
-        public static GCManager gcManager;
-        public static AsyncInputManager asyncInputManager;
-        public static HyperRabbitManager hyperRabbitManager;
-
-
-        //public static bool ready = false;
+        public static EventListener<bool> onToggleListener = new EventListener<bool>("OnToggle");
+        public static EventListener<UnityModManager.ModEntry> onGUIListener = new EventListener<UnityModManager.ModEntry>("OnGUI");
+        public static EventListener<UnityModManager.ModEntry> onHideGUIListener = new EventListener<UnityModManager.ModEntry>("OnHideGUI");
+        public static EventListener<scrController> onApplicationQuitListener = new EventListener<scrController>("OnApplicationQuit");
 
         public static bool Load(UnityModManager.ModEntry modEntry)
         {
             modEntry.OnToggle = NoStopMod.OnToggle;
-            //modEntry.OnGUI = NoStopMod.OnGUI;
+            modEntry.OnGUI = onGUIListener.Invoke;
+            modEntry.OnHideGUI = onHideGUIListener.Invoke;
+
             NoStopMod.harmony = new Harmony(modEntry.Info.Id);
             NoStopMod.mod = modEntry;
-            NoStopMod.onToggleListeners = new List<Action<bool>>();
-            NoStopMod.onGUIListeners = new List<Action<UnityModManager.ModEntry>>();
+            
+            GCManager.Init();
+            InputFixerManager.Init();
+            HyperRabbitManager.Init();
 
-            gcManager = new GCManager();
-            asyncInputManager = new AsyncInputManager();
-            hyperRabbitManager = new HyperRabbitManager();
-
+            Settings.Init();
             return true;
         }
 
@@ -56,36 +51,18 @@ namespace NoStopMod
             }
 
             isEnabled = enabled;
-            foreach (Action<bool> listener in onToggleListeners)
-            {
-                try
-                {
-                    listener.Invoke(enabled);
-                }
-                catch (Exception e)
-                {
-                    mod.Logger.Error("Error on OnToggle : " + e.Message);
-                }
-            }
-
+            onToggleListener.Invoke(enabled);
             return true;
         }
-
-        public static void OnGUI(UnityModManager.ModEntry modEntry)
+        
+        [HarmonyPatch(typeof(scrController), "OnApplicationQuit")]
+        private static class scrController_OnApplicationQuit_Patch
         {
-            NoStopMod.mod = modEntry;
-            foreach (Action<UnityModManager.ModEntry> listener in onGUIListeners)
+            public static void Prefix(scrController __instance)
             {
-                try
-                { 
-                    listener.Invoke(modEntry);
-                }
-                catch (Exception e)
-                {
-                    mod.Logger.Error("Error on ONGUI : " + e.Message);
-                }
+                onApplicationQuitListener.Invoke(__instance);
             }
         }
-
+        
     }
 }

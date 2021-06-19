@@ -1,12 +1,12 @@
 ﻿using DG.Tweening;
 using HarmonyLib;
-using NoStopMod.AsyncInput.HitIgnore;
+using NoStopMod.InputFixer.HitIgnore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace NoStopMod.AsyncInput
+namespace NoStopMod.InputFixer
 {
     public static class AsyncInputPatches
     {
@@ -28,18 +28,9 @@ namespace NoStopMod.AsyncInput
         {
             public static void Postfix(scrController __instance)
             {
-                NoStopMod.asyncInputManager.jumpToOtherClass = true;
+                InputFixerManager.jumpToOtherClass = true;
                 __instance.conductor.Start();
-                NoStopMod.asyncInputManager.Start();
-            }
-        }
-        
-        [HarmonyPatch(typeof(scrController), "OnApplicationQuit")]
-        private static class scrController_OnApplicationQuit_Patch
-        {
-            public static void Prefix(scrController __instance)
-            {
-                NoStopMod.asyncInputManager.Stop();
+                InputFixerManager.Start();
             }
         }
 
@@ -48,46 +39,47 @@ namespace NoStopMod.AsyncInput
         {
             public static void Prefix(scrConductor __instance)
             {
-                NoStopMod.asyncInputManager.prevTick = NoStopMod.asyncInputManager.currTick;
-                NoStopMod.asyncInputManager.currTick = DateTime.Now.Ticks;
+                InputFixerManager.prevTick = InputFixerManager.currTick;
+                InputFixerManager.currTick = DateTime.Now.Ticks;
             }
 
             public static void Postfix(scrConductor __instance, double ___dspTimeSong)
-            {   
+            {
                 if (AudioListener.pause)
                 {
-                    NoStopMod.asyncInputManager.adjustOffsetTick(__instance, ___dspTimeSong);
+                    InputFixerManager.adjustOffsetTick(__instance, ___dspTimeSong);
+                }
+                
+                if (!InputFixerManager.settings.enableAsync)
+                {
+                    InputFixerManager.UpdateKeyQueue(InputFixerManager.currTick);
                 }
 
-                while (NoStopMod.asyncInputManager.keyQueue.Any())
+                while (InputFixerManager.keyQueue.Any())
                 {
                     long tick;
                     List<KeyCode> keyCodes;
-                    NoStopMod.asyncInputManager.keyQueue.Dequeue().Deconstruct(out tick, out keyCodes);
+                    InputFixerManager.keyQueue.Dequeue().Deconstruct(out tick, out keyCodes);
 
                     if (AudioListener.pause || RDC.auto) continue;
-
-                    NoStopMod.asyncInputManager.currPressTick = tick - NoStopMod.asyncInputManager.offsetTick;
-                    //NoStopMod.mod.Logger.Log("Hit:" + keyCodes.Count() + "(" + GCS.sceneToLoad + "), " + NoStopMod.asyncInputManager.hitIgnoreManager.scrController_state + ", " + __instance.controller.GetState());
-
+                    
                     scrController controller = __instance.controller;
-                    HitIgnoreManager hitDisableManager = NoStopMod.asyncInputManager.hitIgnoreManager;
                     int count = 0;
                     for (int i = 0; i < keyCodes.Count(); i++)
                     {
-                        if (hitDisableManager.shouldBeIgnored(keyCodes[i])) continue;
+                        if (HitIgnoreManager.shouldBeIgnored(keyCodes[i])) continue;
                         if (++count > 4) break;
-                        //NoStopMod.mod.Logger.Log("Hit " + keyCodes[i] + ", " + GCS.sceneToLoad + ", ");
                     }
+
+                    InputFixerManager.currPressTick = tick - InputFixerManager.offsetTick;
                     controller.keyBufferCount += count;
                     while (controller.keyBufferCount > 0)
                     {
                         controller.keyBufferCount--;
-                        NoStopMod.asyncInputManager.jumpToOtherClass = true;
+                        InputFixerManager.jumpToOtherClass = true;
                         controller.chosenplanet.Update_RefreshAngles();
                         controller.Hit();
                     }
-
                 }
 
             }
@@ -96,12 +88,10 @@ namespace NoStopMod.AsyncInput
         [HarmonyPatch(typeof(scrController), "CountValidKeysPressed")]
         private static class scrController_CountValidKeysPressed_Patch
         {
-            public static void Postfix(scrController __instance, ref int __result)
+            public static bool Prefix(scrController __instance, ref int __result)
             {
-                if (__result != 0)
-                {
-                    __result = 0;
-                }
+                __result = 0;
+                return false;
             }
         }
 
@@ -111,11 +101,10 @@ namespace NoStopMod.AsyncInput
             public static bool Prefix(scrPlanet __instance, ref double ___snappedLastAngle)
             {
 
-                if (NoStopMod.asyncInputManager.jumpToOtherClass)
+                if (InputFixerManager.jumpToOtherClass)
                 {
-                    NoStopMod.asyncInputManager.jumpToOtherClass = false;
-                    __instance.angle = NoStopMod.asyncInputManager.getAngle(__instance, ___snappedLastAngle, NoStopMod.asyncInputManager.currPressTick);
-
+                    InputFixerManager.jumpToOtherClass = false;
+                    __instance.angle = InputFixerManager.getAngle(__instance, ___snappedLastAngle, InputFixerManager.currPressTick);
                     return false;
                 }
 
@@ -123,8 +112,8 @@ namespace NoStopMod.AsyncInput
 
                 if (!GCS.d_stationary)
                 {
-                    long nowTick = NoStopMod.asyncInputManager.currTick - NoStopMod.asyncInputManager.offsetTick;
-                    __instance.angle = NoStopMod.asyncInputManager.getAngle(__instance, ___snappedLastAngle, nowTick);
+                    long nowTick = InputFixerManager.currTick - InputFixerManager.offsetTick;
+                    __instance.angle = InputFixerManager.getAngle(__instance, ___snappedLastAngle, nowTick);
 
                     if (__instance.shouldPrint)
                     {
@@ -174,7 +163,7 @@ namespace NoStopMod.AsyncInput
         {
             public static void Postfix(scrController __instance)
             {
-                NoStopMod.asyncInputManager.jumpToOtherClass = true;
+                InputFixerManager.jumpToOtherClass = true;
                 __instance.conductor.Start();
             }
         }
@@ -184,10 +173,10 @@ namespace NoStopMod.AsyncInput
         {
             public static bool Prefix(scrConductor __instance, double ___dspTimeSong)
             {
-                if (NoStopMod.asyncInputManager.jumpToOtherClass)
+                if (InputFixerManager.jumpToOtherClass)
                 {
-                    NoStopMod.asyncInputManager.jumpToOtherClass = false;
-                    NoStopMod.asyncInputManager.adjustOffsetTick(__instance, ___dspTimeSong);
+                    InputFixerManager.jumpToOtherClass = false;
+                    InputFixerManager.adjustOffsetTick(__instance, ___dspTimeSong);
                     return false;
                 }
                 return true;
@@ -199,7 +188,7 @@ namespace NoStopMod.AsyncInput
         {
             public static void Postfix(scrConductor __instance, double ___dspTimeSong)
             {
-                NoStopMod.asyncInputManager.adjustOffsetTick(__instance, ___dspTimeSong);
+                InputFixerManager.adjustOffsetTick(__instance, ___dspTimeSong);
                 //NoStopMod.mod.Logger.Log("Rewind");
             }
         }
@@ -209,7 +198,7 @@ namespace NoStopMod.AsyncInput
         {
             public static void Prefix(scrConductor __instance, double ___dspTimeSong)
             {
-                NoStopMod.asyncInputManager.adjustOffsetTick(__instance, ___dspTimeSong);
+                InputFixerManager.adjustOffsetTick(__instance, ___dspTimeSong);
                 //NoStopMod.mod.Logger.Log("StartMusicCo");
             }
         }
@@ -219,7 +208,7 @@ namespace NoStopMod.AsyncInput
         {
             public static void Postfix(scrConductor __instance, double ___dspTimeSong)
             {
-                NoStopMod.asyncInputManager.adjustOffsetTick(__instance, ___dspTimeSong);
+                InputFixerManager.adjustOffsetTick(__instance, ___dspTimeSong);
                 //NoStopMod.mod.Logger.Log("ScrubMusicToTile");
             }
         }
@@ -229,7 +218,7 @@ namespace NoStopMod.AsyncInput
         {
             public static void Postfix(scrConductor __instance, double ___dspTimeSong)
             {
-                NoStopMod.asyncInputManager.adjustOffsetTick(__instance, ___dspTimeSong);
+                InputFixerManager.adjustOffsetTick(__instance, ___dspTimeSong);
                 //NoStopMod.mod.Logger.Log("DesyncFix");
             }
         }

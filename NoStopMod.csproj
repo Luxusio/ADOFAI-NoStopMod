@@ -87,16 +87,25 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsyncInput\AsyncInputManager.cs" />
-    <Compile Include="AsyncInput\AsyncInputPatches.cs" />
-    <Compile Include="AsyncInput\HitIgnore\HitIgnoreManager.cs" />
-    <Compile Include="AsyncInput\HitIgnore\HitIgnorePatches.cs" />
+    <Compile Include="Helper\Abstraction\SettingsBase.cs" />
+    <Compile Include="Helper\EventListener.cs" />
+    <Compile Include="Helper\JSONHelper.cs" />
+    <Compile Include="InputFixer\HitIgnore\KeyLimiter\KeyLimiterManager.cs" />
+    <Compile Include="InputFixer\HitIgnore\KeyLimiter\KeyLimiterSettings.cs" />
+    <Compile Include="InputFixer\InputFixerManager.cs" />
+    <Compile Include="InputFixer\InputFixerPatches.cs" />
+    <Compile Include="InputFixer\InputFixerSettings.cs" />
+    <Compile Include="InputFixer\HitIgnore\HitIgnoreManager.cs" />
+    <Compile Include="InputFixer\HitIgnore\HitIgnorePatches.cs" />
+    <Compile Include="Helper\SimpleGUI.cs" />
     <Compile Include="GarbageCollection\GCManager.cs" />
     <Compile Include="GarbageCollection\GCPatches.cs" />
     <Compile Include="HyperRabbit\HyperRabbitManager.cs" />
     <Compile Include="HyperRabbit\HyperRabbitPatches.cs" />
+    <Compile Include="lib\SimpleJSON.cs" />
     <Compile Include="NoStopMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
