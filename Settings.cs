@@ -17,43 +17,38 @@ namespace NoStopMod
         public const String path = "\\Mods\\NoStopMod\\settings.json";
 
         public static List<SettingsBase> settings = new List<SettingsBase>();
+        public static EventListener<bool> settingsLoadListener = new EventListener<bool>("SettingsLoad");
 
         public static void Init()
         {
-            NoStopMod.onToggleListener.Add(onToggle);
-            NoStopMod.onApplicationQuitListener.Add(onApplicationQuit);
-        }
-
-        private static void onToggle(bool enabled)
-        {
-            Load();
-        }
-
-        private static void onApplicationQuit(scrController __instance)
-        {
-            Save();
+            NoStopMod.onToggleListener.Add(_ => Load());
+            NoStopMod.onApplicationQuitListener.Add(_ => Save());
         }
 
         public static void Load()
         {
-            string text = File.ReadAllText(Environment.CurrentDirectory + path);
-            if (text == null)
+            try
+            {
+                string text = File.ReadAllText(Environment.CurrentDirectory + path);
+
+                JSONNode jsonNode = JSON.Parse(text);
+                for (int i = 0; i < settings.Count(); i++)
+                {
+                    try
+                    {
+                        settings[i].Load(ref jsonNode);
+                    }
+                    catch (Exception e)
+                    {
+                        NoStopMod.mod.Logger.Error("While Loading : " + e.Message + ", " + e.StackTrace);
+                    }
+                }
+                settingsLoadListener.Invoke(true);
+            }
+            catch
             {
                 Save();
-                return;
-            }
-
-            JSONNode jsonNode = JSON.Parse(text);
-            for (int i = 0; i < settings.Count(); i++)
-            {
-                try
-                {
-                    settings[i].Load(ref jsonNode);
-                }
-                catch (Exception e)
-                {
-                    NoStopMod.mod.Logger.Error("While Loading : " + e.Message + ", " + e.StackTrace);
-                }
+                settingsLoadListener.Invoke(false);
             }
         }
 
