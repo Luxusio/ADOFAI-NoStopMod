@@ -44,7 +44,7 @@ namespace NoStopMod.InputFixer
             }
 
             public static void Postfix(scrConductor __instance, double ___dspTimeSong)
-            {   
+            {
                 if (AudioListener.pause)
                 {
                     InputFixerManager.adjustOffsetTick(__instance, ___dspTimeSong);

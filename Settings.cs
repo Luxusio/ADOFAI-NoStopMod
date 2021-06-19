@@ -4,7 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NoStopMod.Abstraction;
+using NoStopMod.Helper;
+using NoStopMod.Helper.Abstraction;
 using SimpleJSON;
 using UnityEngine;
 
@@ -58,7 +59,7 @@ namespace NoStopMod
 
         public static void Save()
         {
-            JSONNode node = JSON.Parse("{}");
+            JSONNode node = JSONHelper.CreateEmptyNode();
             for (int i = 0; i < settings.Count();i++)
             {
                 try

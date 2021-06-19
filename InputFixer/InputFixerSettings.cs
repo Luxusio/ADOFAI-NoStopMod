@@ -1,4 +1,5 @@
-﻿using NoStopMod.Abstraction;
+﻿using NoStopMod.Helper;
+using NoStopMod.Helper.Abstraction;
 using SimpleJSON;
 using System;
 
@@ -21,7 +22,7 @@ namespace NoStopMod.InputFixer
 
         public void Save(ref JSONNode json)
         {
-            JSONNode node = JSON.Parse("{}");
+            JSONNode node = JSONHelper.CreateEmptyNode();
             node["enableAsync"].AsBool = enableAsync;
             node["enableKeyLimit"].AsBool = enableKeyLimit;
 

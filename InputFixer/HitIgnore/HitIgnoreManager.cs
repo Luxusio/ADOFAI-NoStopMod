@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NoStopMod.InputFixer.HitIgnore.KeyLimiter;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -41,6 +42,8 @@ namespace NoStopMod.InputFixer.HitIgnore
             ignoreScnCLS[(int)KeyCode.DownArrow] = true;
             
             scnCLS_searchMode = false;
+
+            KeyLimiterManager.Init();
         }
 
         public static bool shouldBeIgnored(KeyCode keyCode)

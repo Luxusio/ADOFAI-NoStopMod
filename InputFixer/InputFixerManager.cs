@@ -1,5 +1,5 @@
 ﻿using NoStopMod.InputFixer.HitIgnore;
-using NoStopMod.CustomLayout;
+using NoStopMod.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
