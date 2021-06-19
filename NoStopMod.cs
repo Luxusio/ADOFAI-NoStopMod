@@ -20,12 +20,15 @@ namespace NoStopMod
 
         public static EventListener<bool> onToggleListener = new EventListener<bool>("OnToggle");
         public static EventListener<UnityModManager.ModEntry> onGUIListener = new EventListener<UnityModManager.ModEntry>("OnGUI");
+        public static EventListener<UnityModManager.ModEntry> onHideGUIListener = new EventListener<UnityModManager.ModEntry>("OnHideGUI");
         public static EventListener<scrController> onApplicationQuitListener = new EventListener<scrController>("OnApplicationQuit");
 
         public static bool Load(UnityModManager.ModEntry modEntry)
         {
             modEntry.OnToggle = NoStopMod.OnToggle;
-            modEntry.OnGUI = NoStopMod.OnGUI;
+            modEntry.OnGUI = onGUIListener.Invoke;
+            modEntry.OnHideGUI = onHideGUIListener.Invoke;
+
             NoStopMod.harmony = new Harmony(modEntry.Info.Id);
             NoStopMod.mod = modEntry;
             
@@ -54,35 +57,13 @@ namespace NoStopMod
             onToggleListener.Invoke(enabled);
             return true;
         }
-
-        public static void OnGUI(UnityModManager.ModEntry modEntry)
-        {
-            NoStopMod.mod = modEntry;
-            onGUIListener.Invoke(modEntry);
-        }
-
-
+        
         [HarmonyPatch(typeof(scrController), "OnApplicationQuit")]
         private static class scrController_OnApplicationQuit_Patch
         {
             public static void Prefix(scrController __instance)
             {
                 onApplicationQuitListener.Invoke(__instance);
-            }
-        }
-
-        private static void executeListeners<T>(List<Action<T>> listeners, T obj, String guiMessage)
-        {
-            for (int i=0;i< listeners.Count;i++)
-            {
-                try
-                {
-                    listeners[i].Invoke(obj);
-                }
-                catch (Exception e)
-                {
-                    mod.Logger.Error("Error on " + guiMessage + " : " + e.Message + ", " + e.StackTrace);
-                }
             }
         }
         

@@ -13,8 +13,8 @@ namespace NoStopMod.InputFixer.HitIgnore.KeyLimiter
     class KeyLimiterSettings : SettingsBase
     {
 
-        public bool enable;
-        public List<KeyCode> limitKeys;
+        public bool enable = false;
+        public List<KeyCode> limitKeys = new List<KeyCode>();
         
         public void Load(ref JSONNode json)
         {
@@ -22,8 +22,7 @@ namespace NoStopMod.InputFixer.HitIgnore.KeyLimiter
 
             enable = node["enable"].AsBool;
             limitKeys = JSONHelper.ReadArray(ref node, "limitKeys", (arrayNode) => { return (KeyCode) arrayNode.AsInt; });
-            
-            throw new NotImplementedException();
+
         }
 
         public void Save(ref JSONNode json)
