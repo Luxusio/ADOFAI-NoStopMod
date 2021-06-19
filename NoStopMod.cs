@@ -4,7 +4,7 @@ using HarmonyLib;
 using UnityModManagerNet;
 using NoStopMod.GarbageCollection;
 using System.Collections.Generic;
-using NoStopMod.AsyncInput;
+using NoStopMod.InputFixer;
 using NoStopMod.HyperRabbit;
 using SimpleJSON;
 
@@ -29,7 +29,7 @@ namespace NoStopMod
             NoStopMod.mod = modEntry;
             
             GCManager.Init();
-            AsyncInputManager.Init();
+            InputFixerManager.Init();
             HyperRabbitManager.Init();
 
             Settings.Init();

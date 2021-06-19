@@ -1,4 +1,4 @@
-﻿using NoStopMod.AsyncInput.HitIgnore;
+﻿using NoStopMod.InputFixer.HitIgnore;
 using NoStopMod.CustomLayout;
 using System;
 using System.Collections.Generic;
@@ -7,11 +7,11 @@ using System.Threading;
 using UnityEngine;
 using UnityModManagerNet;
 
-namespace NoStopMod.AsyncInput
+namespace NoStopMod.InputFixer
 {
-    class AsyncInputManager
+    class InputFixerManager
     {
-        public static AsyncInputSettings settings;
+        public static InputFixerSettings settings;
         
         private static Thread thread;
         public static Queue<Tuple<long, List<KeyCode>>> keyQueue = new Queue<Tuple<long, List<KeyCode>>>();
@@ -21,8 +21,9 @@ namespace NoStopMod.AsyncInput
 
         public static long offsetTick;
         public static long currPressTick;
-        
+
         public static bool jumpToOtherClass = false;
+        public static bool editInputLimit = false;
 
         private static bool[] mask;
         
@@ -32,7 +33,7 @@ namespace NoStopMod.AsyncInput
             NoStopMod.onGUIListeners.Add(OnGUI);
             NoStopMod.onApplicationQuitListeners.Add(OnApplicationQuit);
 
-            settings = new AsyncInputSettings();
+            settings = new InputFixerSettings();
             Settings.settings.Add(settings);
 
             prevTick = DateTime.Now.Ticks;
@@ -50,9 +51,9 @@ namespace NoStopMod.AsyncInput
 
         private static void OnGUI(UnityModManager.ModEntry modEntry)
         {
-            GUILayout.BeginVertical("Input");
+            //GUILayout.BeginVertical("Input");
             SimpleGUI.Toggle(ref settings.enableAsync, "Toggle Input Asynchronously", UpdateEnableAsync);
-            GUILayout.EndVertical();
+            //GUILayout.EndVertical(); 
         }
 
         private static void UpdateEnableAsync(bool value)
@@ -118,34 +119,44 @@ namespace NoStopMod.AsyncInput
             while (true)
             {
                 long currTick = DateTime.Now.Ticks;
-
                 if (currTick > prevTick)
                 {
                     prevTick = currTick;
-                    List<KeyCode> keyCodes = new List<KeyCode>();
-
-                    for (int i = 0; i < 320; i++)
-                    {
-                        if (GetKeyDown(i))
-                        {
-                            keyCodes.Add((KeyCode)i);
-                        }
-                    }
-
-                    for (int i = 323; i <= 329; i++)
-                    {
-                        if (GetKeyDown(i))
-                        {
-                            keyCodes.Add((KeyCode)i);
-                        }
-                    }
-                    
-                    if (keyCodes.Any())
-                    {
-                        keyQueue.Enqueue(new Tuple<long, List<KeyCode>>(currTick, keyCodes));
-                    }
+                    UpdateKeyQueue(currTick);
                 }
             }
+        }
+
+        public static void UpdateKeyQueue(long currTick)
+        {
+            List<KeyCode> keyCodes = getPressedKeys();
+            if (keyCodes.Any())
+            {
+                keyQueue.Enqueue(new Tuple<long, List<KeyCode>>(currTick, keyCodes));
+            }
+        }
+
+        private static List<KeyCode> getPressedKeys()
+        {
+            List<KeyCode> keyCodes = new List<KeyCode>();
+
+            for (int i = 0; i < 320; i++)
+            {
+                if (GetKeyDown(i))
+                {
+                    keyCodes.Add((KeyCode)i);
+                }
+            }
+
+            for (int i = 323; i <= 329; i++)
+            {
+                if (GetKeyDown(i))
+                {
+                    keyCodes.Add((KeyCode)i);
+                }
+            }
+
+            return keyCodes;
         }
 
         public static double getAngle(scrPlanet __instance, double ___snappedLastAngle, long nowTick)
@@ -170,7 +181,7 @@ namespace NoStopMod.AsyncInput
         {
             if (scrConductor.instance != null)
             {
-                AsyncInputManager.jumpToOtherClass = true;
+                InputFixerManager.jumpToOtherClass = true;
                 scrConductor.instance.Start();
             }
         }

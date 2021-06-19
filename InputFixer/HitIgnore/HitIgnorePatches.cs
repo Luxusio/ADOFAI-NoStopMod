@@ -2,7 +2,7 @@
 using MonsterLove.StateMachine;
 using System;
 
-namespace NoStopMod.AsyncInput.HitIgnore
+namespace NoStopMod.InputFixer.HitIgnore
 {
     class HitIgnorePatches
     {

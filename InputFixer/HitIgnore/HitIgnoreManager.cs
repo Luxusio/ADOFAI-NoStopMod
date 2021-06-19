@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace NoStopMod.AsyncInput.HitIgnore
+namespace NoStopMod.InputFixer.HitIgnore
 {
     class HitIgnoreManager
     {

@@ -2,25 +2,30 @@
 using SimpleJSON;
 using System;
 
-namespace NoStopMod.AsyncInput
+namespace NoStopMod.InputFixer
 {
-    class AsyncInputSettings : SettingsBase
+    class InputFixerSettings : SettingsBase
     {
         public bool enableAsync = false;
+        public bool enableKeyLimit = false;
 
         public void Load(ref JSONNode json)
         {
-            JSONNode node = json["AsyncInput"];
+            JSONNode node = json["InputFixer"];
 
             enableAsync = node["enableAsync"].AsBool;
+            enableKeyLimit = node["enableKeyLimit"].AsBool;
+            JSONArray array = node["LimitKeys"].AsArray;
+            
         }
 
         public void Save(ref JSONNode json)
         {
             JSONNode node = JSON.Parse("{}");
             node["enableAsync"].AsBool = enableAsync;
+            node["enableKeyLimit"].AsBool = enableKeyLimit;
 
-            json["AsyncInput"] = node;
+            json["InputFixer"] = node;
         }
     }
 }
