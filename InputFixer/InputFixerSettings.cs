@@ -17,7 +17,6 @@ namespace NoStopMod.InputFixer
             enableAsync = node["enableAsync"].AsBool;
             enableKeyLimit = node["enableKeyLimit"].AsBool;
             JSONArray array = node["LimitKeys"].AsArray;
-            
         }
 
         public void Save(ref JSONNode json)

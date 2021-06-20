@@ -37,12 +37,6 @@ namespace NoStopMod.InputFixer
         [HarmonyPatch(typeof(scrConductor), "Update")]
         private static class scrConductor_Update_Patch_Time
         {
-            public static void Prefix(scrConductor __instance)
-            {
-                InputFixerManager.prevTick = InputFixerManager.currTick;
-                InputFixerManager.currTick = DateTime.Now.Ticks;
-            }
-
             public static void Postfix(scrConductor __instance, double ___dspTimeSong)
             {
                 if (AudioListener.pause)
@@ -52,7 +46,7 @@ namespace NoStopMod.InputFixer
                 
                 if (!InputFixerManager.settings.enableAsync)
                 {
-                    InputFixerManager.UpdateKeyQueue(InputFixerManager.currTick);
+                    InputFixerManager.UpdateKeyQueue(NoStopMod.CurrFrameTick());
                 }
 
                 while (InputFixerManager.keyQueue.Any())
@@ -112,7 +106,7 @@ namespace NoStopMod.InputFixer
 
                 if (!GCS.d_stationary)
                 {
-                    long nowTick = InputFixerManager.currTick - InputFixerManager.offsetTick;
+                    long nowTick = NoStopMod.CurrFrameTick() - InputFixerManager.offsetTick;
                     __instance.angle = InputFixerManager.getAngle(__instance, ___snappedLastAngle, nowTick);
 
                     if (__instance.shouldPrint)

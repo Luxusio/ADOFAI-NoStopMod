@@ -15,9 +15,7 @@ namespace NoStopMod.InputFixer
         
         private static Thread thread;
         public static Queue<Tuple<long, List<KeyCode>>> keyQueue = new Queue<Tuple<long, List<KeyCode>>>();
-
-        public static long currTick;
-        public static long prevTick;
+        
 
         public static long offsetTick;
         public static long currPressTick;
@@ -36,9 +34,6 @@ namespace NoStopMod.InputFixer
 
             settings = new InputFixerSettings();
             Settings.settings.Add(settings);
-
-            prevTick = DateTime.Now.Ticks;
-            currTick = prevTick;
             
             mask = Enumerable.Repeat(false, 1024).ToArray();
 
@@ -106,10 +101,11 @@ namespace NoStopMod.InputFixer
 
         private static void Run()
         {
-            long prevTick = DateTime.Now.Ticks;
-            while (true)
+            long prevTick, currTick;
+            prevTick = DateTime.Now.Ticks;
+            while (settings.enableAsync)
             {
-                long currTick = DateTime.Now.Ticks;
+                currTick = DateTime.Now.Ticks;
                 if (currTick > prevTick)
                 {
                     prevTick = currTick;
@@ -180,7 +176,7 @@ namespace NoStopMod.InputFixer
 
         public static void adjustOffsetTick(scrConductor __instance, double ___dspTimeSong)
         {
-            offsetTick = currTick - (long)((__instance.dspTime - ___dspTimeSong) * 10000000);
+            offsetTick = NoStopMod.CurrFrameTick() - (long)((__instance.dspTime - ___dspTimeSong) * 10000000);
         }
 
     }
