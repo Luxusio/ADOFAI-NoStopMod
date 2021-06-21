@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using UnityEngine;
 using UnityModManagerNet;
+using NoStopMod.InputFixer.SyncFixer;
 
 namespace NoStopMod.InputFixer
 {
@@ -15,11 +16,9 @@ namespace NoStopMod.InputFixer
         
         private static Thread thread;
         public static Queue<Tuple<long, List<KeyCode>>> keyQueue = new Queue<Tuple<long, List<KeyCode>>>();
+        
 
-        public static long currTick;
-        public static long prevTick;
-
-        public static long offsetTick;
+        //public static long offsetTick;
         public static long currPressTick;
 
         public static bool jumpToOtherClass = false;
@@ -36,13 +35,11 @@ namespace NoStopMod.InputFixer
 
             settings = new InputFixerSettings();
             Settings.settings.Add(settings);
-
-            prevTick = DateTime.Now.Ticks;
-            currTick = prevTick;
             
             mask = Enumerable.Repeat(false, 1024).ToArray();
 
             HitIgnoreManager.Init();
+            SyncFixerManager.Init();
         }
 
         private static void OnGUI(UnityModManager.ModEntry modEntry)
@@ -67,7 +64,6 @@ namespace NoStopMod.InputFixer
         public static void Start()
         {
             Stop();
-            adjustOffsetTick();
             if (settings.enableAsync) {
                 thread = new Thread(Run);
                 thread.Start();
@@ -106,10 +102,11 @@ namespace NoStopMod.InputFixer
 
         private static void Run()
         {
-            long prevTick = DateTime.Now.Ticks;
-            while (true)
+            long prevTick, currTick;
+            prevTick = DateTime.Now.Ticks;
+            while (settings.enableAsync)
             {
-                long currTick = DateTime.Now.Ticks;
+                currTick = DateTime.Now.Ticks;
                 if (currTick > prevTick)
                 {
                     prevTick = currTick;
@@ -160,28 +157,13 @@ namespace NoStopMod.InputFixer
         {
             if (!GCS.d_oldConductor && !GCS.d_webglConductor)
             {
-                return ((nowTick / 10000000.0 - scrConductor.calibration_i) * __instance.song.pitch) - __instance.addoffset;
+                return ((nowTick / 10000000.0 - SyncFixerManager.newScrConductor.dspTimeSong - scrConductor.calibration_i) * __instance.song.pitch) - __instance.addoffset;
             }
             else
             {
                 return (__instance.song.time - scrConductor.calibration_i) - __instance.addoffset / __instance.song.pitch;
             }
         }
-
-        public static void adjustOffsetTick()
-        {
-            if (scrConductor.instance != null)
-            {
-                long prevOffset = offsetTick;
-                InputFixerManager.jumpToOtherClass = true;
-                scrConductor.instance.Start();
-            }
-        }
-
-        public static void adjustOffsetTick(scrConductor __instance, double ___dspTimeSong)
-        {
-            offsetTick = currTick - (long)((__instance.dspTime - ___dspTimeSong) * 10000000);
-        }
-
+        
     }
 }

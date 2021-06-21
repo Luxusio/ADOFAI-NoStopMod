@@ -1,6 +1,7 @@
 ﻿using DG.Tweening;
 using HarmonyLib;
 using NoStopMod.InputFixer.HitIgnore;
+using NoStopMod.InputFixer.SyncFixer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,26 +11,12 @@ namespace NoStopMod.InputFixer
 {
     public static class AsyncInputPatches
     {
-
-        //public static string s(double d, int to = 6)
-        //{
-        //    try
-        //    {
-        //        return ("" + d).Substring(0, to);
-        //    }
-        //    catch
-        //    {
-        //        return "" + d;
-        //    }
-        //}
         
         [HarmonyPatch(typeof(scrController), "Awake")]
         private static class scrController_Awake_Patch
         {
             public static void Postfix(scrController __instance)
             {
-                InputFixerManager.jumpToOtherClass = true;
-                __instance.conductor.Start();
                 InputFixerManager.Start();
             }
         }
@@ -37,22 +24,12 @@ namespace NoStopMod.InputFixer
         [HarmonyPatch(typeof(scrConductor), "Update")]
         private static class scrConductor_Update_Patch_Time
         {
-            public static void Prefix(scrConductor __instance)
+            public static void Postfix(scrConductor __instance)
             {
-                InputFixerManager.prevTick = InputFixerManager.currTick;
-                InputFixerManager.currTick = DateTime.Now.Ticks;
-            }
-
-            public static void Postfix(scrConductor __instance, double ___dspTimeSong)
-            {
-                if (AudioListener.pause)
-                {
-                    InputFixerManager.adjustOffsetTick(__instance, ___dspTimeSong);
-                }
                 
                 if (!InputFixerManager.settings.enableAsync)
                 {
-                    InputFixerManager.UpdateKeyQueue(InputFixerManager.currTick);
+                    InputFixerManager.UpdateKeyQueue(NoStopMod.CurrFrameTick());
                 }
 
                 while (InputFixerManager.keyQueue.Any())
@@ -71,7 +48,7 @@ namespace NoStopMod.InputFixer
                         if (++count > 4) break;
                     }
 
-                    InputFixerManager.currPressTick = tick - InputFixerManager.offsetTick;
+                    InputFixerManager.currPressTick = tick - SyncFixerManager.newScrConductor.offsetTick;
                     controller.keyBufferCount += count;
                     while (controller.keyBufferCount > 0)
                     {
@@ -112,7 +89,7 @@ namespace NoStopMod.InputFixer
 
                 if (!GCS.d_stationary)
                 {
-                    long nowTick = InputFixerManager.currTick - InputFixerManager.offsetTick;
+                    long nowTick = NoStopMod.CurrFrameTick() - SyncFixerManager.newScrConductor.offsetTick;
                     __instance.angle = InputFixerManager.getAngle(__instance, ___snappedLastAngle, nowTick);
 
                     if (__instance.shouldPrint)
@@ -157,72 +134,7 @@ namespace NoStopMod.InputFixer
                 return false;
             }
         }
-
-        [HarmonyPatch(typeof(scrController), "OnMusicScheduled")]
-        private static class scrController_Rewind_Patch
-        {
-            public static void Postfix(scrController __instance)
-            {
-                InputFixerManager.jumpToOtherClass = true;
-                __instance.conductor.Start();
-            }
-        }
-
-        [HarmonyPatch(typeof(scrConductor), "Start")]
-        private static class scrConductor_Start_Patch
-        {
-            public static bool Prefix(scrConductor __instance, double ___dspTimeSong)
-            {
-                if (InputFixerManager.jumpToOtherClass)
-                {
-                    InputFixerManager.jumpToOtherClass = false;
-                    InputFixerManager.adjustOffsetTick(__instance, ___dspTimeSong);
-                    return false;
-                }
-                return true;
-            }
-        }
-
-        [HarmonyPatch(typeof(scrConductor), "Rewind")]
-        private static class scrConductor_Rewind_Patch
-        {
-            public static void Postfix(scrConductor __instance, double ___dspTimeSong)
-            {
-                InputFixerManager.adjustOffsetTick(__instance, ___dspTimeSong);
-                //NoStopMod.mod.Logger.Log("Rewind");
-            }
-        }
-
-        [HarmonyPatch(typeof(scrConductor), "StartMusicCo")]
-        private static class scrConductor_StartMusicCo_Patch
-        {
-            public static void Prefix(scrConductor __instance, double ___dspTimeSong)
-            {
-                InputFixerManager.adjustOffsetTick(__instance, ___dspTimeSong);
-                //NoStopMod.mod.Logger.Log("StartMusicCo");
-            }
-        }
-
-        [HarmonyPatch(typeof(scrConductor), "ScrubMusicToTile")]
-        private static class scrConductor_ScrubMusicToTile_Patch
-        {
-            public static void Postfix(scrConductor __instance, double ___dspTimeSong)
-            {
-                InputFixerManager.adjustOffsetTick(__instance, ___dspTimeSong);
-                //NoStopMod.mod.Logger.Log("ScrubMusicToTile");
-            }
-        }
-
-        [HarmonyPatch(typeof(scrConductor), "DesyncFix")]
-        private static class scrConductor_DesyncFix_Patch
-        {
-            public static void Postfix(scrConductor __instance, double ___dspTimeSong)
-            {
-                InputFixerManager.adjustOffsetTick(__instance, ___dspTimeSong);
-                //NoStopMod.mod.Logger.Log("DesyncFix");
-            }
-        }
-
-
+        
+        
     }
 }
