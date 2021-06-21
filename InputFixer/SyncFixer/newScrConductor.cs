@@ -44,25 +44,24 @@ namespace NoStopMod.InputFixer.SyncFixer
 
 
         // from scrController
-        //public int FindSongStartTile(scrConductor conductor, int floorNum, bool forceDontStartMusicFourTilesBefore = false)
-        //{
-        //    int result = floorNum;
-        //    if (GCS.usingCheckpoints && !forceDontStartMusicFourTilesBefore)
-        //    {
-        //        List<scrFloor> floorList = conductor.lm.listFloors;
-        //        // (60f / this.bpm) * speed;
-        //        double startSpeed = conductor.crotchetAtStart / (double)floorList[floorNum].speed;
-        //        for (int i = floorNum - 1; i >= 1; i--)
-        //        {
-        //            if (floorList[i].entryTime <= floorList[floorNum].entryTime - (double) conductor.countdownTicks * num)
-        //            {
-        //                result = i;
-        //                break;
-        //            }
-        //        }
-        //    }
-        //    return result;
-        //}
+        public int FindSongStartTile(scrConductor conductor, int floorNum, bool forceDontStartMusicFourTilesBefore = false)
+        {
+            int result = floorNum;
+            if (GCS.usingCheckpoints && !forceDontStartMusicFourTilesBefore)
+            {
+                List<scrFloor> floorList = conductor.lm.listFloors;
+                double startSpeed = conductor.crotchetAtStart / (double)floorList[floorNum].speed;
+                for (int i = floorNum - 1; i >= 1; i--)
+                {
+                    if (floorList[i].entryTime <= floorList[floorNum].entryTime - (double)conductor.countdownTicks * startSpeed)
+                    {
+                        result = i;
+                        break;
+                    }
+                }
+            }
+            return result;
+        }
 
 
         // Original Code
@@ -288,24 +287,24 @@ namespace NoStopMod.InputFixer.SyncFixer
                 AudioManager.Instance.StopAllSounds();
             }
             this.playedHitSounds = true;
-            if (ADOBase.sceneName.Contains("scnCalibration") || __instance.lm == null || !GCS.d_hitsounds)
-            {
-                return;
-            }
-            if (__instance.controller != null && !__instance.controller.isLevelEditor && !__instance.forceHitSounds)
+            if (ADOBase.sceneName.Contains("scnCalibration") || 
+                __instance.lm == null || 
+                !GCS.d_hitsounds || 
+                (__instance.controller != null && !__instance.controller.isLevelEditor && !__instance.forceHitSounds))
             {
                 return;
             }
             HitSound hitSound = __instance.hitSound;
             float volume = __instance.hitSoundVolume;
-            List<scrFloor> listFloors = __instance.lm.listFloors;
-            int num = (GCS.checkpointNum < listFloors.Count && GCS.usingCheckpoints) ? (GCS.checkpointNum + 1) : 1;
+            List<scrFloor> floorList = __instance.lm.listFloors;
+            int num = (GCS.checkpointNum < floorList.Count && GCS.usingCheckpoints) ? (GCS.checkpointNum + 1) : 1;
             double num2 = this.dspTimeSong + __instance.addoffset / (double)__instance.song.pitch;
+
             this.hitSoundsData = new List<HitSoundsData>();
             this.nextHitSoundToSchedule = 0;
-            for (int i = 1; i < listFloors.Count; i++)
+            for (int i = 1; i < floorList.Count; i++)
             {
-                scrFloor scrFloor = listFloors[i];
+                scrFloor scrFloor = floorList[i];
                 ffxSetHitsound setHitsound = scrFloor.setHitsound;
                 if (setHitsound != null)
                 {
@@ -313,10 +312,10 @@ namespace NoStopMod.InputFixer.SyncFixer
                     volume = setHitsound.volume;
                 }
                 double num3 = (hitSound == HitSound.Shaker || hitSound == HitSound.ShakerLoud) ? 0.015 : 0.0;
-                double num4 = num2 + scrFloor.entryTimePitchAdj - num3;
-                if (i >= num && num4 > __instance.dspTime && !scrFloor.midSpin && hitSound != HitSound.None)
+                double time = num2 + scrFloor.entryTimePitchAdj - num3;
+                if (i >= num && time > __instance.dspTime && !scrFloor.midSpin && hitSound != HitSound.None)
                 {
-                    HitSoundsData item = new HitSoundsData(hitSound, num4, volume);
+                    HitSoundsData item = new HitSoundsData(hitSound, time, volume);
                     this.hitSoundsData.Add(item);
                 }
             }
@@ -362,6 +361,7 @@ namespace NoStopMod.InputFixer.SyncFixer
             {
                 __instance.StopCoroutine(this.startMusicCoroutine);
             }
+            AudioManager.Instance.StopAllSounds();
             this.startMusicCoroutine = __instance.StartCoroutine(this.StartMusicCo(__instance, onComplete, onSongScheduled));
         }
 
@@ -372,7 +372,7 @@ namespace NoStopMod.InputFixer.SyncFixer
 
             for (float timer = 0.1f; timer >= 0f; timer -= Time.deltaTime)
             {
-                yield return 0;
+                yield return null;
             }
             this.dspTimeSong = __instance.dspTime + (double)this.buffer;
             if (__instance.fastTakeoff)
@@ -391,22 +391,33 @@ namespace NoStopMod.InputFixer.SyncFixer
                 __instance.song2.PlayScheduled(time);
             }
             __instance.StartCoroutine(this.ToggleHasSongStarted(__instance, this.dspTimeSong));
-
-            if (GCS.checkpointNum == 0)
+            
+            if (GCS.checkpointNum != 0)
             {
-                __instance.PlayHitTimes();
+                yield return null;
+
+                int startTile = FindSongStartTile(__instance, GCS.checkpointNum, RDC.auto && __instance.isLevelEditor);
+
+                AudioListener.pause = true;
+                __instance.song.SetScheduledStartTime(__instance.dspTime);
+                double num = __instance.separateCountdownTime ? (__instance.crotchetAtStart * (double)__instance.countdownTicks) : 0.0;
+                __instance.song.time = (float)(__instance.lm.listFloors[startTile].entryTime + __instance.addoffset - num);
+                this.dspTimeSong = __instance.dspTime - __instance.lm.listFloors[startTile].entryTimePitchAdj - __instance.addoffset / (double)__instance.song.pitch;
+                __instance.lastHit = __instance.lm.listFloors[startTile].entryTime;
+                AudioListener.pause = false;
+                
             }
-            yield return 0;
+
             onSongScheduled?.Invoke();
+
+            this.PlayHitTimes(__instance);
             yield return new WaitForSeconds(4f);
             while (__instance.song.isPlaying)
             {
                 yield return null;
             }
-            if (onComplete != null)
-            {
-                onComplete();
-            }
+            onComplete?.Invoke();
+            
             yield break;
         }
 
@@ -583,56 +594,57 @@ namespace NoStopMod.InputFixer.SyncFixer
         public void ScrubMusicToTile(scrConductor __instance, int tileID)
         {
             //NoStopMod.mod.Logger.Log("ScrubMusicToTile");
-            AudioListener.pause = true;
-            AudioManager.Instance.StopAllSounds();
-            __instance.song.SetScheduledStartTime(__instance.dspTime);
-            double num = __instance.separateCountdownTime ? (__instance.crotchetAtStart * (double)__instance.countdownTicks) : 0.0;
-            __instance.song.time = (float)(__instance.lm.listFloors[tileID].entryTime + __instance.addoffset - num);
-            this.dspTimeSong = __instance.dspTime - __instance.lm.listFloors[tileID].entryTimePitchAdj - __instance.addoffset / (double)__instance.song.pitch;
-            __instance.lastHit = __instance.lm.listFloors[tileID].entryTime;
-            __instance.StartCoroutine(this.DesyncFix(__instance));
+            //AudioListener.pause = true;
+            //AudioManager.Instance.StopAllSounds();
+            //__instance.song.SetScheduledStartTime(__instance.dspTime);
+            //double num = __instance.separateCountdownTime ? (__instance.crotchetAtStart * (double)__instance.countdownTicks) : 0.0;
+            //__instance.song.time = (float)(__instance.lm.listFloors[tileID].entryTime + __instance.addoffset - num);
+            //this.dspTimeSong = __instance.dspTime - __instance.lm.listFloors[tileID].entryTimePitchAdj - __instance.addoffset / (double)__instance.song.pitch;
+            //__instance.lastHit = __instance.lm.listFloors[tileID].entryTime;
+            //__instance.StartCoroutine(this.DesyncFix(__instance));
         }
 
         // Token: 0x060001D0 RID: 464 RVA: 0x0000D64B File Offset: 0x0000B84B
         public IEnumerator DesyncFix(scrConductor __instance)
         {
             //NoStopMod.mod.Logger.Log("DesyncFix");
-            int num;
-            for (int framecounty = 2; framecounty > 0; framecounty = num - 1)
-            {
-                yield return 0;
-                num = framecounty;
-            }
-            AudioListener.pause = false;
-            __instance.PlayHitTimes();
-            int numberOfAttempts = 0;
-            int framesToWait = 10;
-            double maxDifference = 0.005;
-            for (int i = 0; i < numberOfAttempts; i = num + 1)
-            {
-                for (int framecount = framesToWait; framecount > 0; framecount = num - 1)
-                {
-                    yield return 0;
-                    num = framecount;
-                }
-                if (__instance.song.isPlaying || __instance.song.clip == null)
-                {
-                    yield break;
-                }
-                double num2 = (double)__instance.song.time + (__instance.separateCountdownTime ? (__instance.crotchetAtStart * (double)__instance.countdownTicks) : 0.0);
-                double num3 = __instance.songposition_minusi + (double)(scrConductor.calibration_i * __instance.song.pitch) + __instance.addoffset;
-                if (Math.Abs(num3 - num2) > maxDifference)
-                {
-                    double num4 = num2 - num3;
-                    Debug.Log("Desync Fix Attempt: found difference " + num4);
-                    Debug.Log("Attempt " + i);
-                    Debug.Log("song time " + num2);
-                    Debug.Log("dsptime " + num3);
-                    this.dspTimeSong -= num4;
-                    __instance.PlayHitTimes();
-                }
-                num = i;
-            }
+            //int num;
+            //for (int framecounty = 2; framecounty > 0; framecounty = num - 1)
+            //{
+            //    yield return 0;
+            //    num = framecounty;
+            //}
+            //AudioListener.pause = false;
+            //__instance.PlayHitTimes();
+
+            //int numberOfAttempts = 0;
+            //int framesToWait = 10;
+            //double maxDifference = 0.005;
+            //for (int i = 0; i < numberOfAttempts; i = num + 1)
+            //{
+            //    for (int framecount = framesToWait; framecount > 0; framecount = num - 1)
+            //    {
+            //        yield return 0;
+            //        num = framecount;
+            //    }
+            //    if (__instance.song.isPlaying || __instance.song.clip == null)
+            //    {
+            //        yield break;
+            //    }
+            //    double num2 = (double)__instance.song.time + (__instance.separateCountdownTime ? (__instance.crotchetAtStart * (double)__instance.countdownTicks) : 0.0);
+            //    double num3 = __instance.songposition_minusi + (double)(scrConductor.calibration_i * __instance.song.pitch) + __instance.addoffset;
+            //    if (Math.Abs(num3 - num2) > maxDifference)
+            //    {
+            //        double num4 = num2 - num3;
+            //        Debug.Log("Desync Fix Attempt: found difference " + num4);
+            //        Debug.Log("Attempt " + i);
+            //        Debug.Log("song time " + num2);
+            //        Debug.Log("dsptime " + num3);
+            //        this.dspTimeSong -= num4;
+            //        __instance.PlayHitTimes();
+            //    }
+            //    num = i;
+            //}
             yield break;
         }
         

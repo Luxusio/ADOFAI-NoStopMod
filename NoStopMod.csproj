@@ -367,7 +367,8 @@
     <Compile Include="GarbageCollection\GCPatches.cs" />
     <Compile Include="HyperRabbit\HyperRabbitManager.cs" />
     <Compile Include="HyperRabbit\HyperRabbitPatches.cs" />
-    <Compile Include="InputFixer\SyncFixer\SyncFixerPatches.cs" />
+    <Compile Include="InputFixer\SyncFixer\SyncFixerPatchesScrConductor.cs" />
+    <Compile Include="InputFixer\SyncFixer\SyncFixerPatchesScrController.cs" />
     <Compile Include="lib\SimpleJSON.cs" />
     <Compile Include="NoStopMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

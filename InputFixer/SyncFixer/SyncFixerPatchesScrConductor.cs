@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace NoStopMod.InputFixer.SyncFixer
 {
-    class SyncFixerPatches
+    class SyncFixerPatchesScrConductor
     {
         //[HarmonyPatch(typeof(scrConductor), "StartMusicCo")]
         //private static class scrConductor_StartMusicCo_Patch
