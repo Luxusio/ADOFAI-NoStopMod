@@ -31,22 +31,42 @@ namespace NoStopMod.InputFixer.SyncFixer
         //int _________________________________;
 
 
-        //// replaces dspTime
-        //public long offsetTick;
+        // new code
+        public long offsetTick;
 
-        //public long dspTick;
+        public long dspTick;
 
         
+        public void FixOffsetTick()
+        {
+            offsetTick = NoStopMod.CurrFrameTick() - (long)(instance.dspTime * 10000000);
+        }
 
 
-        //public void FixOffsetTick()
+        // from scrController
+        //public int FindSongStartTile(scrConductor conductor, int floorNum, bool forceDontStartMusicFourTilesBefore = false)
         //{
-        //    offsetTick = NoStopMod.CurrFrameTick() - (long) ((instance.dspTime - dspTimeSong) * 10000000);
+        //    int result = floorNum;
+        //    if (GCS.usingCheckpoints && !forceDontStartMusicFourTilesBefore)
+        //    {
+        //        List<scrFloor> floorList = conductor.lm.listFloors;
+        //        // (60f / this.bpm) * speed;
+        //        double startSpeed = conductor.crotchetAtStart / (double)floorList[floorNum].speed;
+        //        for (int i = floorNum - 1; i >= 1; i--)
+        //        {
+        //            if (floorList[i].entryTime <= floorList[floorNum].entryTime - (double) conductor.countdownTicks * num)
+        //            {
+        //                result = i;
+        //                break;
+        //            }
+        //        }
+        //    }
+        //    return result;
         //}
-        
+
 
         // Original Code
-        
+
         // Token: 0x04000288 RID: 648
         public List<HitSoundsData> hitSoundsData = new List<HitSoundsData>();
 
@@ -58,7 +78,7 @@ namespace NoStopMod.InputFixer.SyncFixer
 
 
         // Token: 0x0400028D RID: 653
-        public double _songposition_minusi;
+        //public double _songposition_minusi;
 
         // Token: 0x0400028E RID: 654
         public double previousFrameTime;
@@ -203,6 +223,7 @@ namespace NoStopMod.InputFixer.SyncFixer
             }
             this.lastReportedPlayheadPosition = AudioSettings.dspTime;
             __instance.dspTime = AudioSettings.dspTime;
+            FixOffsetTick();
             this.previousFrameTime = Time.unscaledTime;
             if (__instance.song.pitch == 0f && !__instance.isLevelEditor)
             {
@@ -213,7 +234,6 @@ namespace NoStopMod.InputFixer.SyncFixer
                 __instance.controller.startVolume = __instance.song.volume;
             }
 
-            //FixOffsetTick();
         }
 
         // Token: 0x060001C5 RID: 453 RVA: 0x0000CC64 File Offset: 0x0000AE64
@@ -236,9 +256,9 @@ namespace NoStopMod.InputFixer.SyncFixer
             __instance.lastHit = 0.0;
             this.lastReportedPlayheadPosition = AudioSettings.dspTime;
             __instance.dspTime = AudioSettings.dspTime;
+            FixOffsetTick();
             this.previousFrameTime = (double)Time.unscaledTime;
 
-            //FixOffsetTick();
         }
 
         // Token: 0x060001C6 RID: 454 RVA: 0x0000CD24 File Offset: 0x0000AF24
@@ -419,23 +439,30 @@ namespace NoStopMod.InputFixer.SyncFixer
         public void Update(scrConductor __instance)
         {
             RDInput.Update();
-            if (!AudioListener.pause && Application.isFocused && Time.unscaledTime - this.previousFrameTime < 0.10000000149011612)
+            //if (!AudioListener.pause && Application.isFocused && Time.unscaledTime - this.previousFrameTime < 0.10000000149011612)
+            //{
+            //    __instance.dspTime += Time.unscaledTime - this.previousFrameTime;
+            //    dspTick = NoStopMod.CurrFrameTick() - offsetTick;
+            //    NoStopMod.mod.Logger.Log("dspTime : " + __instance.dspTime + ", " + (dspTick / 10000000.0));
+            //}
+
+            if (AudioListener.pause)
+            {
+                offsetTick += NoStopMod.CurrFrameTick() - NoStopMod.PrevFrameTick();
+            }
+            else
             {
                 __instance.dspTime += Time.unscaledTime - this.previousFrameTime;
-
-                //NoStopMod.mod.Logger.Log("dspTime : " + __instance.dspTime + ", " + ((DateTime.Now.Ticks - offsetTick) / 10000000.0));
+                dspTick = NoStopMod.CurrFrameTick() - offsetTick;
+                //NoStopMod.mod.Logger.Log("dspTime : " + __instance.dspTime + ", " + (dspTick / 10000000.0) + "diff(" + (__instance.dspTime - (dspTick / 10000000.0)) + ")");
             }
-            
-            //if (AudioListener.pause)
-            //{
-            //    FixOffsetTick();
-            //}
 
             this.previousFrameTime = Time.unscaledTime;
             if (AudioSettings.dspTime != this.lastReportedPlayheadPosition)
             {
                 __instance.dspTime = AudioSettings.dspTime;
                 this.lastReportedPlayheadPosition = AudioSettings.dspTime;
+                FixOffsetTick();
             }
             if (__instance.hasSongStarted && __instance.isGameWorld && (scrController.States)__instance.controller.GetState() != scrController.States.Fail && (scrController.States)__instance.controller.GetState() != scrController.States.Fail2)
             {
@@ -493,16 +520,16 @@ namespace NoStopMod.InputFixer.SyncFixer
                 float pitch = __instance.song.pitch;
                 double num3 = __instance.addoffset;
             }
-            if (GCS.d_calibration)
-            {
-                if (!(__instance.editor == null))
-                {
-                    if (__instance.editor != null)
-                    {
-                        bool flag = !__instance.controller.paused;
-                    }
-                }
-            }
+            //if (GCS.d_calibration)
+            //{
+            //    if (!(__instance.editor == null))
+            //    {
+            //        if (__instance.editor != null)
+            //        {
+            //            bool flag = !__instance.controller.paused;
+            //        }
+            //    }
+            //}
 
             if (__instance.getSpectrum && !GCS.lofiVersion)
             {
@@ -518,8 +545,7 @@ namespace NoStopMod.InputFixer.SyncFixer
                 audioSource.GetSpectrumData(__instance.spectrum, 0, FFTWindow.BlackmanHarris);
             }
         }
-
-        // Token: 0x060001CD RID: 461 RVA: 0x0000D4CC File Offset: 0x0000B6CC
+        
         public void OnBeat(scrConductor __instance)
         {
             List<ADOBase> onBeats = __instance.onBeats;
@@ -556,7 +582,7 @@ namespace NoStopMod.InputFixer.SyncFixer
         // Token: 0x060001CF RID: 463 RVA: 0x0000D570 File Offset: 0x0000B770
         public void ScrubMusicToTile(scrConductor __instance, int tileID)
         {
-            NoStopMod.mod.Logger.Log("ScrubMusicToTile");
+            //NoStopMod.mod.Logger.Log("ScrubMusicToTile");
             AudioListener.pause = true;
             AudioManager.Instance.StopAllSounds();
             __instance.song.SetScheduledStartTime(__instance.dspTime);
@@ -570,7 +596,7 @@ namespace NoStopMod.InputFixer.SyncFixer
         // Token: 0x060001D0 RID: 464 RVA: 0x0000D64B File Offset: 0x0000B84B
         public IEnumerator DesyncFix(scrConductor __instance)
         {
-            NoStopMod.mod.Logger.Log("DesyncFix");
+            //NoStopMod.mod.Logger.Log("DesyncFix");
             int num;
             for (int framecounty = 2; framecounty > 0; framecounty = num - 1)
             {

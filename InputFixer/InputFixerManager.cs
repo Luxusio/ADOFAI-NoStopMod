@@ -65,8 +65,8 @@ namespace NoStopMod.InputFixer
         {
             Stop();
             if (settings.enableAsync) {
-                //thread = new Thread(Run);
-                //thread.Start();
+                thread = new Thread(Run);
+                thread.Start();
             }
         }
 
@@ -157,7 +157,7 @@ namespace NoStopMod.InputFixer
         {
             if (!GCS.d_oldConductor && !GCS.d_webglConductor)
             {
-                return ((nowTick / 10000000.0 - scrConductor.calibration_i) * __instance.song.pitch) - __instance.addoffset;
+                return ((nowTick / 10000000.0 - SyncFixerManager.newScrConductor.dspTimeSong - scrConductor.calibration_i) * __instance.song.pitch) - __instance.addoffset;
             }
             else
             {
@@ -165,6 +165,5 @@ namespace NoStopMod.InputFixer
             }
         }
         
-
     }
 }

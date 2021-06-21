@@ -14,7 +14,7 @@ namespace NoStopMod.InputFixer.SyncFixer
         public static void Init()
         {
             newScrConductor = new newScrConductor();
-            //if (newScrConductor.instance != null) newScrConductor.FixOffsetTick();
+            if (newScrConductor.instance != null) newScrConductor.FixOffsetTick();
         }
         
     }

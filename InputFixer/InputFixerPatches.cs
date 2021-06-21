@@ -12,7 +12,6 @@ namespace NoStopMod.InputFixer
     public static class AsyncInputPatches
     {
         
-        /*
         [HarmonyPatch(typeof(scrController), "Awake")]
         private static class scrController_Awake_Patch
         {
@@ -27,7 +26,6 @@ namespace NoStopMod.InputFixer
         {
             public static void Postfix(scrConductor __instance)
             {
-                
                 
                 if (!InputFixerManager.settings.enableAsync)
                 {
@@ -137,7 +135,6 @@ namespace NoStopMod.InputFixer
             }
         }
         
-
-        */
+        
     }
 }
