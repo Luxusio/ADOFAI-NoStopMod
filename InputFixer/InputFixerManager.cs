@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using UnityEngine;
 using UnityModManagerNet;
+using NoStopMod.InputFixer.SyncFixer;
 
 namespace NoStopMod.InputFixer
 {
@@ -17,7 +18,7 @@ namespace NoStopMod.InputFixer
         public static Queue<Tuple<long, List<KeyCode>>> keyQueue = new Queue<Tuple<long, List<KeyCode>>>();
         
 
-        public static long offsetTick;
+        //public static long offsetTick;
         public static long currPressTick;
 
         public static bool jumpToOtherClass = false;
@@ -38,6 +39,7 @@ namespace NoStopMod.InputFixer
             mask = Enumerable.Repeat(false, 1024).ToArray();
 
             HitIgnoreManager.Init();
+            SyncFixerManager.Init();
         }
 
         private static void OnGUI(UnityModManager.ModEntry modEntry)
@@ -62,10 +64,9 @@ namespace NoStopMod.InputFixer
         public static void Start()
         {
             Stop();
-            adjustOffsetTick();
             if (settings.enableAsync) {
-                thread = new Thread(Run);
-                thread.Start();
+                //thread = new Thread(Run);
+                //thread.Start();
             }
         }
 
@@ -163,21 +164,7 @@ namespace NoStopMod.InputFixer
                 return (__instance.song.time - scrConductor.calibration_i) - __instance.addoffset / __instance.song.pitch;
             }
         }
-
-        public static void adjustOffsetTick()
-        {
-            if (scrConductor.instance != null)
-            {
-                long prevOffset = offsetTick;
-                InputFixerManager.jumpToOtherClass = true;
-                scrConductor.instance.Start();
-            }
-        }
-
-        public static void adjustOffsetTick(scrConductor __instance, double ___dspTimeSong)
-        {
-            offsetTick = NoStopMod.CurrFrameTick() - (long)((__instance.dspTime - ___dspTimeSong) * 10000000);
-        }
+        
 
     }
 }
