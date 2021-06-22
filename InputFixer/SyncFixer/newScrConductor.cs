@@ -293,7 +293,7 @@ namespace NoStopMod.InputFixer.SyncFixer
         }
 
         // StartMusicCo, DesyncFix
-        public void PlayHitTimes(scrConductor __instance)
+        public void PlayHitTimes(scrConductor __instance, double hitsoundPlayFrom)
         {
             if (this.playedHitSounds)
             {
@@ -311,7 +311,7 @@ namespace NoStopMod.InputFixer.SyncFixer
             float volume = __instance.hitSoundVolume;
             List<scrFloor> floorList = __instance.lm.listFloors;
             int num = (GCS.checkpointNum < floorList.Count && GCS.usingCheckpoints) ? (GCS.checkpointNum + 1) : 1;
-            double num2 = this.dspTimeSong + __instance.addoffset / (double)__instance.song.pitch;
+            //double num2 = this.dspTimeSong + __instance.addoffset / (double)__instance.song.pitch;
 
             this.hitSoundsData = new List<HitSoundsData>();
             this.nextHitSoundToSchedule = 0;
@@ -324,8 +324,8 @@ namespace NoStopMod.InputFixer.SyncFixer
                     hitSound = setHitsound.hitSound;
                     volume = setHitsound.volume;
                 }
-                double num3 = (hitSound == HitSound.Shaker || hitSound == HitSound.ShakerLoud) ? 0.015 : 0.0;
-                double time = num2 + scrFloor.entryTimePitchAdj - num3;
+                double hitsoundOffset = (hitSound == HitSound.Shaker || hitSound == HitSound.ShakerLoud) ? 0.015 : 0.0;
+                double time = hitsoundPlayFrom + scrFloor.entryTimePitchAdj - hitsoundOffset;
                 if (i >= num && time > __instance.dspTime && !scrFloor.midSpin && hitSound != HitSound.None)
                 {
                     HitSoundsData item = new HitSoundsData(hitSound, time, volume);
@@ -392,6 +392,13 @@ namespace NoStopMod.InputFixer.SyncFixer
             {
                 yield return null;
             }
+
+            __instance.dspTime = AudioSettings.dspTime;
+#if DEBUG
+            NoStopMod.mod.Logger.Log("call From StartMusicCo Second");
+#endif
+            FixOffsetTick();
+
             this.dspTimeSong = __instance.dspTime + (double)this.buffer;
             if (__instance.fastTakeoff)
             {
@@ -408,6 +415,7 @@ namespace NoStopMod.InputFixer.SyncFixer
             __instance.song2?.PlayScheduled(time);
             //__instance.StartCoroutine(this.ToggleHasSongStarted(__instance, this.dspTimeSong));
 
+            double hitSoundPlayFrom = this.dspTimeSong + __instance.addoffset / (double)__instance.song.pitch;
             if (GCS.checkpointNum != 0)
             {
                 int startTile = FindSongStartTile(__instance, GCS.checkpointNum, RDC.auto && __instance.isLevelEditor);
@@ -418,18 +426,26 @@ namespace NoStopMod.InputFixer.SyncFixer
                 __instance.song.SetScheduledStartTime(__instance.dspTime);
                 double num = __instance.separateCountdownTime ? (__instance.crotchetAtStart * (double)__instance.countdownTicks) : 0.0;
                 __instance.song.time = (float)(__instance.lm.listFloors[startTile].entryTime + __instance.addoffset - num);
-                this.dspTimeSong = __instance.dspTime - __instance.lm.listFloors[startTile].entryTimePitchAdj - __instance.addoffset / (double)__instance.song.pitch;
+                
+                hitSoundPlayFrom = __instance.dspTime - __instance.lm.listFloors[startTile].entryTimePitchAdj;
+                this.dspTimeSong = hitSoundPlayFrom - __instance.addoffset / (double)__instance.song.pitch;
                 __instance.lastHit = __instance.lm.listFloors[startTile].entryTime;
 
-                AudioListener.pause = false;
             }
 
+            //double num2 = this.dspTimeSong + __instance.addoffset / (double)__instance.song.pitch;
+            this.PlayHitTimes(__instance, hitSoundPlayFrom);
+            AudioListener.pause = false;
+
             __instance.hasSongStarted = true;
-            this.PlayHitTimes(__instance);
+
+            // problem: hitsound plays very little later.
+            // how to solve?.... 
+
 
             onSongScheduled?.Invoke();
 #if DEBUG
-            NoStopMod.mod.Logger.Log("call From StartMusicCo Second");
+            NoStopMod.mod.Logger.Log("call From StartMusicCo Third");
 #endif
             FixOffsetTick();
             yield return null;

@@ -54,15 +54,15 @@ namespace NoStopMod.InputFixer.SyncFixer
             }
         }
 
-        [HarmonyPatch(typeof(scrConductor), "PlayHitTimes")]
-        private static class scrConductor_PlayHitTimes_Patch
-        {
-            public static bool Prefix(scrConductor __instance)
-            {
-                SyncFixerManager.newScrConductor.PlayHitTimes(__instance);
-                return false;
-            }
-        }
+        //[HarmonyPatch(typeof(scrConductor), "PlayHitTimes")]
+        //private static class scrConductor_PlayHitTimes_Patch
+        //{
+        //    public static bool Prefix(scrConductor __instance)
+        //    {
+        //        SyncFixerManager.newScrConductor.PlayHitTimes(__instance);
+        //        return false;
+        //    }
+        //}
 
         [HarmonyPatch(typeof(scrConductor), "GetCountdownTime")]
         private static class scrConductor_GetCountdownTime_Patch
