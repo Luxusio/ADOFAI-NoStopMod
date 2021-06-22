@@ -10,8 +10,12 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
+
+
 namespace NoStopMod.InputFixer.SyncFixer
 {
+
+
     class newScrConductor
     {
         // Note : this class replaces scrController in ADOFAI.
@@ -40,6 +44,9 @@ namespace NoStopMod.InputFixer.SyncFixer
         public void FixOffsetTick()
         {
             offsetTick = NoStopMod.CurrFrameTick() - (long)(instance.dspTime * 10000000);
+#if DEBUG
+            NoStopMod.mod.Logger.Log("FixOffsetTick");
+#endif
         }
 
 
@@ -222,6 +229,9 @@ namespace NoStopMod.InputFixer.SyncFixer
             }
             this.lastReportedPlayheadPosition = AudioSettings.dspTime;
             __instance.dspTime = AudioSettings.dspTime;
+#if DEBUG
+            NoStopMod.mod.Logger.Log("CallFrom Start");
+#endif
             FixOffsetTick();
             this.previousFrameTime = Time.unscaledTime;
             if (__instance.song.pitch == 0f && !__instance.isLevelEditor)
@@ -255,6 +265,9 @@ namespace NoStopMod.InputFixer.SyncFixer
             __instance.lastHit = 0.0;
             this.lastReportedPlayheadPosition = AudioSettings.dspTime;
             __instance.dspTime = AudioSettings.dspTime;
+#if DEBUG
+            NoStopMod.mod.Logger.Log("callFrom Rewind");
+#endif
             FixOffsetTick();
             this.previousFrameTime = (double)Time.unscaledTime;
 
@@ -369,6 +382,9 @@ namespace NoStopMod.InputFixer.SyncFixer
         public IEnumerator StartMusicCo(scrConductor __instance, Action onComplete, Action onSongScheduled = null)
         {
             __instance.dspTime = AudioSettings.dspTime;
+#if DEBUG
+            NoStopMod.mod.Logger.Log("call From StartMusicCo First");
+#endif
             FixOffsetTick();
             this.dspTimeSong = __instance.dspTime + (double)this.buffer + 0.10000000149011612;
 
@@ -390,33 +406,34 @@ namespace NoStopMod.InputFixer.SyncFixer
             double time = this.dspTimeSong + (__instance.separateCountdownTime ? (__instance.crotchet / (double)__instance.song.pitch * (double)__instance.countdownTicks) : 0.0);
             __instance.song.PlayScheduled(time);
             __instance.song2?.PlayScheduled(time);
-            __instance.StartCoroutine(this.ToggleHasSongStarted(__instance, this.dspTimeSong));
+            //__instance.StartCoroutine(this.ToggleHasSongStarted(__instance, this.dspTimeSong));
 
             if (GCS.checkpointNum != 0)
             {
-                AudioListener.pause = true;
                 int startTile = FindSongStartTile(__instance, GCS.checkpointNum, RDC.auto && __instance.isLevelEditor);
-
+                
+                AudioListener.pause = true;
                 yield return null;
+                
                 __instance.song.SetScheduledStartTime(__instance.dspTime);
-                //__instance.song.PlayScheduled(__instance.dspTime);
                 double num = __instance.separateCountdownTime ? (__instance.crotchetAtStart * (double)__instance.countdownTicks) : 0.0;
                 __instance.song.time = (float)(__instance.lm.listFloors[startTile].entryTime + __instance.addoffset - num);
                 this.dspTimeSong = __instance.dspTime - __instance.lm.listFloors[startTile].entryTimePitchAdj - __instance.addoffset / (double)__instance.song.pitch;
                 __instance.lastHit = __instance.lm.listFloors[startTile].entryTime;
 
+                AudioListener.pause = false;
             }
 
-            //this.ToggleHasSongStarted(__instance, this.dspTimeSong);
-            yield return null;
-            yield return null;
-
+            __instance.hasSongStarted = true;
             this.PlayHitTimes(__instance);
-            __instance.conductor.hasSongStarted = true;
-            AudioListener.pause = false;
-            
 
             onSongScheduled?.Invoke();
+#if DEBUG
+            NoStopMod.mod.Logger.Log("call From StartMusicCo Second");
+#endif
+            FixOffsetTick();
+            yield return null;
+            FixOffsetTick();
 
             yield return new WaitForSeconds(4f);
             while (__instance.song.isPlaying)
@@ -431,25 +448,25 @@ namespace NoStopMod.InputFixer.SyncFixer
         // Token: 0x060001CB RID: 459 RVA: 0x0000D155 File Offset: 0x0000B355
         public IEnumerator ToggleHasSongStarted(scrConductor __instance, double songstarttime)
         {
-            NoStopMod.mod.Logger.Log("ToggleHasSongStarted");
-            if (GCS.d_webglConductor)
-            {
-                __instance.song.volume = 0f;
-            }
-            while (scrConductor.instance.dspTime < songstarttime)
-            {
-                yield return null;
-            }
-            __instance.hasSongStarted = true;
-            scrDebugHUDMessage.Log("Song started forreal!");
-            if (GCS.d_webglConductor)
-            {
-                yield return new WaitForSeconds(0.2f);
-                __instance.song.Pause();
-                yield return new WaitForSeconds(0.1f);
-                __instance.song.UnPause();
-                __instance.song.volume = 1f;
-            }
+            //NoStopMod.mod.Logger.Log("ToggleHasSongStarted");
+            //if (GCS.d_webglConductor)
+            //{
+            //    __instance.song.volume = 0f;
+            //}
+            //while (scrConductor.instance.dspTime < songstarttime)
+            //{
+            //    yield return null;
+            //}
+            //__instance.hasSongStarted = true;
+            //scrDebugHUDMessage.Log("Song started forreal!");
+            //if (GCS.d_webglConductor)
+            //{
+            //    yield return new WaitForSeconds(0.2f);
+            //    __instance.song.Pause();
+            //    yield return new WaitForSeconds(0.1f);
+            //    __instance.song.UnPause();
+            //    __instance.song.volume = 1f;
+            //}
             yield break;
         }
 
@@ -472,7 +489,9 @@ namespace NoStopMod.InputFixer.SyncFixer
             {
                 __instance.dspTime += Time.unscaledTime - this.previousFrameTime;
                 dspTick = NoStopMod.CurrFrameTick() - offsetTick;
-                //NoStopMod.mod.Logger.Log("dspTime : " + __instance.dspTime + ", " + (dspTick / 10000000.0) + "diff(" + (__instance.dspTime - (dspTick / 10000000.0)) + ")");
+#if DEBUG
+                NoStopMod.mod.Logger.Log("dspTime : " + __instance.dspTime + ", " + (dspTick / 10000000.0) + "diff(" + (__instance.dspTime - (dspTick / 10000000.0)) + ")");
+#endif
             }
 
             this.previousFrameTime = Time.unscaledTime;
@@ -480,7 +499,6 @@ namespace NoStopMod.InputFixer.SyncFixer
             {
                 __instance.dspTime = AudioSettings.dspTime;
                 this.lastReportedPlayheadPosition = AudioSettings.dspTime;
-                FixOffsetTick();
             }
 
             if (__instance.hasSongStarted && __instance.isGameWorld && (scrController.States)__instance.controller.GetState() != scrController.States.Fail && (scrController.States)__instance.controller.GetState() != scrController.States.Fail2)
