@@ -386,7 +386,7 @@ namespace NoStopMod.InputFixer.SyncFixer
             NoStopMod.mod.Logger.Log("call From StartMusicCo First");
 #endif
             FixOffsetTick();
-            this.dspTimeSong = __instance.dspTime + (double)this.buffer + 0.10000000149011612;
+            this.dspTimeSong = __instance.dspTime + (double)this.buffer + 0.1f;
 
             for (float timer = 0.1f; timer >= 0f; timer -= Time.deltaTime)
             {
@@ -399,41 +399,37 @@ namespace NoStopMod.InputFixer.SyncFixer
 #endif
             FixOffsetTick();
 
-            this.dspTimeSong = __instance.dspTime + (double)this.buffer;
+            this.dspTimeSong = __instance.dspTime + (double) this.buffer;
             if (__instance.fastTakeoff)
             {
-                this.dspTimeSong -= (double)__instance.countdownTicks * __instance.crotchetAtStart / (double)__instance.song.pitch;
+                this.dspTimeSong -= (double)__instance.crotchetAtStart * __instance.countdownTicks / __instance.song.pitch;
             }
 
-            double countdownTime = __instance.separateCountdownTime ? (__instance.crotchetAtStart * (double)__instance.countdownTicks) : 0.0;
-            double time = this.dspTimeSong + countdownTime / __instance.song.pitch;
-            __instance.song.PlayScheduled(time);
-            __instance.song2?.PlayScheduled(time);
+            double countdownTime = __instance.separateCountdownTime ? (__instance.crotchetAtStart * __instance.countdownTicks) : 0.0;
 
-            double hitSoundPlayFrom = this.dspTimeSong + __instance.addoffset / (double)__instance.song.pitch;
             if (GCS.checkpointNum != 0)
             {
-                int startTile = FindSongStartTile(__instance, GCS.checkpointNum, RDC.auto && __instance.isLevelEditor);
-
-                AudioListener.pause = true;
-                yield return null;
-
-                __instance.song.SetScheduledStartTime(__instance.dspTime);
-                __instance.song.time = (float)(__instance.lm.listFloors[startTile].entryTime + __instance.addoffset - countdownTime);
-
-                hitSoundPlayFrom = __instance.dspTime - __instance.lm.listFloors[startTile].entryTimePitchAdj;
-                this.dspTimeSong = hitSoundPlayFrom - __instance.addoffset / (double)__instance.song.pitch;
-                __instance.lastHit = __instance.lm.listFloors[startTile].entryTime;
-
+                this.dspTimeSong = __instance.dspTime - countdownTime / __instance.song.pitch + this.buffer;
             }
+            double time = this.dspTimeSong + countdownTime / __instance.song.pitch;
             
-            this.PlayHitTimes(__instance, hitSoundPlayFrom);
-            AudioListener.pause = false;
+            __instance.song.PlayScheduled(time);
+            __instance.song2?.PlayScheduled(time);
+            
+            if (GCS.checkpointNum != 0)
+            {
+                double entryTime = __instance.lm.listFloors[FindSongStartTile(__instance, GCS.checkpointNum, RDC.auto && __instance.isLevelEditor)].entryTime;
+                
+                double destTime = entryTime + __instance.addoffset - countdownTime;
+                this.dspTimeSong -= destTime / __instance.song.pitch;
+                __instance.song.time = (float) destTime;
+                
+                __instance.lastHit = entryTime;
+            }
 
+            double hitSoundPlayFrom = this.dspTimeSong + __instance.addoffset / __instance.song.pitch;
+            this.PlayHitTimes(__instance, hitSoundPlayFrom);
             __instance.hasSongStarted = true;
-            
-            // problem: hitsound plays very little later.
-            // how to solve?.... 
 
 
             onSongScheduled?.Invoke();
