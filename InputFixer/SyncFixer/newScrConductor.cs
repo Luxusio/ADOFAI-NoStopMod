@@ -32,9 +32,6 @@ namespace NoStopMod.InputFixer.SyncFixer
         */
         // a
 
-        //int _________________________________;
-
-
         // new code
         public long offsetTick;
 
@@ -49,6 +46,17 @@ namespace NoStopMod.InputFixer.SyncFixer
 #endif
         }
 
+        public double getSongPosition(scrConductor __instance, long nowTick)
+        {
+            if (!GCS.d_oldConductor && !GCS.d_webglConductor)
+            {
+                return ((nowTick / 10000000.0 - this.dspTimeSong - scrConductor.calibration_i) * __instance.song.pitch) - __instance.addoffset;
+            }
+            else
+            {
+                return (__instance.song.time - scrConductor.calibration_i) - __instance.addoffset / __instance.song.pitch;
+            }
+        }
 
         // from scrController
         public int FindSongStartTile(scrConductor conductor, int floorNum, bool forceDontStartMusicFourTilesBefore = false)
@@ -412,7 +420,8 @@ namespace NoStopMod.InputFixer.SyncFixer
                 this.dspTimeSong = __instance.dspTime - countdownTime / __instance.song.pitch + this.buffer;
             }
             double time = this.dspTimeSong + countdownTime / __instance.song.pitch;
-            
+
+            __instance.song.UnPause();
             __instance.song.PlayScheduled(time);
             __instance.song2?.PlayScheduled(time);
             
@@ -520,17 +529,18 @@ namespace NoStopMod.InputFixer.SyncFixer
                 }
             }
             __instance.crotchet = (double)(60f / __instance.bpm);
-            double songposition_minusi = __instance.songposition_minusi;
-            if (!GCS.d_oldConductor && !GCS.d_webglConductor)
-            {
-                __instance.songposition_minusi = (double)((float)(__instance.dspTime - this.dspTimeSong - (double)scrConductor.calibration_i) * __instance.song.pitch) - __instance.addoffset;
-            }
-            else
-            {
-                __instance.songposition_minusi = (double)(__instance.song.time - scrConductor.calibration_i) - __instance.addoffset / (double)__instance.song.pitch;
-            }
+            double prevSongposition_minusi = __instance.songposition_minusi;
+            __instance.songposition_minusi = getSongPosition(__instance, dspTick);
+            //if (!GCS.d_oldConductor && !GCS.d_webglConductor)
+            //{
+            //    __instance.songposition_minusi = (double)((float)(__instance.dspTime - this.dspTimeSong - (double)scrConductor.calibration_i) * __instance.song.pitch) - __instance.addoffset;
+            //}
+            //else
+            //{
+            //    __instance.songposition_minusi = (double)(__instance.song.time - scrConductor.calibration_i) - __instance.addoffset / (double)__instance.song.pitch;
+            //}
 
-            __instance.deltaSongPos = __instance.songposition_minusi - songposition_minusi;
+            __instance.deltaSongPos = __instance.songposition_minusi - prevSongposition_minusi;
             __instance.deltaSongPos = Math.Max(__instance.deltaSongPos, 0.0);
             if (__instance.songposition_minusi > this.nextBeatTime)
             {
