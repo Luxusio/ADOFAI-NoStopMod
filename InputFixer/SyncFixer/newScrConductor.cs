@@ -405,40 +405,33 @@ namespace NoStopMod.InputFixer.SyncFixer
                 this.dspTimeSong -= (double)__instance.countdownTicks * __instance.crotchetAtStart / (double)__instance.song.pitch;
             }
 
-            //FixOffsetTick();
-            //yield return null;
-
-            //__instance.song.UnPause();
-
-            double time = this.dspTimeSong + (__instance.separateCountdownTime ? (__instance.crotchet / (double)__instance.song.pitch * (double)__instance.countdownTicks) : 0.0);
+            double countdownTime = __instance.separateCountdownTime ? (__instance.crotchetAtStart * (double)__instance.countdownTicks) : 0.0;
+            double time = this.dspTimeSong + countdownTime / __instance.song.pitch;
             __instance.song.PlayScheduled(time);
             __instance.song2?.PlayScheduled(time);
-            //__instance.StartCoroutine(this.ToggleHasSongStarted(__instance, this.dspTimeSong));
 
             double hitSoundPlayFrom = this.dspTimeSong + __instance.addoffset / (double)__instance.song.pitch;
             if (GCS.checkpointNum != 0)
             {
                 int startTile = FindSongStartTile(__instance, GCS.checkpointNum, RDC.auto && __instance.isLevelEditor);
-                
+
                 AudioListener.pause = true;
                 yield return null;
-                
+
                 __instance.song.SetScheduledStartTime(__instance.dspTime);
-                double num = __instance.separateCountdownTime ? (__instance.crotchetAtStart * (double)__instance.countdownTicks) : 0.0;
-                __instance.song.time = (float)(__instance.lm.listFloors[startTile].entryTime + __instance.addoffset - num);
-                
+                __instance.song.time = (float)(__instance.lm.listFloors[startTile].entryTime + __instance.addoffset - countdownTime);
+
                 hitSoundPlayFrom = __instance.dspTime - __instance.lm.listFloors[startTile].entryTimePitchAdj;
                 this.dspTimeSong = hitSoundPlayFrom - __instance.addoffset / (double)__instance.song.pitch;
                 __instance.lastHit = __instance.lm.listFloors[startTile].entryTime;
 
             }
-
-            //double num2 = this.dspTimeSong + __instance.addoffset / (double)__instance.song.pitch;
+            
             this.PlayHitTimes(__instance, hitSoundPlayFrom);
             AudioListener.pause = false;
 
             __instance.hasSongStarted = true;
-
+            
             // problem: hitsound plays very little later.
             // how to solve?.... 
 
