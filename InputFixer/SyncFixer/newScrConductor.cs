@@ -407,44 +407,32 @@ namespace NoStopMod.InputFixer.SyncFixer
 #endif
             FixOffsetTick();
 
-            this.dspTimeSong = __instance.dspTime + (double)this.buffer;
+            double countdownTime = __instance.crotchetAtStart * __instance.countdownTicks;
+            double separatedCountdownTime = __instance.separateCountdownTime ? countdownTime : 0.0;
+            
+            this.dspTimeSong = __instance.dspTime + this.buffer;
             if (__instance.fastTakeoff)
             {
-                this.dspTimeSong -= (double)__instance.crotchetAtStart * __instance.countdownTicks / __instance.song.pitch;
+                this.dspTimeSong -= countdownTime / __instance.song.pitch;
             }
-
-            double countdownTime = __instance.separateCountdownTime ? (__instance.crotchetAtStart * __instance.countdownTicks) : 0.0;
-
             
-            double time = this.dspTimeSong + countdownTime / __instance.song.pitch;
+            double time = this.dspTimeSong + separatedCountdownTime / __instance.song.pitch;
 
             __instance.song.UnPause();
             __instance.song.PlayScheduled(time);
             __instance.song2?.PlayScheduled(time);
             
-
             if (GCS.checkpointNum != 0)
             {
+                yield return null;
+                AudioListener.pause = true;
+                __instance.song.SetScheduledStartTime(__instance.dspTime);
+
                 double entryTime = __instance.lm.listFloors[FindSongStartTile(__instance, GCS.checkpointNum, RDC.auto && __instance.isLevelEditor)].entryTime;
                 
-                yield return null;
-                AudioListener.pause = true;
-                this.dspTimeSong = __instance.dspTime - countdownTime / __instance.song.pitch;
-                __instance.song.SetScheduledStartTime(this.dspTimeSong + countdownTime / __instance.song.pitch);
-                double destTime = entryTime + __instance.addoffset - countdownTime;
-                this.dspTimeSong -= destTime / __instance.song.pitch;
-                __instance.song.time = (float)destTime;
-
                 __instance.lastHit = entryTime;
-            }
-            else
-            {
-                yield return null;
-
-                AudioListener.pause = true;
-                __instance.song.SetScheduledStartTime(time);
-                __instance.song2?.SetScheduledStartTime(time);
-
+                __instance.song.time = (float) (entryTime + __instance.addoffset - separatedCountdownTime);
+                this.dspTimeSong = __instance.dspTime - (entryTime + __instance.addoffset) / __instance.song.pitch;
             }
 
             double hitSoundPlayFrom = this.dspTimeSong + __instance.addoffset / __instance.song.pitch;
@@ -452,14 +440,14 @@ namespace NoStopMod.InputFixer.SyncFixer
             __instance.hasSongStarted = true;
 
 
+            onSongScheduled?.Invoke();
+
+            yield return null;
+            AudioListener.pause = false;
 #if DEBUG
             NoStopMod.mod.Logger.Log("call From StartMusicCo Third");
 #endif
             FixOffsetTick();
-            onSongScheduled?.Invoke();
-            yield return null;
-            FixOffsetTick();
-            AudioListener.pause = false;
 
             yield return new WaitForSeconds(4f);
             while (__instance.song.isPlaying)
