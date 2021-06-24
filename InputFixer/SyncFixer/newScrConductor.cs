@@ -37,10 +37,12 @@ namespace NoStopMod.InputFixer.SyncFixer
 
         public long dspTick;
 
+        public double dspTime;
+
 
         public void FixOffsetTick()
         {
-            offsetTick = NoStopMod.CurrFrameTick() - (long)(instance.dspTime * 10000000);
+            offsetTick = NoStopMod.CurrFrameTick() - (long)(this.dspTime * 10000000);
 #if DEBUG
             NoStopMod.mod.Logger.Log("FixOffsetTick");
 #endif
@@ -236,7 +238,7 @@ namespace NoStopMod.InputFixer.SyncFixer
                 __instance.txtOffset.text = "";
             }
             this.lastReportedPlayheadPosition = AudioSettings.dspTime;
-            __instance.dspTime = AudioSettings.dspTime;
+            this.dspTime = AudioSettings.dspTime;
 #if DEBUG
             NoStopMod.mod.Logger.Log("CallFrom Start");
 #endif
@@ -272,7 +274,7 @@ namespace NoStopMod.InputFixer.SyncFixer
             this.dspTimeSong = 0.0;
             __instance.lastHit = 0.0;
             this.lastReportedPlayheadPosition = AudioSettings.dspTime;
-            __instance.dspTime = AudioSettings.dspTime;
+            this.dspTime = AudioSettings.dspTime;
 #if DEBUG
             NoStopMod.mod.Logger.Log("callFrom Rewind");
 #endif
@@ -334,7 +336,7 @@ namespace NoStopMod.InputFixer.SyncFixer
                 }
                 double hitsoundOffset = (hitSound == HitSound.Shaker || hitSound == HitSound.ShakerLoud) ? 0.015 : 0.0;
                 double time = hitsoundPlayFrom + scrFloor.entryTimePitchAdj - hitsoundOffset;
-                if (i >= num && time > __instance.dspTime && !scrFloor.midSpin && hitSound != HitSound.None)
+                if (i >= num && time > this.dspTime && !scrFloor.midSpin && hitSound != HitSound.None)
                 {
                     HitSoundsData item = new HitSoundsData(hitSound, time, volume);
                     this.hitSoundsData.Add(item);
@@ -349,7 +351,7 @@ namespace NoStopMod.InputFixer.SyncFixer
                     for (int j = 0; j < __instance.countdownTicks; j++)
                     {
                         double countdownTime = this.GetCountdownTime(__instance, j);
-                        if (countdownTime > __instance.dspTime)
+                        if (countdownTime > this.dspTime)
                         {
                             __instance.countdownTimes[j] = countdownTime;
                             AudioManager.Play("sndHat", countdownTime, __instance.hitSoundVolume, 10);
@@ -389,19 +391,19 @@ namespace NoStopMod.InputFixer.SyncFixer
         // Token: 0x060001CA RID: 458 RVA: 0x0000D138 File Offset: 0x0000B338
         public IEnumerator StartMusicCo(scrConductor __instance, Action onComplete, Action onSongScheduled = null)
         {
-            __instance.dspTime = AudioSettings.dspTime;
+            this.dspTime = AudioSettings.dspTime;
 #if DEBUG
             NoStopMod.mod.Logger.Log("call From StartMusicCo First");
 #endif
             FixOffsetTick();
-            this.dspTimeSong = __instance.dspTime + (double)this.buffer + 0.1f;
+            this.dspTimeSong = this.dspTime + (double)this.buffer + 0.1f;
 
             for (float timer = 0.1f; timer >= 0f; timer -= Time.deltaTime)
             {
                 yield return null;
             }
 
-            __instance.dspTime = AudioSettings.dspTime;
+            this.dspTime = AudioSettings.dspTime;
 #if DEBUG
             NoStopMod.mod.Logger.Log("call From StartMusicCo Second");
 #endif
@@ -410,7 +412,7 @@ namespace NoStopMod.InputFixer.SyncFixer
             double countdownTime = __instance.crotchetAtStart * __instance.countdownTicks;
             double separatedCountdownTime = __instance.separateCountdownTime ? countdownTime : 0.0;
             
-            this.dspTimeSong = __instance.dspTime + this.buffer;
+            this.dspTimeSong = this.dspTime + this.buffer;
             if (__instance.fastTakeoff)
             {
                 this.dspTimeSong -= countdownTime / __instance.song.pitch;
@@ -426,13 +428,13 @@ namespace NoStopMod.InputFixer.SyncFixer
             {
                 yield return null;
                 AudioListener.pause = true;
-                __instance.song.SetScheduledStartTime(__instance.dspTime);
+                __instance.song.SetScheduledStartTime(this.dspTime);
 
                 double entryTime = __instance.lm.listFloors[FindSongStartTile(__instance, GCS.checkpointNum, RDC.auto && __instance.isLevelEditor)].entryTime;
                 
                 __instance.lastHit = entryTime;
                 __instance.song.time = (float) (entryTime + __instance.addoffset - separatedCountdownTime);
-                this.dspTimeSong = __instance.dspTime - (entryTime + __instance.addoffset) / __instance.song.pitch;
+                this.dspTimeSong = this.dspTime - (entryTime + __instance.addoffset) / __instance.song.pitch;
             }
 
             double hitSoundPlayFrom = this.dspTimeSong + __instance.addoffset / __instance.song.pitch;
@@ -499,7 +501,7 @@ namespace NoStopMod.InputFixer.SyncFixer
             }
             else
             {
-                __instance.dspTime += Time.unscaledTime - this.previousFrameTime;
+                this.dspTime += Time.unscaledTime - this.previousFrameTime;
                 dspTick = NoStopMod.CurrFrameTick() - offsetTick;
 #if DEBUG
                 NoStopMod.mod.Logger.Log("dspTime : " + __instance.dspTime + ", " + (dspTick / 10000000.0) + "diff(" + (__instance.dspTime - (dspTick / 10000000.0)) + ")");
@@ -509,7 +511,7 @@ namespace NoStopMod.InputFixer.SyncFixer
             this.previousFrameTime = Time.unscaledTime;
             if (AudioSettings.dspTime != this.lastReportedPlayheadPosition)
             {
-                __instance.dspTime = AudioSettings.dspTime;
+                this.dspTime = AudioSettings.dspTime;
                 this.lastReportedPlayheadPosition = AudioSettings.dspTime;
             }
 
@@ -518,7 +520,7 @@ namespace NoStopMod.InputFixer.SyncFixer
                 while (this.nextHitSoundToSchedule < this.hitSoundsData.Count)
                 {
                     HitSoundsData hitSoundsData = this.hitSoundsData[this.nextHitSoundToSchedule];
-                    if (__instance.dspTime + 5.0 <= hitSoundsData.time)
+                    if (this.dspTime + 5.0 <= hitSoundsData.time)
                     {
                         break;
                     }
@@ -586,28 +588,28 @@ namespace NoStopMod.InputFixer.SyncFixer
             }
         }
 
-        public void OnBeat(scrConductor __instance)
-        {
-            List<ADOBase> onBeats = __instance.onBeats;
-            if (onBeats == null)
-            {
-                return;
-            }
-            int count = onBeats.Count;
-            for (int i = 0; i < count; i++)
-            {
-                onBeats[i].OnBeat();
-            }
-            if (__instance.controller != null && __instance.controller.gameworld)
-            {
-                List<scrFloor> listFloors = __instance.controller.lm.listFloors;
-                int count2 = listFloors.Count;
-                for (int j = 0; j < count2; j++)
-                {
-                    listFloors[j].OnBeat();
-                }
-            }
-        }
+        //public void OnBeat(scrConductor __instance)
+        //{
+        //    List<ADOBase> onBeats = __instance.onBeats;
+        //    if (onBeats == null)
+        //    {
+        //        return;
+        //    }
+        //    int count = onBeats.Count;
+        //    for (int i = 0; i < count; i++)
+        //    {
+        //        onBeats[i].OnBeat();
+        //    }
+        //    if (__instance.controller != null && __instance.controller.gameworld)
+        //    {
+        //        List<scrFloor> listFloors = __instance.controller.lm.listFloors;
+        //        int count2 = listFloors.Count;
+        //        for (int j = 0; j < count2; j++)
+        //        {
+        //            listFloors[j].OnBeat();
+        //        }
+        //    }
+        //}
 
         // Token: 0x060001CE RID: 462 RVA: 0x0000D555 File Offset: 0x0000B755
         public void PlaySfx(scrConductor __instance, int num, float volume = 1f, bool ignoreListenerPause = false)

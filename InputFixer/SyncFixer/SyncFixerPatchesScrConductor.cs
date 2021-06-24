@@ -114,15 +114,15 @@ namespace NoStopMod.InputFixer.SyncFixer
             }
         }
 
-        [HarmonyPatch(typeof(scrConductor), "OnBeat")]
-        private static class scrConductor_OnBeat_Patch
-        {
-            public static bool Prefix(scrConductor __instance)
-            {
-                SyncFixerManager.newScrConductor.OnBeat(__instance);
-                return false;
-            }
-        }
+        //[HarmonyPatch(typeof(scrConductor), "OnBeat")]
+        //private static class scrConductor_OnBeat_Patch
+        //{
+        //    public static bool Prefix(scrConductor __instance)
+        //    {
+        //        SyncFixerManager.newScrConductor.OnBeat(__instance);
+        //        return false;
+        //    }
+        //}
 
         [HarmonyPatch(typeof(scrConductor), "PlaySfx")]
         private static class scrConductor_PlaySfx_Patch
