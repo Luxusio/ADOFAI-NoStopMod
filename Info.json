@@ -6,4 +6,6 @@
   "ManagerVersion": "0.23.4.0",
   "AssemblyName": "NoStopMod.dll",
   "EntryMethod": "NoStopMod.NoStopMod.Load"
+  "HomePage": "https://github.com/Luxusio/ADOFAI-NoStopMod",
+  "Repository": "https://raw.githubusercontent.com/Luxusio/ADOFAI-NoStopMod/master/Repository.json"
 }
