@@ -352,6 +352,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EditorSongFixer\EditorSongFixerManager.cs" />
     <Compile Include="Helper\Abstraction\SettingsBase.cs" />
     <Compile Include="Helper\EventListener.cs" />
     <Compile Include="Helper\JSONHelper.cs" />
@@ -368,6 +369,7 @@
     <Compile Include="HyperRabbit\HyperRabbitManager.cs" />
     <Compile Include="HyperRabbit\HyperRabbitPatches.cs" />
     <Compile Include="InputFixer\SyncFixer\SongAudioSource.cs" />
+    <Compile Include="EditorSongFixer\EditorSongFixerPatches.cs" />
     <Compile Include="InputFixer\SyncFixer\SyncFixerPatchesScrConductor.cs" />
     <Compile Include="InputFixer\SyncFixer\SyncFixerPatchesScrController.cs" />
     <Compile Include="lib\SimpleJSON.cs" />
