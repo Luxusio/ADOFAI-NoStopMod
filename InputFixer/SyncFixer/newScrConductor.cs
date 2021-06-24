@@ -22,16 +22,13 @@ namespace NoStopMod.InputFixer.SyncFixer
         // Note : this class replaces scrController in ADOFAI.
         // to fix Desync bug, I replaced AudioSettings.dspTime to DateTime.Now.Ticks
         // I hope this mechanism work well.
-
         
-
         /*
          dspTime update
          Start()
          Rewind()
          Update()
         */
-        // a
 
         // new code
         public long offsetTick;
@@ -311,6 +308,7 @@ namespace NoStopMod.InputFixer.SyncFixer
         // StartMusicCo, DesyncFix
         public void PlayHitTimes(scrConductor __instance, double hitsoundPlayFrom)
         {
+            this.hitSoundsData = new List<HitSoundsData>();
             if (this.playedHitSounds)
             {
                 AudioManager.Instance.StopAllSounds();
@@ -329,7 +327,6 @@ namespace NoStopMod.InputFixer.SyncFixer
             int num = (GCS.checkpointNum < floorList.Count && GCS.usingCheckpoints) ? (GCS.checkpointNum + 1) : 1;
             //double num2 = this.dspTimeSong + __instance.addoffset / (double)__instance.song.pitch;
 
-            this.hitSoundsData = new List<HitSoundsData>();
             this.nextHitSoundToSchedule = 0;
             for (int i = 1; i < floorList.Count; i++)
             {
@@ -443,6 +440,8 @@ namespace NoStopMod.InputFixer.SyncFixer
                 this.dspTimeSong = this.dspTime - (entryTime + __instance.addoffset) / __instance.song.pitch;
             }
             //this.dspTimeSong + __instance.addoffset / (double)__instance.song.pitch
+            
+            onSongScheduled?.Invoke();
 
             double hitSoundPlayFrom = this.dspTimeSong + __instance.addoffset / __instance.song.pitch;
             this.PlayHitTimes(__instance, hitSoundPlayFrom);
@@ -454,7 +453,6 @@ namespace NoStopMod.InputFixer.SyncFixer
             __instance.hasSongStarted = true;
 
 
-            onSongScheduled?.Invoke();
 
             yield return null;
             AudioListener.pause = false;
