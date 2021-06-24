@@ -149,21 +149,11 @@ namespace NoStopMod.InputFixer
 
         public static double getAngle(scrPlanet __instance, double ___snappedLastAngle, long nowTick)
         {
-            return ___snappedLastAngle + (getSongPosition(__instance.conductor, nowTick) - __instance.conductor.lastHit) / __instance.conductor.crotchet
+            return ___snappedLastAngle + (SyncFixerManager.newScrConductor.getSongPosition(__instance.conductor, nowTick) - __instance.conductor.lastHit) / __instance.conductor.crotchet
                 * 3.141592653598793238 * __instance.controller.speed * (double)(__instance.controller.isCW ? 1 : -1);
         }
 
-        public static double getSongPosition(scrConductor __instance, long nowTick)
-        {
-            if (!GCS.d_oldConductor && !GCS.d_webglConductor)
-            {
-                return ((nowTick / 10000000.0 - SyncFixerManager.newScrConductor.dspTimeSong - scrConductor.calibration_i) * __instance.song.pitch) - __instance.addoffset;
-            }
-            else
-            {
-                return (__instance.song.time - scrConductor.calibration_i) - __instance.addoffset / __instance.song.pitch;
-            }
-        }
+        
         
     }
 }

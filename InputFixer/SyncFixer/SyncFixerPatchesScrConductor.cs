@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace NoStopMod.InputFixer.SyncFixer
 {
-    class SyncFixerPatches
+    class SyncFixerPatchesScrConductor
     {
         //[HarmonyPatch(typeof(scrConductor), "StartMusicCo")]
         //private static class scrConductor_StartMusicCo_Patch
@@ -44,25 +44,25 @@ namespace NoStopMod.InputFixer.SyncFixer
             }
         }
 
-        [HarmonyPatch(typeof(scrConductor), "SetupConductorWithLevelData")]
-        private static class scrConductor_SetupConductorWithLevelData_Patch
-        {
-            public static bool Prefix(scrConductor __instance, LevelData levelData)
-            {
-                SyncFixerManager.newScrConductor.SetupConductorWithLevelData(__instance, levelData);
-                return false;
-            }
-        }
+        //[HarmonyPatch(typeof(scrConductor), "SetupConductorWithLevelData")]
+        //private static class scrConductor_SetupConductorWithLevelData_Patch
+        //{
+        //    public static bool Prefix(scrConductor __instance, LevelData levelData)
+        //    {
+        //        SyncFixerManager.newScrConductor.SetupConductorWithLevelData(__instance, levelData);
+        //        return false;
+        //    }
+        //}
 
-        [HarmonyPatch(typeof(scrConductor), "PlayHitTimes")]
-        private static class scrConductor_PlayHitTimes_Patch
-        {
-            public static bool Prefix(scrConductor __instance)
-            {
-                SyncFixerManager.newScrConductor.PlayHitTimes(__instance);
-                return false;
-            }
-        }
+        //[HarmonyPatch(typeof(scrConductor), "PlayHitTimes")]
+        //private static class scrConductor_PlayHitTimes_Patch
+        //{
+        //    public static bool Prefix(scrConductor __instance)
+        //    {
+        //        SyncFixerManager.newScrConductor.PlayHitTimes(__instance);
+        //        return false;
+        //    }
+        //}
 
         [HarmonyPatch(typeof(scrConductor), "GetCountdownTime")]
         private static class scrConductor_GetCountdownTime_Patch
@@ -114,15 +114,15 @@ namespace NoStopMod.InputFixer.SyncFixer
             }
         }
 
-        [HarmonyPatch(typeof(scrConductor), "OnBeat")]
-        private static class scrConductor_OnBeat_Patch
-        {
-            public static bool Prefix(scrConductor __instance)
-            {
-                SyncFixerManager.newScrConductor.OnBeat(__instance);
-                return false;
-            }
-        }
+        //[HarmonyPatch(typeof(scrConductor), "OnBeat")]
+        //private static class scrConductor_OnBeat_Patch
+        //{
+        //    public static bool Prefix(scrConductor __instance)
+        //    {
+        //        SyncFixerManager.newScrConductor.OnBeat(__instance);
+        //        return false;
+        //    }
+        //}
 
         [HarmonyPatch(typeof(scrConductor), "PlaySfx")]
         private static class scrConductor_PlaySfx_Patch

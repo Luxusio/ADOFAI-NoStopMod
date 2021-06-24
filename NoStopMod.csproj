@@ -352,9 +352,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EditorSongFixer\EditorSongFixerManager.cs" />
     <Compile Include="Helper\Abstraction\SettingsBase.cs" />
     <Compile Include="Helper\EventListener.cs" />
     <Compile Include="Helper\JSONHelper.cs" />
+    <Compile Include="Helper\ReflectionField.cs" />
     <Compile Include="InputFixer\HitIgnore\KeyLimiter\KeyLimiterManager.cs" />
     <Compile Include="InputFixer\HitIgnore\KeyLimiter\KeyLimiterSettings.cs" />
     <Compile Include="InputFixer\InputFixerManager.cs" />
@@ -367,7 +369,10 @@
     <Compile Include="GarbageCollection\GCPatches.cs" />
     <Compile Include="HyperRabbit\HyperRabbitManager.cs" />
     <Compile Include="HyperRabbit\HyperRabbitPatches.cs" />
-    <Compile Include="InputFixer\SyncFixer\SyncFixerPatches.cs" />
+    <Compile Include="InputFixer\SyncFixer\SongAudioSource.cs" />
+    <Compile Include="EditorSongFixer\EditorSongFixerPatches.cs" />
+    <Compile Include="InputFixer\SyncFixer\SyncFixerPatchesScrConductor.cs" />
+    <Compile Include="InputFixer\SyncFixer\SyncFixerPatchesScrController.cs" />
     <Compile Include="lib\SimpleJSON.cs" />
     <Compile Include="NoStopMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
