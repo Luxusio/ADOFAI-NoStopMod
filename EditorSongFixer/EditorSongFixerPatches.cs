@@ -29,7 +29,8 @@ namespace NoStopMod.InputFixer.SyncFixer
         {
             private static void Prefix(scnEditor __instance)
             {
-                EditorSongFixerManager.scnEditorCurrentSongKeyInfo?.SetValue(CustomLevel.instance, null);
+                EditorSongFixerManager.scnEditorCurrentSongKey
+                    .SetValue(CustomLevel.instance, null);
             }
         }
 

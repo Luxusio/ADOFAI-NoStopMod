@@ -44,15 +44,15 @@ namespace NoStopMod.InputFixer.SyncFixer
             }
         }
 
-        [HarmonyPatch(typeof(scrConductor), "SetupConductorWithLevelData")]
-        private static class scrConductor_SetupConductorWithLevelData_Patch
-        {
-            public static bool Prefix(scrConductor __instance, LevelData levelData)
-            {
-                SyncFixerManager.newScrConductor.SetupConductorWithLevelData(__instance, levelData);
-                return false;
-            }
-        }
+        //[HarmonyPatch(typeof(scrConductor), "SetupConductorWithLevelData")]
+        //private static class scrConductor_SetupConductorWithLevelData_Patch
+        //{
+        //    public static bool Prefix(scrConductor __instance, LevelData levelData)
+        //    {
+        //        SyncFixerManager.newScrConductor.SetupConductorWithLevelData(__instance, levelData);
+        //        return false;
+        //    }
+        //}
 
         //[HarmonyPatch(typeof(scrConductor), "PlayHitTimes")]
         //private static class scrConductor_PlayHitTimes_Patch

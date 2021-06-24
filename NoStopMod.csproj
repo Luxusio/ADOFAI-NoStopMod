@@ -356,6 +356,7 @@
     <Compile Include="Helper\Abstraction\SettingsBase.cs" />
     <Compile Include="Helper\EventListener.cs" />
     <Compile Include="Helper\JSONHelper.cs" />
+    <Compile Include="Helper\ReflectionField.cs" />
     <Compile Include="InputFixer\HitIgnore\KeyLimiter\KeyLimiterManager.cs" />
     <Compile Include="InputFixer\HitIgnore\KeyLimiter\KeyLimiterSettings.cs" />
     <Compile Include="InputFixer\InputFixerManager.cs" />

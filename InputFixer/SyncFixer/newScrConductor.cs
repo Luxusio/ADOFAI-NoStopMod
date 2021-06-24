@@ -1,6 +1,7 @@
 ﻿using ADOFAI;
 using DG.Tweening;
 using HarmonyLib;
+using NoStopMod.Helper;
 using RDTools;
 using System;
 using System.Collections;
@@ -22,7 +23,7 @@ namespace NoStopMod.InputFixer.SyncFixer
         // to fix Desync bug, I replaced AudioSettings.dspTime to DateTime.Now.Ticks
         // I hope this mechanism work well.
 
-
+        
 
         /*
          dspTime update
@@ -38,7 +39,8 @@ namespace NoStopMod.InputFixer.SyncFixer
         public long dspTick;
 
         public double dspTime;
-
+        
+        public static ReflectionField<double> dspTimeField = new ReflectionField<double>("dspTime", "_dspTime");
 
         public void FixOffsetTick()
         {
@@ -79,6 +81,10 @@ namespace NoStopMod.InputFixer.SyncFixer
             }
             return result;
         }
+
+
+
+
 
 
         // Original Code
@@ -284,23 +290,23 @@ namespace NoStopMod.InputFixer.SyncFixer
         }
 
         // Token: 0x060001C6 RID: 454 RVA: 0x0000CD24 File Offset: 0x0000AF24
-        public void SetupConductorWithLevelData(scrConductor __instance, LevelData levelData)
-        {
-            __instance.bpm = levelData.bpm;
-            __instance.crotchet = (double)(60f / __instance.bpm);
-            __instance.crotchetAtStart = __instance.crotchet;
-            __instance.addoffset = (double)((float)levelData.offset * 0.001f);
-            __instance.song.volume = (float)levelData.volume * 0.01f;
-            __instance.hitSoundVolume = (float)levelData.hitsoundVolume * 0.01f;
-            __instance.hitSound = levelData.hitsound;
-            __instance.separateCountdownTime = levelData.separateCountdownTime;
-            float num = (float)levelData.pitch * 0.01f;
-            if (GCS.standaloneLevelMode)
-            {
-                num *= GCS.currentSpeedRun;
-            }
-            __instance.song.pitch = num;
-        }
+        //public void SetupConductorWithLevelData(scrConductor __instance, LevelData levelData)
+        //{
+        //    __instance.bpm = levelData.bpm;
+        //    __instance.crotchet = (double)(60f / __instance.bpm);
+        //    __instance.crotchetAtStart = __instance.crotchet;
+        //    __instance.addoffset = (double)((float)levelData.offset * 0.001f);
+        //    __instance.song.volume = (float)levelData.volume * 0.01f;
+        //    __instance.hitSoundVolume = (float)levelData.hitsoundVolume * 0.01f;
+        //    __instance.hitSound = levelData.hitsound;
+        //    __instance.separateCountdownTime = levelData.separateCountdownTime;
+        //    float num = (float)levelData.pitch * 0.01f;
+        //    if (GCS.standaloneLevelMode)
+        //    {
+        //        num *= GCS.currentSpeedRun;
+        //    }
+        //    __instance.song.pitch = num;
+        //}
 
         // StartMusicCo, DesyncFix
         public void PlayHitTimes(scrConductor __instance, double hitsoundPlayFrom)
@@ -328,7 +334,7 @@ namespace NoStopMod.InputFixer.SyncFixer
             for (int i = 1; i < floorList.Count; i++)
             {
                 scrFloor scrFloor = floorList[i];
-                ffxSetHitsound setHitsound = scrFloor.setHitsound;
+                ffxSetHitsound setHitsound = scrFloor.GetComponent<ffxSetHitsound>();
                 if (setHitsound != null)
                 {
                     hitSound = setHitsound.hitSound;
@@ -436,9 +442,15 @@ namespace NoStopMod.InputFixer.SyncFixer
                 __instance.song.time = (float) (entryTime + __instance.addoffset - separatedCountdownTime);
                 this.dspTimeSong = this.dspTime - (entryTime + __instance.addoffset) / __instance.song.pitch;
             }
+            //this.dspTimeSong + __instance.addoffset / (double)__instance.song.pitch
 
             double hitSoundPlayFrom = this.dspTimeSong + __instance.addoffset / __instance.song.pitch;
             this.PlayHitTimes(__instance, hitSoundPlayFrom);
+
+            //dspTimeSongField.SetValue(__instance, this.dspTimeSong);
+            //dspTimeField.SetValue(__instance, this.dspTime);
+            //__instance.PlayHitTimes();
+
             __instance.hasSongStarted = true;
 
 

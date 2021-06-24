@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace NoStopMod.Helper
 {
-    class ReflectionField
+    public class ReflectionField<T>
     {
         private static FieldInfo fi;
 
@@ -15,17 +15,33 @@ namespace NoStopMod.Helper
             this.fieldNames = fieldNames;
         }
 
-        public FieldInfo getFieldInfo(Type type)
+        public FieldInfo GetFieldInfo(Type type)
         {
             if (fi == null)
             {
                 for (int i=0;i < fieldNames.Count();i++)
                 {
-                    fi = type.GetField(fieldNames[i], BindingFlags.NonPublic | BindingFlags.Instance);
+                    fi = type.GetField(fieldNames[i], 
+                        BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | 
+                        BindingFlags.GetField | BindingFlags.SetField | BindingFlags.GetProperty | BindingFlags.SetProperty);
                     if (fi != null) break;
+                }
+                if (fi == null)
+                {
+                    NoStopMod.mod.Logger.Error("Cannot find fieldInfo : (type=" + type + ", name" + fieldNames + ")");
                 }
             }
             return fi;
+        }
+
+        public void SetValue(object obj, T value)
+        {
+            GetFieldInfo(obj.GetType())?.SetValue(obj, value);
+        }
+        
+        public T GetValue(object obj)
+        {
+            return (T) GetFieldInfo(obj.GetType())?.GetValue(obj);
         }
 
     }

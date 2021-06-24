@@ -8,7 +8,11 @@
         public static void Init()
         {
             newScrConductor = new newScrConductor();
-            if (newScrConductor.instance != null) newScrConductor.FixOffsetTick();
+            if (scrConductor.instance != null)
+            {
+                newScrConductor.dspTime = newScrConductor.dspTimeField.GetValue(scrConductor.instance);
+                newScrConductor.FixOffsetTick();
+            }
         }
         
     }
