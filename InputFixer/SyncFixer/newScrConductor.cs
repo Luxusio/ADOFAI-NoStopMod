@@ -407,7 +407,7 @@ namespace NoStopMod.InputFixer.SyncFixer
 #endif
             FixOffsetTick();
 
-            this.dspTimeSong = __instance.dspTime + (double) this.buffer;
+            this.dspTimeSong = __instance.dspTime + (double)this.buffer;
             if (__instance.fastTakeoff)
             {
                 this.dspTimeSong -= (double)__instance.crotchetAtStart * __instance.countdownTicks / __instance.song.pitch;
@@ -415,25 +415,36 @@ namespace NoStopMod.InputFixer.SyncFixer
 
             double countdownTime = __instance.separateCountdownTime ? (__instance.crotchetAtStart * __instance.countdownTicks) : 0.0;
 
-            if (GCS.checkpointNum != 0)
-            {
-                this.dspTimeSong = __instance.dspTime - countdownTime / __instance.song.pitch + this.buffer;
-            }
+            
             double time = this.dspTimeSong + countdownTime / __instance.song.pitch;
 
             __instance.song.UnPause();
             __instance.song.PlayScheduled(time);
             __instance.song2?.PlayScheduled(time);
             
+
             if (GCS.checkpointNum != 0)
             {
                 double entryTime = __instance.lm.listFloors[FindSongStartTile(__instance, GCS.checkpointNum, RDC.auto && __instance.isLevelEditor)].entryTime;
                 
+                yield return null;
+                AudioListener.pause = true;
+                this.dspTimeSong = __instance.dspTime - countdownTime / __instance.song.pitch;
+                __instance.song.SetScheduledStartTime(this.dspTimeSong + countdownTime / __instance.song.pitch);
                 double destTime = entryTime + __instance.addoffset - countdownTime;
                 this.dspTimeSong -= destTime / __instance.song.pitch;
-                __instance.song.time = (float) destTime;
-                
+                __instance.song.time = (float)destTime;
+
                 __instance.lastHit = entryTime;
+            }
+            else
+            {
+                yield return null;
+
+                AudioListener.pause = true;
+                __instance.song.SetScheduledStartTime(time);
+                __instance.song2?.SetScheduledStartTime(time);
+
             }
 
             double hitSoundPlayFrom = this.dspTimeSong + __instance.addoffset / __instance.song.pitch;
@@ -441,13 +452,14 @@ namespace NoStopMod.InputFixer.SyncFixer
             __instance.hasSongStarted = true;
 
 
-            onSongScheduled?.Invoke();
 #if DEBUG
             NoStopMod.mod.Logger.Log("call From StartMusicCo Third");
 #endif
             FixOffsetTick();
+            onSongScheduled?.Invoke();
             yield return null;
             FixOffsetTick();
+            AudioListener.pause = false;
 
             yield return new WaitForSeconds(4f);
             while (__instance.song.isPlaying)
@@ -458,8 +470,7 @@ namespace NoStopMod.InputFixer.SyncFixer
 
             yield break;
         }
-
-        // Token: 0x060001CB RID: 459 RVA: 0x0000D155 File Offset: 0x0000B355
+        
         public IEnumerator ToggleHasSongStarted(scrConductor __instance, double songstarttime)
         {
             //NoStopMod.mod.Logger.Log("ToggleHasSongStarted");
@@ -483,8 +494,7 @@ namespace NoStopMod.InputFixer.SyncFixer
             //}
             yield break;
         }
-
-        // Token: 0x060001CC RID: 460 RVA: 0x0000D16C File Offset: 0x0000B36C
+        
         public void Update(scrConductor __instance)
         {
             RDInput.Update();
@@ -572,16 +582,6 @@ namespace NoStopMod.InputFixer.SyncFixer
                 float pitch = __instance.song.pitch;
                 double num3 = __instance.addoffset;
             }
-            //if (GCS.d_calibration)
-            //{
-            //    if (!(__instance.editor == null))
-            //    {
-            //        if (__instance.editor != null)
-            //        {
-            //            bool flag = !__instance.controller.paused;
-            //        }
-            //    }
-            //}
 
             if (__instance.getSpectrum && !GCS.lofiVersion)
             {
@@ -692,11 +692,7 @@ namespace NoStopMod.InputFixer.SyncFixer
         // Token: 0x060001D7 RID: 471 RVA: 0x0000D89B File Offset: 0x0000BA9B
         private int GetOffsetChange(bool fine)
         {
-            if (!fine)
-            {
-                return 10;
-            }
-            return 1;
+            return fine ? 1 : 10;
         }
 
         // Token: 0x060001DC RID: 476 RVA: 0x0000D91C File Offset: 0x0000BB1C
@@ -750,7 +746,4 @@ namespace NoStopMod.InputFixer.SyncFixer
 
     }
 }
-
-
-
 
