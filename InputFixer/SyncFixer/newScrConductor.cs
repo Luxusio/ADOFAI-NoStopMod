@@ -1,17 +1,9 @@
-﻿using ADOFAI;
-using DG.Tweening;
-using HarmonyLib;
-using NoStopMod.Helper;
+﻿using NoStopMod.Helper;
 using RDTools;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-
-
 
 namespace NoStopMod.InputFixer.SyncFixer
 {
@@ -22,7 +14,7 @@ namespace NoStopMod.InputFixer.SyncFixer
         // Note : this class replaces scrController in ADOFAI.
         // to fix Desync bug, I replaced AudioSettings.dspTime to DateTime.Now.Ticks
         // I hope this mechanism work well.
-        
+
         /*
          dspTime update
          Start()
@@ -36,7 +28,7 @@ namespace NoStopMod.InputFixer.SyncFixer
         public long dspTick;
 
         public double dspTime;
-        
+
         public static ReflectionField<double> dspTimeField = new ReflectionField<double>("dspTime", "_dspTime");
 
         public void FixOffsetTick()
@@ -79,11 +71,7 @@ namespace NoStopMod.InputFixer.SyncFixer
             return result;
         }
 
-
-
-
-
-
+        
         // Original Code
 
         // Token: 0x04000288 RID: 648
@@ -414,19 +402,19 @@ namespace NoStopMod.InputFixer.SyncFixer
 
             double countdownTime = __instance.crotchetAtStart * __instance.countdownTicks;
             double separatedCountdownTime = __instance.separateCountdownTime ? countdownTime : 0.0;
-            
+
             this.dspTimeSong = this.dspTime + this.buffer;
             if (__instance.fastTakeoff)
             {
                 this.dspTimeSong -= countdownTime / __instance.song.pitch;
             }
-            
+
             double time = this.dspTimeSong + separatedCountdownTime / __instance.song.pitch;
 
             __instance.song.UnPause();
             __instance.song.PlayScheduled(time);
             __instance.song2?.PlayScheduled(time);
-            
+
             if (GCS.checkpointNum != 0)
             {
                 yield return null;
@@ -434,32 +422,20 @@ namespace NoStopMod.InputFixer.SyncFixer
                 __instance.song.SetScheduledStartTime(this.dspTime);
 
                 double entryTime = __instance.lm.listFloors[FindSongStartTile(__instance, GCS.checkpointNum, RDC.auto && __instance.isLevelEditor)].entryTime;
-                
+
                 __instance.lastHit = entryTime;
-                __instance.song.time = (float) (entryTime + __instance.addoffset - separatedCountdownTime);
+                __instance.song.time = (float)(entryTime + __instance.addoffset - separatedCountdownTime);
                 this.dspTimeSong = this.dspTime - (entryTime + __instance.addoffset) / __instance.song.pitch;
             }
-            //this.dspTimeSong + __instance.addoffset / (double)__instance.song.pitch
-            
             onSongScheduled?.Invoke();
 
             double hitSoundPlayFrom = this.dspTimeSong + __instance.addoffset / __instance.song.pitch;
             this.PlayHitTimes(__instance, hitSoundPlayFrom);
-
-            //dspTimeSongField.SetValue(__instance, this.dspTimeSong);
-            //dspTimeField.SetValue(__instance, this.dspTime);
-            //__instance.PlayHitTimes();
-
+            
             __instance.hasSongStarted = true;
-
-
 
             yield return null;
             AudioListener.pause = false;
-#if DEBUG
-            NoStopMod.mod.Logger.Log("call From StartMusicCo Third");
-#endif
-            FixOffsetTick();
 
             yield return new WaitForSeconds(4f);
             while (__instance.song.isPlaying)
@@ -470,7 +446,7 @@ namespace NoStopMod.InputFixer.SyncFixer
 
             yield break;
         }
-        
+
         public IEnumerator ToggleHasSongStarted(scrConductor __instance, double songstarttime)
         {
             //NoStopMod.mod.Logger.Log("ToggleHasSongStarted");
@@ -494,7 +470,7 @@ namespace NoStopMod.InputFixer.SyncFixer
             //}
             yield break;
         }
-        
+
         public void Update(scrConductor __instance)
         {
             RDInput.Update();
@@ -523,6 +499,7 @@ namespace NoStopMod.InputFixer.SyncFixer
             {
                 this.dspTime = AudioSettings.dspTime;
                 this.lastReportedPlayheadPosition = AudioSettings.dspTime;
+                FixOffsetTick();
             }
 
             if (__instance.hasSongStarted && __instance.isGameWorld && (scrController.States)__instance.controller.GetState() != scrController.States.Fail && (scrController.States)__instance.controller.GetState() != scrController.States.Fail2)
