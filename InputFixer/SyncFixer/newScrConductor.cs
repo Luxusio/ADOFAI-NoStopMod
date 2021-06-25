@@ -95,7 +95,7 @@ namespace NoStopMod.InputFixer.SyncFixer
         
         //public AudioSource audiosource;
         
-        public bool playedHitSounds;
+        //public bool playedHitSounds;
         
         //public scrConductor.DuckState _duckState;
         
@@ -264,11 +264,11 @@ namespace NoStopMod.InputFixer.SyncFixer
         public void PlayHitTimes(scrConductor __instance, double hitsoundPlayFrom)
         {
             this.hitSoundsData = new List<HitSoundsData>();
-            if (this.playedHitSounds)
-            {
-                AudioManager.Instance.StopAllSounds();
-            }
-            this.playedHitSounds = true;
+            //if (this.playedHitSounds)
+            //{
+            //    AudioManager.Instance.StopAllSounds();
+            //}
+            //this.playedHitSounds = true;
             if (ADOBase.sceneName.Contains("scnCalibration") ||
                 __instance.lm == null ||
                 !GCS.d_hitsounds ||
