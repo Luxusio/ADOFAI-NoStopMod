@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NoStopMod.Helper;
 using NoStopMod.Helper.Abstraction;
 using SimpleJSON;
-using UnityEngine;
 
 namespace NoStopMod
 {

@@ -8,7 +8,7 @@ namespace NoStopMod.Helper
     {
         private static FieldInfo fi;
 
-        private string[] fieldNames;
+        private readonly string[] fieldNames;
 
         public ReflectionField(params string[] fieldNames)
         {
