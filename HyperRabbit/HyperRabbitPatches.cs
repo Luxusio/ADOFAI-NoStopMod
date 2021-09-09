@@ -12,7 +12,7 @@ namespace NoStopMod.HyperRabbit
             {
                 if (RDC.auto && scrController.isGameWorld)
                 {
-                    int num = 1000;
+                    int num = HyperRabbitManager.settings.maxTilePerFrame;
                     while (num > 0 && __instance.chosenplanet.AutoShouldHitNow())
                     {
                         __instance.keyBufferCount = 0;
