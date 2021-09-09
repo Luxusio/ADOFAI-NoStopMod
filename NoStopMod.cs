@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using HarmonyLib;
 using UnityModManagerNet;
-using NoStopMod.GarbageCollection;
 using NoStopMod.InputFixer;
 using NoStopMod.HyperRabbit;
 using NoStopMod.Helper;
@@ -35,8 +34,7 @@ namespace NoStopMod
             
             NoStopMod.prevFrameTick = DateTime.Now.Ticks;
             NoStopMod.currFrameTick = prevFrameTick;
-
-            GCManager.Init();
+            
             InputFixerManager.Init();
             HyperRabbitManager.Init();
 
