@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityModManagerNet;
 
 namespace NoStopMod.HyperRabbit
@@ -11,35 +6,23 @@ namespace NoStopMod.HyperRabbit
     class HyperRabbitManager
     {
 
-        public static bool isEnabled;
-        
-        enum Status
-        {
-            OFF,
-            FIXED_OTTO,
-            HYPER_RABBIT,
-        }
+        public static HyperRabbitSettings settings;
 
         public static void Init()
         {
-            NoStopMod.onToggleListener.Add(OnToggle);
-            //NoStopMod.onGUIListeners.Add(OnGUI);
-        }
+            NoStopMod.onGUIListener.Add(OnGUI);
 
-        private static void OnToggle(bool enabled)
-        {
-            isEnabled = enabled;
+            settings = new HyperRabbitSettings();
+            Settings.settings.Add(settings);
         }
 
         private static void OnGUI(UnityModManager.ModEntry modEntry)
         {
             GUILayout.BeginHorizontal("HyperRabbit");
-            GUILayout.TextArea("HyperRabbit Status", 20);
-            //if (GUILayout.Button(tex))
-            //{
+            GUILayout.TextArea("Max tile per frame", 20);
 
-            //}
-            //this.isEnabled = GUILayout.Toggle(isEnabled, "HyperRabbit");
+            settings.maxTilePerFrame = (int) GUILayout.HorizontalSlider(settings.maxTilePerFrame, 1, 1000);
+            
             GUILayout.EndHorizontal();
         }
 
