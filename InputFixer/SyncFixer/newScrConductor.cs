@@ -1,9 +1,11 @@
-﻿using NoStopMod.Helper;
+using NoStopMod.Helper;
 using RDTools;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
+
 
 namespace NoStopMod.InputFixer.SyncFixer
 {
@@ -356,32 +358,35 @@ namespace NoStopMod.InputFixer.SyncFixer
                 yield return null;
             }
 
-            this.dspTime = AudioSettings.dspTime;
 #if DEBUG
             NoStopMod.mod.Logger.Log("call From StartMusicCo Second");
 #endif
+            this.dspTime = AudioSettings.dspTime;
             FixOffsetTick();
+
+            AudioListener.pause = true;
 
             double countdownTime = __instance.crotchetAtStart * __instance.countdownTicks;
             double separatedCountdownTime = __instance.separateCountdownTime ? countdownTime : 0.0;
 
-            this.dspTimeSong = this.dspTime + this.buffer;
-            if (__instance.fastTakeoff)
+
+
+            if (GCS.checkpointNum == 0)
             {
-                this.dspTimeSong -= countdownTime / __instance.song.pitch;
+                this.dspTimeSong = this.dspTime + this.buffer;
+                if (__instance.fastTakeoff)
+                {
+                    this.dspTimeSong -= countdownTime / __instance.song.pitch;
+                }
+
+                double time = this.dspTimeSong + separatedCountdownTime / __instance.song.pitch;
+
+                __instance.song.PlayScheduled(time);
+                __instance.song2?.PlayScheduled(time);
             }
-
-            double time = this.dspTimeSong + separatedCountdownTime / __instance.song.pitch;
-
-            __instance.song.UnPause();
-            __instance.song.PlayScheduled(time);
-            __instance.song2?.PlayScheduled(time);
-
-            if (GCS.checkpointNum != 0)
+            else
             {
-                yield return null;
-                AudioListener.pause = true;
-                __instance.song.SetScheduledStartTime(this.dspTime);
+                __instance.song.PlayScheduled(this.dspTime);
 
                 double entryTime = __instance.lm.listFloors[FindSongStartTile(__instance, GCS.checkpointNum, RDC.auto && __instance.isLevelEditor)].entryTime;
 
@@ -398,6 +403,10 @@ namespace NoStopMod.InputFixer.SyncFixer
 
             yield return null;
             AudioListener.pause = false;
+#if DEBUG
+            NoStopMod.mod.Logger.Log("call From StartMusicCo Third");
+#endif
+            FixOffsetTick();
 
             yield return new WaitForSeconds(4f);
             while (__instance.song.isPlaying)
