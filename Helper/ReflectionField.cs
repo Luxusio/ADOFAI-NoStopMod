@@ -6,7 +6,7 @@ namespace NoStopMod.Helper
 {
     public class ReflectionField<T>
     {
-        private static FieldInfo fi;
+        private static FieldInfo fieldInfo;
 
         private readonly string[] fieldNames;
 
@@ -17,21 +17,21 @@ namespace NoStopMod.Helper
 
         public FieldInfo GetFieldInfo(Type type)
         {
-            if (fi == null)
+            if (fieldInfo == null)
             {
                 for (int i=0;i < fieldNames.Count();i++)
                 {
-                    fi = type.GetField(fieldNames[i], 
+                    fieldInfo = type.GetField(fieldNames[i], 
                         BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | 
                         BindingFlags.GetField | BindingFlags.SetField | BindingFlags.GetProperty | BindingFlags.SetProperty);
-                    if (fi != null) break;
+                    if (fieldInfo != null) break;
                 }
-                if (fi == null)
+                if (fieldInfo == null)
                 {
                     NoStopMod.mod.Logger.Error("Cannot find fieldInfo : (type=" + type + ", name" + fieldNames + ")");
                 }
             }
-            return fi;
+            return fieldInfo;
         }
 
         public void SetValue(object obj, T value)
