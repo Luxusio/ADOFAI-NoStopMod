@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Reflection;
+﻿using System.Reflection;
 using HarmonyLib;
-using UnityEngine;
 using UnityModManagerNet;
-using UnityEngine.Scripting;
+using NoStopMod.InputFixer;
+using NoStopMod.HyperRabbit;
+using NoStopMod.Helper;
+using System;
 
 namespace NoStopMod
 {
@@ -16,85 +13,81 @@ namespace NoStopMod
 
         public static UnityModManager.ModEntry mod;
         public static Harmony harmony;
+        public static bool isEnabled = false;
 
-        public static bool currentEnabled = false;
-        public static bool ready = false;
-        public static bool gcEnabled = true;
+        public static EventListener<bool> onToggleListener = new EventListener<bool>("OnToggle");
+        public static EventListener<UnityModManager.ModEntry> onGUIListener = new EventListener<UnityModManager.ModEntry>("OnGUI");
+        public static EventListener<UnityModManager.ModEntry> onHideGUIListener = new EventListener<UnityModManager.ModEntry>("OnHideGUI");
+        public static EventListener<scrController> onApplicationQuitListener = new EventListener<scrController>("OnApplicationQuit");
+
+        private static long currFrameTick;
+        private static long prevFrameTick;
 
         public static bool Load(UnityModManager.ModEntry modEntry)
         {
-            modEntry.OnToggle = new Func<UnityModManager.ModEntry, bool, bool>(NoStopMod.OnToggle);
+            modEntry.OnToggle = NoStopMod.OnToggle;
+            modEntry.OnGUI = onGUIListener.Invoke;
+            modEntry.OnHideGUI = onHideGUIListener.Invoke;
+
+            NoStopMod.harmony = new Harmony(modEntry.Info.Id);
             NoStopMod.mod = modEntry;
+            
+            NoStopMod.prevFrameTick = DateTime.Now.Ticks;
+            NoStopMod.currFrameTick = prevFrameTick;
+            
+            InputFixerManager.Init();
+            HyperRabbitManager.Init();
+
+            Settings.Init();
             return true;
         }
 
         public static bool OnToggle(UnityModManager.ModEntry modEntry, bool enabled)
         {
             NoStopMod.mod = modEntry;
-            
-            if (NoStopMod.currentEnabled != enabled)
+
+            if (enabled)
             {
-                if (enabled)
-                {
-                    NoStopMod.ready = true;
-                    NoStopMod.harmony = new Harmony(modEntry.Info.Id);
-                    NoStopMod.harmony.PatchAll(Assembly.GetExecutingAssembly());
-                    
-                }
-                else
-                {
-                    NoStopMod.ready = false;
-                    NoStopMod.harmony.UnpatchAll(NoStopMod.harmony.Id);
-                    
-                }
-                NoStopMod.currentEnabled = enabled;
+                NoStopMod.harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
-            NoStopMod.gcEnabled = true;
+            else
+            {
+                NoStopMod.harmony.UnpatchAll(NoStopMod.harmony.Id);
+            }
+
+            isEnabled = enabled;
+            onToggleListener.Invoke(enabled);
             return true;
         }
 
-        public static bool GetDisableAutoSave()
+        public static long CurrFrameTick()
         {
-            return NoStopMod.ready && !NoStopMod.gcEnabled;
+            return NoStopMod.currFrameTick;
         }
 
-        public static void DisableGC()
+        public static long PrevFrameTick()
         {
-            if (NoStopMod.ready)
+            return NoStopMod.prevFrameTick;
+        }
+
+        [HarmonyPatch(typeof(scrConductor), "Update")]
+        private static class scrConductor_Update_Patch_Time
+        {
+            public static void Prefix(scrConductor __instance)
             {
-                try
-                {
-                    gcEnabled = false;
-                    //NoStopMod.mod.Logger.Log("disablegc");
-                    GarbageCollector.GCMode = GarbageCollector.Mode.Disabled;
-                    System.Runtime.GCSettings.LatencyMode = System.Runtime.GCLatencyMode.SustainedLowLatency;
-                }
-                catch (NotImplementedException e)
-                {
-                    NoStopMod.mod.Logger.Log("Exception occur");
-                    NoStopMod.mod.Logger.Error(e.ToString());
-                }
+                NoStopMod.prevFrameTick = NoStopMod.currFrameTick;
+                NoStopMod.currFrameTick = DateTime.Now.Ticks;
             }
         }
 
-        public static void EnableGC()
+        [HarmonyPatch(typeof(scrController), "OnApplicationQuit")]
+        private static class scrController_OnApplicationQuit_Patch
         {
-            if (NoStopMod.ready)
+            public static void Prefix(scrController __instance)
             {
-                try
-                {
-                    gcEnabled = true;
-                    //NoStopMod.mod.Logger.Log("enablegc");
-                    GarbageCollector.GCMode = GarbageCollector.Mode.Enabled;
-                    System.Runtime.GCSettings.LatencyMode = System.Runtime.GCLatencyMode.Interactive;
-                    GC.Collect();
-                } catch (NotImplementedException e)
-                {
-                    NoStopMod.mod.Logger.Log("Exception occur");
-                    NoStopMod.mod.Logger.Error(e.ToString());
-                }
+                onApplicationQuitListener.Invoke(__instance);
             }
         }
-
+        
     }
 }

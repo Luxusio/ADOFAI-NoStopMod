@@ -1,8 +1,11 @@
 {
   "Id": "NoStopMod",
+  "DisplayName": "NoStopMod",
   "Author": "Luxus",
-  "Version": "1.0.0",
-  "ManagerVersion": "1.0.0",
+  "Version": "1.2.3",
+  "ManagerVersion": "0.23.4.0",
   "AssemblyName": "NoStopMod.dll",
-  "EntryMethod": "NoStopMod.NoStopMod.Load"
+  "EntryMethod": "NoStopMod.NoStopMod.Load",
+  "HomePage": "https://github.com/Luxusio/ADOFAI-NoStopMod",
+  "Repository": "https://raw.githubusercontent.com/Luxusio/ADOFAI-NoStopMod/master/Repository.json"
 }
