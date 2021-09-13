@@ -6,7 +6,7 @@ namespace NoStopMod.HyperRabbit
 {
     class HyperRabbitSettings : SettingsBase
     {
-        public int maxTilePerFrame = 5;
+        public int maxTilePerFrame = 0;
 
         public void Load(ref JSONNode json)
         {
