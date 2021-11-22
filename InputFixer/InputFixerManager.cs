@@ -1,5 +1,4 @@
-﻿using NoStopMod.InputFixer.HitIgnore;
-using NoStopMod.Helper;
+using NoStopMod.InputFixer.HitIgnore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,8 +16,6 @@ namespace NoStopMod.InputFixer
         private static Thread thread;
         public static Queue<Tuple<long, List<KeyCode>>> keyQueue = new Queue<Tuple<long, List<KeyCode>>>();
         
-
-        //public static long offsetTick;
         public static long currPressTick;
 
         public static bool jumpToOtherClass = false;
@@ -45,7 +42,6 @@ namespace NoStopMod.InputFixer
         private static void OnGUI(UnityModManager.ModEntry modEntry)
         {
             //GUILayout.BeginVertical("Input");
-            SimpleGUI.Toggle(ref settings.enableAsync, "Toggle Input Asynchronously", UpdateEnableAsync);
             //GUILayout.EndVertical(); 
         }
 
@@ -64,10 +60,8 @@ namespace NoStopMod.InputFixer
         public static void Start()
         {
             Stop();
-            if (settings.enableAsync) {
-                thread = new Thread(Run);
-                thread.Start();
-            }
+            thread = new Thread(Run);
+            thread.Start();
         }
 
         public static void Stop()
@@ -149,7 +143,7 @@ namespace NoStopMod.InputFixer
 
         public static double getAngle(scrPlanet __instance, double ___snappedLastAngle, long nowTick)
         {
-            return ___snappedLastAngle + (SyncFixerManager.newScrConductor.getSongPosition(__instance.conductor, nowTick) - __instance.conductor.lastHit) / __instance.conductor.crotchet
+            return ___snappedLastAngle + (SyncFixerManager.GetSongPosition(__instance.conductor, nowTick) - __instance.conductor.lastHit) / __instance.conductor.crotchet
                 * 3.141592653598793238 * __instance.controller.speed * (double)(__instance.controller.isCW ? 1 : -1);
         }
 

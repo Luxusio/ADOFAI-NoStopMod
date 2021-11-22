@@ -48,7 +48,7 @@ namespace NoStopMod.InputFixer
                         if (++count > 4) break;
                     }
 
-                    InputFixerManager.currPressTick = tick - SyncFixerManager.newScrConductor.offsetTick;
+                    InputFixerManager.currPressTick = tick - SyncFixerManager.offsetTick;
                     controller.keyBufferCount += count;
                     while (controller.keyBufferCount > 0)
                     {
@@ -89,7 +89,7 @@ namespace NoStopMod.InputFixer
 
                 if (!GCS.d_stationary)
                 {
-                    long nowTick = NoStopMod.CurrFrameTick() - SyncFixerManager.newScrConductor.offsetTick;
+                    long nowTick = NoStopMod.CurrFrameTick() - SyncFixerManager.offsetTick;
                     __instance.angle = InputFixerManager.getAngle(__instance, ___snappedLastAngle, nowTick);
 
                     if (__instance.shouldPrint)
