@@ -8,3 +8,4 @@ copy ..\bin\Debug\NoStopMod.dll NoStopMod
 xcopy .\NoStopMod\*.* %1\NoStopMod\* /y
 
 cd ..
+rmdir /s /q tmp
