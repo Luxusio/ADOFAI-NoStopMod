@@ -1,4 +1,6 @@
-﻿using System;
+﻿using NoStopMod.Helper.RawInputManager;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityModManagerNet;
@@ -12,7 +14,7 @@ namespace NoStopMod.InputFixer.HitIgnore.KeyLimiter
 
         public static bool isChangingLimitedKeys = false;
 
-        private static bool[] enableKey = Enumerable.Repeat(false, 1024).ToArray();
+        private static HashSet<RawKeyCode> enableKey = new HashSet<RawKeyCode>();
 
         public static void Init()
         {
@@ -26,10 +28,10 @@ namespace NoStopMod.InputFixer.HitIgnore.KeyLimiter
 
         private static void InitEnableKey()
         {
-            enableKey = Enumerable.Repeat(false, 1024).ToArray();
+            enableKey.Clear();
             for (int i = 0; i < settings.limitKeys.Count; i++)
             {
-                enableKey[(int)settings.limitKeys[i]] = true;
+                enableKey.Add(settings.limitKeys[i]);
             }
         }
 
@@ -75,23 +77,23 @@ namespace NoStopMod.InputFixer.HitIgnore.KeyLimiter
             isChangingLimitedKeys = false;
         }
 
-        public static bool IsKeyEnabled(KeyCode keyCode)
+        public static bool IsKeyEnabled(RawKeyCode keyCode)
         {
-            return enableKey[(int) keyCode];
+            return enableKey.Contains(keyCode);
         }
 
-        public static void UpdateKeyLimiter(KeyCode keyCode)
+        public static void UpdateKeyLimiter(RawKeyCode keyCode)
         {
             int idx = settings.limitKeys.IndexOf(keyCode);
             if (idx == -1)
             {
                 settings.limitKeys.Add(keyCode);
-                enableKey[(int)keyCode] = true;
+                enableKey.Add(keyCode);
             }
             else
             {
                 settings.limitKeys.RemoveAt(idx);
-                enableKey[(int)keyCode] = false;
+                enableKey.Remove(keyCode);
             }
 
         }

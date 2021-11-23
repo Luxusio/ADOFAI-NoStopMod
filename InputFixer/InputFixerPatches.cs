@@ -1,5 +1,6 @@
 ﻿using DG.Tweening;
 using HarmonyLib;
+using NoStopMod.Helper.RawInputManager;
 using NoStopMod.InputFixer.HitIgnore;
 using System;
 using System.Collections.Generic;
@@ -46,34 +47,58 @@ namespace NoStopMod.InputFixer
                 InputFixerManager.dspTimeSong = ___dspTimeSong;
 
                 // planet hit processing
+
+                long rawKeyCodesMs = 0;
+                List<RawKeyCode> rawKeyCodes = new List<RawKeyCode>();
+
                 while (InputFixerManager.keyQueue.Any())
                 {
-                    long tick;
-                    List<KeyCode> keyCodes;
-                    InputFixerManager.keyQueue.Dequeue().Deconstruct(out tick, out keyCodes);
+                    long ms;
+                    RawKeyCode rawKeyCode;
+                    InputFixerManager.keyQueue.Dequeue().Deconstruct(out ms, out rawKeyCode);
 
-                    if (AudioListener.pause || RDC.auto) continue;
-                    
-                    scrController controller = __instance.controller;
-                    int count = 0;
-                    for (int i = 0; i < keyCodes.Count(); i++)
+                    if (ms != rawKeyCodesMs)
                     {
-                        if (HitIgnoreManager.shouldBeIgnored(keyCodes[i])) continue;
-                        if (++count > 4) break;
+                        ProcessKeyInputs(rawKeyCodes, rawKeyCodesMs);
+                        rawKeyCodes.Clear();
+                        rawKeyCodesMs = ms;
                     }
 
-                    InputFixerManager.currPressMs = tick - InputFixerManager.offsetMs;
-                    controller.keyBufferCount += count;
-                    while (controller.keyBufferCount > 0)
-                    {
-                        controller.keyBufferCount--;
-                        InputFixerManager.jumpToOtherClass = true;
-                        controller.chosenplanet.Update_RefreshAngles();
-                        controller.Hit();
-                    }
+                    rawKeyCodes.Add(rawKeyCode);
                 }
 
+                ProcessKeyInputs(rawKeyCodes, rawKeyCodesMs);
             }
+
+            private static void ProcessKeyInputs(List<RawKeyCode> rawKeyCodes, long ms)
+            {
+                scrController controller = scrController.instance;
+                int count = 0;
+                for (int i = 0; i < rawKeyCodes.Count(); i++)
+                {
+                    if (HitIgnoreManager.ShouldBeIgnored(rawKeyCodes[i])) continue;
+
+                    if (AudioListener.pause || RDC.auto) continue;
+#if DEBUG
+                    else
+                    {
+                        NoStopMod.mod.Logger.Log("Fetch Input : " + InputFixerManager.offsetMs + ", " + ms + ", " + rawKeyCodes[i]);
+                    }
+#endif
+                    if (++count > 4) break;
+                }
+
+                InputFixerManager.currPressMs = ms - InputFixerManager.offsetMs;
+                controller.keyBufferCount += count;
+                while (controller.keyBufferCount > 0)
+                {
+                    controller.keyBufferCount--;
+                    InputFixerManager.jumpToOtherClass = true;
+                    controller.chosenplanet.Update_RefreshAngles();
+                    controller.Hit();
+                }
+            }
+
         }
 
         [HarmonyPatch(typeof(scrController), "CountValidKeysPressed")]
@@ -81,7 +106,6 @@ namespace NoStopMod.InputFixer
         {
             public static bool Prefix(scrController __instance, ref int __result)
             {
-                __result = 0;
                 return false;
             }
         }
@@ -96,6 +120,12 @@ namespace NoStopMod.InputFixer
                 {
                     InputFixerManager.jumpToOtherClass = false;
                     __instance.angle = InputFixerManager.GetAngle(__instance, ___snappedLastAngle, InputFixerManager.currPressMs);
+#if DEBUG
+                    {
+                        double difference = __instance.angle - __instance.targetExitAngle;
+                        NoStopMod.mod.Logger.Log("Diff : " + difference);
+                    }
+#endif
                     return false;
                 }
 
@@ -113,13 +143,13 @@ namespace NoStopMod.InputFixer
                 }
                 else
                 {
-                    if (Input.GetKey(KeyCode.DownArrow))
+                    if (UnityEngine.Input.GetKey(KeyCode.DownArrow))
                     {
-                        __instance.angle += 0.10000000149011612;
+                        __instance.angle += 0.1;
                     }
-                    if (Input.GetKey(KeyCode.UpArrow))
+                    if (UnityEngine.Input.GetKey(KeyCode.UpArrow))
                     {
-                        __instance.angle -= 0.10000000149011612;
+                        __instance.angle -= 0.1;
                     }
                 }
                 float num = (float)__instance.angle;

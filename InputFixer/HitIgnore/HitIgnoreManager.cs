@@ -1,8 +1,8 @@
-﻿using NoStopMod.InputFixer.HitIgnore.KeyLimiter;
+﻿using NoStopMod.Helper.RawInputManager;
+using NoStopMod.InputFixer.HitIgnore.KeyLimiter;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace NoStopMod.InputFixer.HitIgnore
 {
@@ -21,25 +21,26 @@ namespace NoStopMod.InputFixer.HitIgnore
 
             bool[] ignoreScnNewIntro = Enumerable.Repeat(false, 1024).ToArray();
             dictionary["scnNewIntro"] = ignoreScnNewIntro;
-            ignoreScnNewIntro[(int)KeyCode.BackQuote] = true;
-            ignoreScnNewIntro[(int)KeyCode.Alpha0] = true;
-            ignoreScnNewIntro[(int)KeyCode.Alpha1] = true;
-            ignoreScnNewIntro[(int)KeyCode.Alpha2] = true;
-            ignoreScnNewIntro[(int)KeyCode.Alpha3] = true;
-            ignoreScnNewIntro[(int)KeyCode.Alpha4] = true;
-            ignoreScnNewIntro[(int)KeyCode.Alpha5] = true;
-            ignoreScnNewIntro[(int)KeyCode.Alpha6] = true;
-            ignoreScnNewIntro[(int)KeyCode.Alpha7] = true;
+           
+            ignoreScnNewIntro[(int)RawKeyCode.OEM_7] = true;
+            ignoreScnNewIntro[(int)RawKeyCode.KEY_0] = true;
+            ignoreScnNewIntro[(int)RawKeyCode.KEY_1] = true;
+            ignoreScnNewIntro[(int)RawKeyCode.KEY_2] = true;
+            ignoreScnNewIntro[(int)RawKeyCode.KEY_3] = true;
+            ignoreScnNewIntro[(int)RawKeyCode.KEY_4] = true;
+            ignoreScnNewIntro[(int)RawKeyCode.KEY_5] = true;
+            ignoreScnNewIntro[(int)RawKeyCode.KEY_6] = true;
+            ignoreScnNewIntro[(int)RawKeyCode.KEY_7] = true;
 
             bool[] ignoreScnCLS = Enumerable.Repeat(false, 1024).ToArray();
             dictionary["scnCLS"] = ignoreScnCLS;
-            ignoreScnCLS[(int)KeyCode.S] = true;
-            ignoreScnCLS[(int)KeyCode.Delete] = true;
-            ignoreScnCLS[(int)KeyCode.F] = true;
-            ignoreScnCLS[(int)KeyCode.O] = true;
-            ignoreScnCLS[(int)KeyCode.Alpha7] = true;
-            ignoreScnCLS[(int)KeyCode.UpArrow] = true;
-            ignoreScnCLS[(int)KeyCode.DownArrow] = true;
+            ignoreScnCLS[(int)RawKeyCode.KEY_S] = true;
+            ignoreScnCLS[(int)RawKeyCode.DELETE] = true;
+            ignoreScnCLS[(int)RawKeyCode.KEY_F] = true;
+            ignoreScnCLS[(int)RawKeyCode.KEY_O] = true;
+            ignoreScnCLS[(int)RawKeyCode.KEY_7] = true;
+            ignoreScnCLS[(int)RawKeyCode.UP] = true;
+            ignoreScnCLS[(int)RawKeyCode.DOWN] = true;
             
             scnCLS_searchMode = false;
 
@@ -51,9 +52,9 @@ namespace NoStopMod.InputFixer.HitIgnore
             KeyLimiterManager.Init();
         }
 
-        public static bool shouldBeIgnored(KeyCode keyCode)
+        public static bool ShouldBeIgnored(RawKeyCode keyCode)
         {
-            if (keyCode == KeyCode.Escape) return true;
+            if (keyCode == RawKeyCode.ESC) return true;
             if (KeyLimiterManager.isChangingLimitedKeys)
             {
                 KeyLimiterManager.UpdateKeyLimiter(keyCode);
@@ -72,10 +73,13 @@ namespace NoStopMod.InputFixer.HitIgnore
                 {
                     return true;
                 }
-                if(ignoreScnCLS[(int) keyCode]) return true;
+                if (ignoreScnCLS[(int)keyCode])
+                {
+                    return true;
+                }
             }
             
-            if(KeyLimiterManager.settings.enable)
+            if (KeyLimiterManager.settings.enable)
             {
                 return !KeyLimiterManager.IsKeyEnabled(keyCode);
             }

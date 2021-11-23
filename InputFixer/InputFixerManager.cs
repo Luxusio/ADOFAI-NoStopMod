@@ -1,4 +1,5 @@
-﻿using NoStopMod.InputFixer.HitIgnore;
+﻿using NoStopMod.Helper.RawInputManager;
+using NoStopMod.InputFixer.HitIgnore;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,16 +15,14 @@ namespace NoStopMod.InputFixer
         public static InputFixerSettings settings;
         
         private static Thread thread;
-        public static Queue<Tuple<long, List<KeyCode>>> keyQueue = new Queue<Tuple<long, List<KeyCode>>>();
+        public static Queue<Tuple<long, RawKeyCode>> keyQueue = new Queue<Tuple<long, RawKeyCode>>();
         
         public static long currPressMs;
 
         public static bool jumpToOtherClass = false;
         public static bool editInputLimit = false;
 
-        private static bool[] mask;
-
-
+        public static HHook hhook;
         public static Stopwatch stopwatch;
 
         public static long currFrameMs;
@@ -33,11 +32,12 @@ namespace NoStopMod.InputFixer
         public static double dspTimeSong;
 
         public static long offsetMs;
-         
 
         public static double lastReportedDspTime;
 
-        public static double previousFrameTime; 
+        public static double previousFrameTime;
+
+        private static HashSet<RawKeyCode> mask = new HashSet<RawKeyCode>();
 
 
         public static void Init()
@@ -48,8 +48,6 @@ namespace NoStopMod.InputFixer
 
             settings = new InputFixerSettings();
             Settings.settings.Add(settings);
-            
-            mask = Enumerable.Repeat(false, 1024).ToArray();
 
             HitIgnoreManager.Init();
         }
@@ -67,54 +65,52 @@ namespace NoStopMod.InputFixer
                 thread.Abort();
                 thread = null;
             }
-            keyQueue.Clear();
-            stopwatch?.Stop();
             currFrameMs = 0;
             prevFrameMs = 0;
             if (toggle)
             {
-                thread = new Thread(Run);
+                thread = new Thread(() => {
+                    stopwatch?.Stop();
+                    stopwatch = new Stopwatch();
+                    stopwatch.Start();
+                    mask.Clear();
+                    keyQueue.Clear();
+
+                    while (true)
+                    {
+                        Thread.Sleep(60000);
+                    }
+                });
+
                 thread.Start();
+                SetHooker();
             }
         }
 
-        private static void Run()
+        private static void SetHooker()
         {
-            stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            long prevMs = 0, currMs = 0;
-
-            while (true)
+            hhook?.UnHook();
+            hhook = KBDHooker.Hook((nCode, wParam, lParam) =>
             {
-                currMs = stopwatch.ElapsedMilliseconds;
-                if (currMs > prevMs)
+                RawKeyCode code = lParam.GetKeyCode();
+                if (code.IsKeyDown(nCode, wParam, lParam))
                 {
-                    prevMs = currMs;
-                    UpdateKeyQueue(currMs);
+                    if (!mask.Contains(code))
+                    {
+                        mask.Add(code);
+                        keyQueue.Enqueue(new Tuple<long, RawKeyCode>(stopwatch.ElapsedMilliseconds, code));
+                    }
                 }
-            }
+                else if (code.IsKeyUp(nCode, wParam, lParam))
+                {
+                    mask.Remove(code);
+                }
+
+                return KBDHooker.CallNextHookEx(hhook, nCode, wParam, lParam);
+            });
         }
 
-        private static bool GetKeyDown(int idx)
-        {
-            if (mask[idx])
-            {
-                if (!Input.GetKey((KeyCode)idx))
-                {
-                    mask[idx] = false;
-                }
-            }
-            else
-            {
-                if (Input.GetKey((KeyCode)idx))
-                {
-                    mask[idx] = true;
-                    return true;
-                }
-            }
-            return false;
-        }
+
 
         public static double GetSongPosition(scrConductor __instance, long nowTick)
         {
@@ -128,44 +124,11 @@ namespace NoStopMod.InputFixer
             }
         }
 
-        public static void UpdateKeyQueue(long currMs)
-        {
-            List<KeyCode> keyCodes = GetPressedKeys();
-            if (keyCodes.Any())
-            {
-                keyQueue.Enqueue(new Tuple<long, List<KeyCode>>(currMs, keyCodes));
-            }
-        }
-
-        private static List<KeyCode> GetPressedKeys()
-        {
-            List<KeyCode> keyCodes = new List<KeyCode>();
-
-            for (int i = 0; i < 320; i++)
-            {
-                if (GetKeyDown(i))
-                {
-                    keyCodes.Add((KeyCode)i);
-                }
-            }
-
-            for (int i = 323; i <= 329; i++)
-            {
-                if (GetKeyDown(i))
-                {
-                    keyCodes.Add((KeyCode)i);
-                }
-            }
-
-            return keyCodes;
-        }
-
         public static double GetAngle(scrPlanet __instance, double ___snappedLastAngle, long nowTick)
         {
             return ___snappedLastAngle + (GetSongPosition(__instance.conductor, nowTick) - __instance.conductor.lastHit) / __instance.conductor.crotchet
                 * 3.141592653598793238 * __instance.controller.speed * (double)(__instance.controller.isCW ? 1 : -1);
         }
-
         
         
     }
