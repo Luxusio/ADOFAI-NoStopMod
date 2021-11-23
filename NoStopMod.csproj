@@ -353,6 +353,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helper\Abstraction\SettingsBase.cs" />
+    <Compile Include="Helper\RawInputManager.cs" />
     <Compile Include="Helper\EventListener.cs" />
     <Compile Include="Helper\JSONHelper.cs" />
     <Compile Include="Helper\ReflectionField.cs" />
@@ -367,16 +368,16 @@
     <Compile Include="Helper\SimpleGUI.cs" />
     <Compile Include="HyperRabbit\HyperRabbitManager.cs" />
     <Compile Include="HyperRabbit\HyperRabbitPatches.cs" />
-    <Compile Include="InputFixer\SyncFixer\SongAudioSource.cs" />
-    <Compile Include="InputFixer\SyncFixer\SyncFixerPatchesScrConductor.cs" />
-    <Compile Include="InputFixer\SyncFixer\SyncFixerPatchesScrController.cs" />
     <Compile Include="lib\SimpleJSON.cs" />
     <Compile Include="NoStopMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="InputFixer\SyncFixer\newScrConductor.cs" />
-    <Compile Include="InputFixer\SyncFixer\SyncFixerManager.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="AfterBuild">
+    <Exec Command="move_debug.bat &quot;C:\Program Files (x86)\Steam\steamapps\common\A Dance of Fire and Ice\Mods&quot;" />
+    <Exec Command="taskkill /f /im &quot;A Dance*&quot; || exit 0" />
+    <Exec Command="explorer steam://rungameid/977950 || exit 0" />
+  </Target>
 </Project>
