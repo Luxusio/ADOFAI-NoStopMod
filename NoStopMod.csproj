@@ -40,90 +40,84 @@
       <HintPath>..\lib\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Accessibility" />
-    <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\Assembly-CSharp.dll</HintPath>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\lib\r77\Assembly-CSharp.dll</HintPath>
     </Reference>
-    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\Assembly-CSharp-firstpass.dll</HintPath>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\lib\r77\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="DemiLib">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\DemiLib.dll</HintPath>
+      <HintPath>..\lib\r77\DemiLib.dll</HintPath>
     </Reference>
-    <Reference Include="DOTween, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\DOTween.dll</HintPath>
+    <Reference Include="DOTween">
+      <HintPath>..\lib\r77\DOTween.dll</HintPath>
     </Reference>
-    <Reference Include="DOTweenPro, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\DOTweenPro.dll</HintPath>
+    <Reference Include="DOTweenPro">
+      <HintPath>..\lib\r77\DOTweenPro.dll</HintPath>
     </Reference>
     <Reference Include="I18N">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\I18N.dll</HintPath>
+      <HintPath>..\lib\r77\I18N.dll</HintPath>
     </Reference>
     <Reference Include="I18N.CJK">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\I18N.CJK.dll</HintPath>
+      <HintPath>..\lib\r77\I18N.CJK.dll</HintPath>
     </Reference>
     <Reference Include="I18N.MidEast">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\I18N.MidEast.dll</HintPath>
+      <HintPath>..\lib\r77\I18N.MidEast.dll</HintPath>
     </Reference>
     <Reference Include="I18N.Other">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\I18N.Other.dll</HintPath>
+      <HintPath>..\lib\r77\I18N.Other.dll</HintPath>
     </Reference>
     <Reference Include="I18N.Rare">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\I18N.Rare.dll</HintPath>
+      <HintPath>..\lib\r77\I18N.Rare.dll</HintPath>
     </Reference>
     <Reference Include="I18N.West">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\I18N.West.dll</HintPath>
+      <HintPath>..\lib\r77\I18N.West.dll</HintPath>
     </Reference>
     <Reference Include="Ionic.Zip">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\Ionic.Zip.dll</HintPath>
+      <HintPath>..\lib\r77\Ionic.Zip.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Data.Sqlite">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\Mono.Data.Sqlite.dll</HintPath>
+      <HintPath>..\lib\r77\Mono.Data.Sqlite.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Posix">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\Mono.Posix.dll</HintPath>
+      <HintPath>..\lib\r77\Mono.Posix.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Security">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\Mono.Security.dll</HintPath>
+      <HintPath>..\lib\r77\Mono.Security.dll</HintPath>
     </Reference>
     <Reference Include="Mono.WebBrowser">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\Mono.WebBrowser.dll</HintPath>
+      <HintPath>..\lib\r77\Mono.WebBrowser.dll</HintPath>
     </Reference>
     <Reference Include="Novell.Directory.Ldap">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\Novell.Directory.Ldap.dll</HintPath>
+      <HintPath>..\lib\r77\Novell.Directory.Ldap.dll</HintPath>
     </Reference>
     <Reference Include="Ookii.Dialogs">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\Ookii.Dialogs.dll</HintPath>
+      <HintPath>..\lib\r77\Ookii.Dialogs.dll</HintPath>
     </Reference>
-    <Reference Include="RDTools, Version=1.0.7156.29099, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\RDTools.dll</HintPath>
+    <Reference Include="RDTools">
+      <HintPath>..\lib\r77\RDTools.dll</HintPath>
     </Reference>
     <Reference Include="sharedRuntime">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\sharedRuntime.dll</HintPath>
+      <HintPath>..\lib\r77\sharedRuntime.dll</HintPath>
     </Reference>
     <Reference Include="Sirenix.OdinInspector.Attributes">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\Sirenix.OdinInspector.Attributes.dll</HintPath>
+      <HintPath>..\lib\r77\Sirenix.OdinInspector.Attributes.dll</HintPath>
     </Reference>
     <Reference Include="Sirenix.OdinInspector.CompatibilityLayer">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\Sirenix.OdinInspector.CompatibilityLayer.dll</HintPath>
+      <HintPath>..\lib\r77\Sirenix.OdinInspector.CompatibilityLayer.dll</HintPath>
     </Reference>
     <Reference Include="Sirenix.Serialization">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\Sirenix.Serialization.dll</HintPath>
+      <HintPath>..\lib\r77\Sirenix.Serialization.dll</HintPath>
     </Reference>
     <Reference Include="Sirenix.Serialization.Config">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\Sirenix.Serialization.Config.dll</HintPath>
+      <HintPath>..\lib\r77\Sirenix.Serialization.Config.dll</HintPath>
     </Reference>
     <Reference Include="Sirenix.Utilities">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\Sirenix.Utilities.dll</HintPath>
+      <HintPath>..\lib\r77\Sirenix.Utilities.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
-    <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Design" />
     <Reference Include="System.DirectoryServices" />
@@ -139,216 +133,218 @@
     <Reference Include="System.Web.Services" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="Unity.MemoryProfiler">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\Unity.MemoryProfiler.dll</HintPath>
-    </Reference>
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\Unity.TextMeshPro.dll</HintPath>
+      <HintPath>..\lib\r77\Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Timeline">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\Unity.Timeline.dll</HintPath>
+      <HintPath>..\lib\r77\Unity.Timeline.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.dll</HintPath>
+    <Reference Include="UnityEngine">
+      <HintPath>..\lib\r77\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AccessibilityModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.AccessibilityModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.AccessibilityModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AIModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.AIModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.AIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AndroidJNIModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.AndroidJNIModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.AndroidJNIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.AnimationModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ARModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.ARModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.ARModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.AudioModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.AudioModule.dll</HintPath>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>..\lib\r77\UnityEngine.AudioModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ClothModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.ClothModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.ClothModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ClusterInputModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.ClusterInputModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.ClusterInputModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ClusterRendererModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.ClusterRendererModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.ClusterRendererModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.CoreModule.dll</HintPath>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\lib\r77\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CrashReportingModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.CrashReportingModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.CrashReportingModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.DirectorModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.DirectorModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.DirectorModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.DSPGraphModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.DSPGraphModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.DSPGraphModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.GameCenterModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.GameCenterModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.GameCenterModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.GIModule">
+      <HintPath>..\lib\r77\UnityEngine.GIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.GridModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.GridModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.GridModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.HotReloadModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.HotReloadModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.HotReloadModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ImageConversionModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.ImageConversionModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.ImageConversionModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.IMGUIModule.dll</HintPath>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>..\lib\r77\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.InputLegacyModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.InputLegacyModule.dll</HintPath>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>..\lib\r77\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.InputModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.InputModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.InputModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.JSONSerializeModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.JSONSerializeModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.JSONSerializeModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.LocalizationModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.LocalizationModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.LocalizationModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.ParticleSystemModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.ParticleSystemModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PerformanceReportingModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.PerformanceReportingModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.PerformanceReportingModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.Physics2DModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.Physics2DModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.Physics2DModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ProfilerModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.ProfilerModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.ProfilerModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule">
+      <HintPath>..\lib\r77\UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ScreenCaptureModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.ScreenCaptureModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.ScreenCaptureModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.SharedInternalsModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.SharedInternalsModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.SharedInternalsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.SpriteMaskModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.SpriteMaskModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.SpriteMaskModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.SpriteShapeModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.SpriteShapeModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.SpriteShapeModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.StreamingModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.StreamingModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.StreamingModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.SubstanceModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.SubstanceModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.SubstanceModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.SubsystemsModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.SubsystemsModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.SubsystemsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TerrainModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.TerrainModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.TerrainModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TerrainPhysicsModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.TerrainPhysicsModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.TerrainPhysicsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TextCoreModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.TextCoreModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.TextCoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.TextRenderingModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TilemapModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.TilemapModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.TilemapModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TLSModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.TLSModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.TLSModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.UI.dll</HintPath>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\lib\r77\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UIElementsModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.UIElementsModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.UIElementsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIElementsNativeModule">
+      <HintPath>..\lib\r77\UnityEngine.UIElementsNativeModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UIModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.UIModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.UIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UmbraModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.UmbraModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.UmbraModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UNETModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.UNETModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.UNETModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityAnalyticsModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.UnityAnalyticsModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.UnityAnalyticsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityConnectModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.UnityConnectModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.UnityConnectModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityCurlModule">
+      <HintPath>..\lib\r77\UnityEngine.UnityCurlModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityTestProtocolModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.UnityTestProtocolModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.UnityTestProtocolModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestAssetBundleModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.UnityWebRequestAssetBundleModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.UnityWebRequestAssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestAudioModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.UnityWebRequestModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.UnityWebRequestModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestTextureModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestWWWModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.VehiclesModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.VehiclesModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.VehiclesModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.VFXModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.VFXModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.VFXModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.VideoModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.VideoModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.VideoModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VirtualTexturingModule">
+      <HintPath>..\lib\r77\UnityEngine.VirtualTexturingModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.VRModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.VRModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.VRModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.WindModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.WindModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.WindModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.XRModule">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\UnityEngine.XRModule.dll</HintPath>
+      <HintPath>..\lib\r77\UnityEngine.XRModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityModManager">
       <HintPath>..\lib\UnityModManager.dll</HintPath>
     </Reference>
     <Reference Include="urecordRuntime">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\urecordRuntime.dll</HintPath>
+      <HintPath>..\lib\r77\urecordRuntime.dll</HintPath>
     </Reference>
     <Reference Include="XTUtilities">
-      <HintPath>..\..\..\..\Desktop\ADOFAI R75 20210619\dll\XTUtilities.dll</HintPath>
+      <HintPath>..\lib\r77\XTUtilities.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -376,8 +372,9 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
-    <Exec Command="move_debug.bat &quot;C:\Program Files (x86)\Steam\steamapps\common\A Dance of Fire and Ice\Mods&quot;" />
     <Exec Command="taskkill /f /im &quot;A Dance*&quot; || exit 0" />
+    <Exec Command="make_debug.bat 1.2.5" />
+	<Exec Command="copy &quot;$(TargetPath)&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\A Dance of Fire and Ice\Mods\NoStopMod&quot;" />
     <Exec Command="explorer steam://rungameid/977950 || exit 0" />
   </Target>
 </Project>
