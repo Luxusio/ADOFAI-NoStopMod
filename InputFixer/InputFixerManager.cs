@@ -3,9 +3,7 @@ using NoStopMod.InputFixer.HitIgnore;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
-using UnityEngine;
 using UnityModManagerNet;
 
 namespace NoStopMod.InputFixer
@@ -39,6 +37,8 @@ namespace NoStopMod.InputFixer
 
         private static HashSet<RawKeyCode> mask = new HashSet<RawKeyCode>();
 
+        private static readonly Process adofaiProcess = Process.GetCurrentProcess();
+        private static Process noopProcess;
 
         public static void Init()
         {
@@ -57,7 +57,7 @@ namespace NoStopMod.InputFixer
             //GUILayout.BeginVertical("Input");
             //GUILayout.EndVertical(); 
         }
-            
+
         public static void ToggleThread(bool toggle)
         {
             if (thread != null)
@@ -90,7 +90,15 @@ namespace NoStopMod.InputFixer
         private static void SetHooker()
         {
             hhook?.UnHook();
-            hhook = KBDHooker.Hook((nCode, wParam, lParam) =>
+
+            noopProcess?.Kill();
+            noopProcess = new Process();
+            noopProcess.StartInfo.FileName = "notepad.exe";
+            noopProcess.StartInfo.Arguments = "";
+            noopProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            noopProcess.Start();
+
+            hhook = KBDHooker.HookProcess((nCode, wParam, lParam) =>
             {
                 RawKeyCode code = lParam.GetKeyCode();
                 if (code.IsKeyDown(nCode, wParam, lParam))
@@ -107,7 +115,7 @@ namespace NoStopMod.InputFixer
                 }
 
                 return KBDHooker.CallNextHookEx(hhook, nCode, wParam, lParam);
-            });
+            }, noopProcess);
         }
 
 
