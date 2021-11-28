@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using UnityModManagerNet;
+using Application = System.Windows.Forms.Application;
 
 namespace NoStopMod.InputFixer
 {
@@ -37,8 +38,7 @@ namespace NoStopMod.InputFixer
 
         private static HashSet<RawKeyCode> mask = new HashSet<RawKeyCode>();
 
-        private static readonly Process adofaiProcess = Process.GetCurrentProcess();
-        private static Process noopProcess;
+        private static bool _threadRunning;
 
         public static void Init()
         {
@@ -62,64 +62,81 @@ namespace NoStopMod.InputFixer
         {
             if (thread != null)
             {
-                thread.Abort();
+                try
+                {
+#if DEBUG
+                    NoStopMod.mod.Logger.Log("abort thread");
+#endif
+                    _threadRunning = false;
+                    thread.Abort();
+                }
+                catch (ThreadAbortException ex)
+                {
+                    NoStopMod.mod.Logger.Error("Error while aborting input thread : " + ex);
+                }
+
                 thread = null;
             }
             currFrameMs = 0;
             prevFrameMs = 0;
             if (toggle)
             {
-                thread = new Thread(() => {
-                    stopwatch?.Stop();
-                    stopwatch = new Stopwatch();
-                    stopwatch.Start();
-                    mask.Clear();
-                    keyQueue.Clear();
-
-                    while (true)
+                thread = new Thread(() =>
+                {
+                    try
                     {
-                        Thread.Sleep(60000);
+                        _threadRunning = true;
+
+                        stopwatch?.Stop();
+                        stopwatch = new Stopwatch();
+                        stopwatch.Start();
+                        mask.Clear();
+                        keyQueue.Clear();
+
+                        hhook?.UnHook();
+                        hhook = KBDHooker.Hook((nCode, wParam, lParam) =>
+                        {
+                            RawKeyCode code = lParam.GetKeyCode();
+                            if (code.IsKeyDown(nCode, wParam, lParam))
+                            {
+                                if (!mask.Contains(code))
+                                {
+                                    mask.Add(code);
+                                    keyQueue.Enqueue(new Tuple<long, RawKeyCode>(stopwatch.ElapsedMilliseconds, code));
+                                }
+                            }
+                            else if (code.IsKeyUp(nCode, wParam, lParam))
+                            {
+                                mask.Remove(code);
+                            }
+
+                            return hhook.CallNextHookEx(nCode, wParam, lParam);
+                        });
+
+                        Application.Run();
+
+                        while (_threadRunning)
+                        {
+                        }
+                    }
+                    finally
+                    {
+#if DEBUG
+                        NoStopMod.mod.Logger.Log("exit thread");
+#endif
+                        hhook?.UnHook();
+                        Application.Exit();
+                        Application.ExitThread();
+#if DEBUG
+                        NoStopMod.mod.Logger.Log("exit success");
+#endif
                     }
                 });
 
                 thread.Start();
-                SetHooker();
             }
         }
-
-        private static void SetHooker()
-        {
-            hhook?.UnHook();
-
-            noopProcess?.Kill();
-            noopProcess = new Process();
-            noopProcess.StartInfo.FileName = "notepad.exe";
-            noopProcess.StartInfo.Arguments = "";
-            noopProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            noopProcess.Start();
-
-            hhook = KBDHooker.HookProcess((nCode, wParam, lParam) =>
-            {
-                RawKeyCode code = lParam.GetKeyCode();
-                if (code.IsKeyDown(nCode, wParam, lParam))
-                {
-                    if (!mask.Contains(code))
-                    {
-                        mask.Add(code);
-                        keyQueue.Enqueue(new Tuple<long, RawKeyCode>(stopwatch.ElapsedMilliseconds, code));
-                    }
-                }
-                else if (code.IsKeyUp(nCode, wParam, lParam))
-                {
-                    mask.Remove(code);
-                }
-
-                return KBDHooker.CallNextHookEx(hhook, nCode, wParam, lParam);
-            }, noopProcess);
-        }
-
-
-
+        
         public static double GetSongPosition(scrConductor __instance, long nowTick)
         {
             if (!GCS.d_oldConductor && !GCS.d_webglConductor)

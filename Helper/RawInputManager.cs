@@ -194,10 +194,12 @@ namespace NoStopMod.Helper.RawInputManager
 		public static bool IsKeyUp(this RawKeyCode keyCode, int nCode, IntPtr wParam, IntPtr lParam) => nCode >= 0 && (int)wParam == 257 && (RawKeyCode)Marshal.ReadInt32(lParam) == keyCode;
 		/// <summary>
 		/// 키보드를 후킹합니다. (전역)
+		/// 해당 메서드를 호출한 스레드에서 후킹을 처리합니다.
+		/// 처리를 위해서는 해당 스레드에 MessageQueue가 존재해야 합니다
 		/// </summary>
 		/// <param name="HookProc">LowLevelKeyboardProc Params:(Int32 nCode, IntPtr wParam, IntPtr lParam) Returns:(IntPtr)</param>
 		/// <returns>Hooked Ptr</returns>
-		public static HHook Hook(this LowLevelKeyboardProc HookProc, uint processId = 0) => (HHook)Extern.SetWindowsHookEx((int)Extern.HookType.WH_KEYBOARD_LL, HookProc, Extern.LoadLibrary("User32"), processId);
+		public static HHook Hook(this LowLevelKeyboardProc HookProc) => (HHook)Extern.SetWindowsHookEx((int)Extern.HookType.WH_KEYBOARD_LL, HookProc, Extern.LoadLibrary("User32"), 0);
 		/// <summary>
 		/// 키보드 후킹을 해제합니다.
 		/// </summary>
