@@ -100,6 +100,9 @@
     <Reference Include="sharedRuntime">
       <HintPath>..\lib\r77\sharedRuntime.dll</HintPath>
     </Reference>
+    <Reference Include="SharpHook, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpHook.1.0.1\lib\net461\SharpHook.dll</HintPath>
+    </Reference>
     <Reference Include="Sirenix.OdinInspector.Attributes">
       <HintPath>..\lib\r77\Sirenix.OdinInspector.Attributes.dll</HintPath>
     </Reference>
@@ -369,14 +372,16 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Exec Command="taskkill /f /im &quot;A Dance*&quot; || exit 0" />
     <Exec Command="make_debug.bat 1.2.5" />
-	<Exec Command="del /f /q &quot;C:\Program Files (x86)\Steam\steamapps\common\A Dance of Fire and Ice\Mods\NoStopMod\NoStopMod.dll&quot; || exit 0" />
-	<Exec Command="ping -n 6 127.0.0.1 &gt; nul" />
-	<Exec Command="copy &quot;$(TargetPath)&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\A Dance of Fire and Ice\Mods\NoStopMod\NoStopMod.dll&quot;" />
+    <Exec Command="del /f /q &quot;C:\Program Files (x86)\Steam\steamapps\common\A Dance of Fire and Ice\Mods\NoStopMod\NoStopMod.dll&quot; || exit 0" />
+    <Exec Command="ping -n 6 127.0.0.1 &gt; nul" />
+    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\A Dance of Fire and Ice\Mods\NoStopMod\NoStopMod.dll&quot;" />
     <Exec Command="explorer steam://rungameid/977950 || exit 0" />
   </Target>
 </Project>

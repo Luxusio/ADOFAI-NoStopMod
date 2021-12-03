@@ -1,4 +1,4 @@
-﻿using NoStopMod.Helper.RawInputManager;
+using NoStopMod.Helper.RawInputManager;
 using NoStopMod.InputFixer.HitIgnore;
 using System;
 using System.Collections.Generic;
