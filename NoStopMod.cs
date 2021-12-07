@@ -31,7 +31,6 @@ namespace NoStopMod
             NoStopMod.harmony = new Harmony(modEntry.Info.Id);
             NoStopMod.mod = modEntry;
 
-            mod.Logger.Log("teststestsetset");
             LoadSharpHookLib();
             
 
@@ -72,9 +71,6 @@ namespace NoStopMod
 
         private static void LoadSharpHookLib()
         {
-
-            NoStopMod.mod.Logger.Log("Dll load :asdfasdf ");
-            NoStopMod.mod.Logger.Log("Dll load :asdfasdf ");
             string osInfo = SystemInfo.operatingSystem.ToLower();
 
             bool is64bit = osInfo.Contains("64");
@@ -83,8 +79,6 @@ namespace NoStopMod
             string basePath = "Mods/NoStopMod/runtimes/SharpHook-";
 
             string dllPath = null;
-            NoStopMod.mod.Logger.Log("Dll load :asdfasdfasdfasdf ");
-            NoStopMod.mod.Logger.Log("Dll load :asdfasdfasdfasdfaS ");
 
             if (osInfo.Contains("windows"))
             {
@@ -128,7 +122,6 @@ namespace NoStopMod
                 }
             }
 
-            NoStopMod.mod.Logger.Log("Dll load :asdfasdfasdfasdfaScdfsfwef ");
             if (dllPath == null)
             {
                 NoStopMod.mod.Logger.Error("Failed to find correct dll (osInfo=" + osInfo + ")");
@@ -140,12 +133,9 @@ namespace NoStopMod
             fs.Read(buffer, 0, buffer.Length);
             fs.Close();
 
-            NoStopMod.mod.Logger.Log("Dll load :asdfasdfasdfasdfaScdfsfwef123123 ");
             AppDomain.CurrentDomain.Load(buffer);
-
-#if DEBUG
             NoStopMod.mod.Logger.Log("Dll load : " + dllPath);
-#endif
+
         }
 
     }

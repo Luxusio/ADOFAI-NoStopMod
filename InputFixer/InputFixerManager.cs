@@ -1,10 +1,7 @@
 using NoStopMod.InputFixer.HitIgnore;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading;
 using SharpHook;
-using UnityModManagerNet;
 
 namespace NoStopMod.InputFixer
 {
@@ -37,8 +34,6 @@ namespace NoStopMod.InputFixer
         {
             hook = new SimpleGlobalHook();
             NoStopMod.onToggleListener.Add(ToggleThread);
-            NoStopMod.onGUIListener.Add(OnGUI);
-            NoStopMod.onApplicationQuitListener.Add(_ => ToggleThread(false));
 
             settings = new InputFixerSettings();
             Settings.settings.Add(settings);
@@ -46,12 +41,6 @@ namespace NoStopMod.InputFixer
             HitIgnoreManager.Init();
         }
         
-        private static void OnGUI(UnityModManager.ModEntry modEntry)
-        {
-            //GUILayout.BeginVertical("Input");
-            //GUILayout.EndVertical(); 
-        }
-
         public static void ToggleThread(bool toggle)
         {
             currFrameTick = 0;
