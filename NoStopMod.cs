@@ -5,7 +5,8 @@ using NoStopMod.InputFixer;
 using NoStopMod.HyperRabbit;
 using NoStopMod.Helper;
 using System;
-using System.Diagnostics;
+using UnityEngine;
+using System.IO;
 
 namespace NoStopMod
 {
@@ -29,7 +30,11 @@ namespace NoStopMod
 
             NoStopMod.harmony = new Harmony(modEntry.Info.Id);
             NoStopMod.mod = modEntry;
+
+            mod.Logger.Log("teststestsetset");
+            LoadSharpHookLib();
             
+
             InputFixerManager.Init();
             HyperRabbitManager.Init();
 
@@ -63,6 +68,85 @@ namespace NoStopMod
                 onApplicationQuitListener.Invoke(__instance);
             }
         }
-        
+
+
+        private static void LoadSharpHookLib()
+        {
+
+            NoStopMod.mod.Logger.Log("Dll load :asdfasdf ");
+            NoStopMod.mod.Logger.Log("Dll load :asdfasdf ");
+            string osInfo = SystemInfo.operatingSystem.ToLower();
+
+            bool is64bit = osInfo.Contains("64");
+            bool isArm = osInfo.Contains("arm");
+
+            string basePath = "Mods/NoStopMod/runtimes/SharpHook-";
+
+            string dllPath = null;
+            NoStopMod.mod.Logger.Log("Dll load :asdfasdfasdfasdf ");
+            NoStopMod.mod.Logger.Log("Dll load :asdfasdfasdfasdfaS ");
+
+            if (osInfo.Contains("windows"))
+            {
+                if (isArm)
+                {
+                    if (is64bit)
+                        dllPath = basePath + "win-arm.dll";
+                    else
+                        dllPath = basePath + "win-arm.dll";
+                }
+                else
+                {
+                    if (is64bit)
+                        dllPath = basePath + "win-x64.dll";
+                    else
+                        dllPath = basePath + "win-x86.dll";
+                }
+            }
+            else if (osInfo.Contains("mac"))
+            {
+                if (isArm)
+                    dllPath = basePath + "osx-arm64.dll";
+                else
+                    dllPath = basePath + "osx-x64.dll";
+            }
+            else if (osInfo.Contains("linux"))
+            {
+                if (isArm)
+                {
+                    if (is64bit)
+                        dllPath = basePath + "linux-arm64.dll";
+                    else
+                        dllPath = basePath + "linux-arm.dll";
+                }
+                else
+                {
+                    if (is64bit)
+                        dllPath = basePath + "linux-x64.dll";
+                    else
+                        dllPath = null;
+                }
+            }
+
+            NoStopMod.mod.Logger.Log("Dll load :asdfasdfasdfasdfaScdfsfwef ");
+            if (dllPath == null)
+            {
+                NoStopMod.mod.Logger.Error("Failed to find correct dll (osInfo=" + osInfo + ")");
+                return;
+            }
+
+            FileStream fs = new FileStream(dllPath, FileMode.Open);
+            byte[] buffer = new byte[(int)fs.Length];
+            fs.Read(buffer, 0, buffer.Length);
+            fs.Close();
+
+            NoStopMod.mod.Logger.Log("Dll load :asdfasdfasdfasdfaScdfsfwef123123 ");
+            AppDomain.CurrentDomain.Load(buffer);
+
+#if DEBUG
+            NoStopMod.mod.Logger.Log("Dll load : " + dllPath);
+#endif
+        }
+
     }
 }

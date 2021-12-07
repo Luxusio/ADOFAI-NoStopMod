@@ -1,27 +1,27 @@
-using NoStopMod.Helper.RawInputManager;
 using NoStopMod.InputFixer.HitIgnore;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using SharpHook;
 using UnityModManagerNet;
-using Application = System.Windows.Forms.Application;
 
 namespace NoStopMod.InputFixer
 {
     class InputFixerManager
     {
         public static InputFixerSettings settings;
-        
+
         private static Thread thread;
-        public static Queue<Tuple<long, RawKeyCode>> keyQueue = new Queue<Tuple<long, RawKeyCode>>();
-        
+        public static Queue<Tuple<long, ushort>> keyQueue = new Queue<Tuple<long, ushort>>();
+
         public static long currPressMs;
 
         public static bool jumpToOtherClass = false;
         public static bool editInputLimit = false;
 
-        public static HHook hhook;
+        private static object hook;
+
         public static Stopwatch stopwatch;
 
         public static long currFrameMs;
@@ -36,12 +36,11 @@ namespace NoStopMod.InputFixer
 
         public static double previousFrameTime;
 
-        private static HashSet<RawKeyCode> mask = new HashSet<RawKeyCode>();
-
-        private static bool _threadRunning;
+        private static HashSet<ushort> mask = new HashSet<ushort>();
 
         public static void Init()
         {
+            hook = new SimpleGlobalHook();
             NoStopMod.onToggleListener.Add(ToggleThread);
             NoStopMod.onGUIListener.Add(OnGUI);
             NoStopMod.onApplicationQuitListener.Add(_ => ToggleThread(false));
@@ -51,7 +50,7 @@ namespace NoStopMod.InputFixer
 
             HitIgnoreManager.Init();
         }
-
+        
         private static void OnGUI(UnityModManager.ModEntry modEntry)
         {
             //GUILayout.BeginVertical("Input");
@@ -67,7 +66,6 @@ namespace NoStopMod.InputFixer
 #if DEBUG
                     NoStopMod.mod.Logger.Log("abort thread");
 #endif
-                    _threadRunning = false;
                     thread.Abort();
                 }
                 catch (ThreadAbortException ex)
@@ -77,66 +75,45 @@ namespace NoStopMod.InputFixer
 
                 thread = null;
             }
+
             currFrameMs = 0;
             prevFrameMs = 0;
             if (toggle)
             {
                 thread = new Thread(() =>
                 {
-                    try
-                    {
-                        _threadRunning = true;
-
-                        stopwatch?.Stop();
-                        stopwatch = new Stopwatch();
-                        stopwatch.Start();
-                        mask.Clear();
-                        keyQueue.Clear();
-
-                        hhook?.UnHook();
-                        hhook = KBDHooker.Hook((nCode, wParam, lParam) =>
-                        {
-                            RawKeyCode code = lParam.GetKeyCode();
-                            if (code.IsKeyDown(nCode, wParam, lParam))
-                            {
-                                if (!mask.Contains(code))
-                                {
-                                    mask.Add(code);
-                                    keyQueue.Enqueue(new Tuple<long, RawKeyCode>(stopwatch.ElapsedMilliseconds, code));
-                                }
-                            }
-                            else if (code.IsKeyUp(nCode, wParam, lParam))
-                            {
-                                mask.Remove(code);
-                            }
-
-                            return hhook.CallNextHookEx(nCode, wParam, lParam);
-                        });
-
-                        Application.Run();
-
-                        while (_threadRunning)
-                        {
-                        }
-                    }
-                    finally
-                    {
-#if DEBUG
-                        NoStopMod.mod.Logger.Log("exit thread");
-#endif
-                        hhook?.UnHook();
-                        Application.Exit();
-                        Application.ExitThread();
-#if DEBUG
-                        NoStopMod.mod.Logger.Log("exit success");
-#endif
-                    }
+                    stopwatch?.Stop();
+                    stopwatch = new Stopwatch();
+                    stopwatch.Start();
+                    mask.Clear();
+                    keyQueue.Clear();
                 });
 
                 thread.Start();
+
+                IGlobalHook mHook = (IGlobalHook) hook;
+                if (!mHook.IsRunning)
+                {
+                    mHook.KeyPressed += HookOnKeyPressed;
+                    mHook.Start();
+#if DEBUG
+                    NoStopMod.mod.Logger.Log("Start Hook");
+#endif
+
+                }
+
             }
         }
-        
+
+        private static void HookOnKeyPressed(object sender, KeyboardHookEventArgs e)
+        {
+            ushort keyCode = (ushort) e.Data.KeyCode;
+            keyQueue.Enqueue(Tuple.Create(stopwatch.ElapsedMilliseconds, keyCode));
+#if DEBUG
+            NoStopMod.mod.Logger.Log("eq " + keyCode);
+#endif
+        }
+
         public static double GetSongPosition(scrConductor __instance, long nowTick)
         {
             if (!GCS.d_oldConductor && !GCS.d_webglConductor)

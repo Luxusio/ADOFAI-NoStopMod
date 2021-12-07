@@ -1,11 +1,11 @@
 ﻿using DG.Tweening;
 using HarmonyLib;
-using NoStopMod.Helper.RawInputManager;
 using NoStopMod.InputFixer.HitIgnore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using KeyCode = SharpHook.Native.KeyCode;
 
 namespace NoStopMod.InputFixer
 {
@@ -49,40 +49,42 @@ namespace NoStopMod.InputFixer
                 // planet hit processing
 
                 long rawKeyCodesMs = 0;
-                List<RawKeyCode> rawKeyCodes = new List<RawKeyCode>();
+                List<KeyCode> keyCodes = new List<KeyCode>();
 
                 while (InputFixerManager.keyQueue.Any())
                 {
                     long ms;
-                    RawKeyCode rawKeyCode;
-                    InputFixerManager.keyQueue.Dequeue().Deconstruct(out ms, out rawKeyCode);
+                    ushort ushortRawKeyCode;
+                    InputFixerManager.keyQueue.Dequeue().Deconstruct(out ms, out ushortRawKeyCode);
+
+                    KeyCode rawKeyCode = (KeyCode)ushortRawKeyCode;
 
                     if (ms != rawKeyCodesMs)
                     {
-                        ProcessKeyInputs(rawKeyCodes, rawKeyCodesMs);
-                        rawKeyCodes.Clear();
+                        ProcessKeyInputs(keyCodes, rawKeyCodesMs);
+                        keyCodes.Clear();
                         rawKeyCodesMs = ms;
                     }
 
-                    rawKeyCodes.Add(rawKeyCode);
+                    keyCodes.Add(rawKeyCode);
                 }
 
-                ProcessKeyInputs(rawKeyCodes, rawKeyCodesMs);
+                ProcessKeyInputs(keyCodes, rawKeyCodesMs);
             }
 
-            private static void ProcessKeyInputs(List<RawKeyCode> rawKeyCodes, long ms)
+            private static void ProcessKeyInputs(List<KeyCode> keyCodes, long ms)
             {
                 scrController controller = scrController.instance;
                 int count = 0;
-                for (int i = 0; i < rawKeyCodes.Count(); i++)
+                for (int i = 0; i < keyCodes.Count(); i++)
                 {
-                    if (HitIgnoreManager.ShouldBeIgnored(rawKeyCodes[i])) continue;
+                    if (HitIgnoreManager.ShouldBeIgnored(keyCodes[i])) continue;
 
                     if (AudioListener.pause || RDC.auto) continue;
 #if DEBUG
                     else
                     {
-                        NoStopMod.mod.Logger.Log("Fetch Input : " + InputFixerManager.offsetMs + ", " + ms + ", " + rawKeyCodes[i]);
+                        NoStopMod.mod.Logger.Log("Fetch Input : " + InputFixerManager.offsetMs + ", " + ms + ", " + keyCodes[i]);
                     }
 #endif
                     if (++count > 4) break;
@@ -143,11 +145,11 @@ namespace NoStopMod.InputFixer
                 }
                 else
                 {
-                    if (UnityEngine.Input.GetKey(KeyCode.DownArrow))
+                    if (UnityEngine.Input.GetKey(UnityEngine.KeyCode.DownArrow))
                     {
                         __instance.angle += 0.1;
                     }
-                    if (UnityEngine.Input.GetKey(KeyCode.UpArrow))
+                    if (UnityEngine.Input.GetKey(UnityEngine.KeyCode.UpArrow))
                     {
                         __instance.angle -= 0.1;
                     }
