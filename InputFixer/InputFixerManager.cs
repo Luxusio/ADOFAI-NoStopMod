@@ -12,20 +12,17 @@ namespace NoStopMod.InputFixer
     {
         public static InputFixerSettings settings;
 
-        private static Thread thread;
         public static Queue<Tuple<long, ushort>> keyQueue = new Queue<Tuple<long, ushort>>();
 
-        public static long currPressMs;
+        public static long currPressTick;
 
         public static bool jumpToOtherClass = false;
         public static bool editInputLimit = false;
 
         private static object hook;
 
-        public static Stopwatch stopwatch;
-
-        public static long currFrameMs;
-        public static long prevFrameMs;
+        public static long currFrameTick;
+        public static long prevFrameTick;
 
         public static double dspTime;
         public static double dspTimeSong;
@@ -35,8 +32,6 @@ namespace NoStopMod.InputFixer
         public static double lastReportedDspTime;
 
         public static double previousFrameTime;
-
-        private static HashSet<ushort> mask = new HashSet<ushort>();
 
         public static void Init()
         {
@@ -59,38 +54,11 @@ namespace NoStopMod.InputFixer
 
         public static void ToggleThread(bool toggle)
         {
-            if (thread != null)
-            {
-                try
-                {
-#if DEBUG
-                    NoStopMod.mod.Logger.Log("abort thread");
-#endif
-                    thread.Abort();
-                }
-                catch (ThreadAbortException ex)
-                {
-                    NoStopMod.mod.Logger.Error("Error while aborting input thread : " + ex);
-                }
-
-                thread = null;
-            }
-
-            currFrameMs = 0;
-            prevFrameMs = 0;
+            currFrameTick = 0;
+            prevFrameTick = 0;
             if (toggle)
             {
-                thread = new Thread(() =>
-                {
-                    stopwatch?.Stop();
-                    stopwatch = new Stopwatch();
-                    stopwatch.Start();
-                    mask.Clear();
-                    keyQueue.Clear();
-                });
-
-                thread.Start();
-
+                keyQueue.Clear();
                 IGlobalHook mHook = (IGlobalHook) hook;
                 if (!mHook.IsRunning)
                 {
@@ -99,7 +67,6 @@ namespace NoStopMod.InputFixer
 #if DEBUG
                     NoStopMod.mod.Logger.Log("Start Hook");
 #endif
-
                 }
 
             }
@@ -108,7 +75,7 @@ namespace NoStopMod.InputFixer
         private static void HookOnKeyPressed(object sender, KeyboardHookEventArgs e)
         {
             ushort keyCode = (ushort) e.Data.KeyCode;
-            keyQueue.Enqueue(Tuple.Create(stopwatch.ElapsedMilliseconds, keyCode));
+            keyQueue.Enqueue(Tuple.Create(DateTime.Now.Ticks, keyCode));
 #if DEBUG
             NoStopMod.mod.Logger.Log("eq " + keyCode);
 #endif
@@ -118,7 +85,7 @@ namespace NoStopMod.InputFixer
         {
             if (!GCS.d_oldConductor && !GCS.d_webglConductor)
             {
-                return ((nowTick / 1000.0 - dspTimeSong - scrConductor.calibration_i) * __instance.song.pitch) - __instance.addoffset;
+                return ((nowTick / 10000000.0 - dspTimeSong - scrConductor.calibration_i) * __instance.song.pitch) - __instance.addoffset;
             }
             else
             {

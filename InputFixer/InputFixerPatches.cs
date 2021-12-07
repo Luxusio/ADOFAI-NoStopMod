@@ -27,8 +27,8 @@ namespace NoStopMod.InputFixer
             public static void Postfix(scrConductor __instance, double ___dspTimeSong)
             {
                 // frameMs set
-                InputFixerManager.prevFrameMs = InputFixerManager.currFrameMs;
-                InputFixerManager.currFrameMs = InputFixerManager.stopwatch.ElapsedMilliseconds;
+                InputFixerManager.prevFrameTick = InputFixerManager.currFrameTick;
+                InputFixerManager.currFrameTick = DateTime.Now.Ticks;
 
                 // dspTime adjust
                 if (!AudioListener.pause && Application.isFocused && Time.unscaledTime - InputFixerManager.previousFrameTime < 0.1)
@@ -41,14 +41,13 @@ namespace NoStopMod.InputFixer
                 {
                     InputFixerManager.lastReportedDspTime = AudioSettings.dspTime;
                     InputFixerManager.dspTime = AudioSettings.dspTime;
-                    InputFixerManager.offsetMs = InputFixerManager.currFrameMs - (long)(InputFixerManager.dspTime * 1000);
+                    InputFixerManager.offsetMs = InputFixerManager.currFrameTick - (long)(InputFixerManager.dspTime * 10000000);
                 }
 
                 InputFixerManager.dspTimeSong = ___dspTimeSong;
 
                 // planet hit processing
-
-                long rawKeyCodesMs = 0;
+                long rawKeyCodesTick = 0;
                 List<KeyCode> keyCodes = new List<KeyCode>();
 
                 while (InputFixerManager.keyQueue.Any())
@@ -59,17 +58,17 @@ namespace NoStopMod.InputFixer
 
                     KeyCode rawKeyCode = (KeyCode)ushortRawKeyCode;
 
-                    if (ms != rawKeyCodesMs)
+                    if (ms != rawKeyCodesTick)
                     {
-                        ProcessKeyInputs(keyCodes, rawKeyCodesMs);
+                        ProcessKeyInputs(keyCodes, rawKeyCodesTick);
                         keyCodes.Clear();
-                        rawKeyCodesMs = ms;
+                        rawKeyCodesTick = ms;
                     }
 
                     keyCodes.Add(rawKeyCode);
                 }
 
-                ProcessKeyInputs(keyCodes, rawKeyCodesMs);
+                ProcessKeyInputs(keyCodes, rawKeyCodesTick);
             }
 
             private static void ProcessKeyInputs(List<KeyCode> keyCodes, long ms)
@@ -90,7 +89,7 @@ namespace NoStopMod.InputFixer
                     if (++count > 4) break;
                 }
 
-                InputFixerManager.currPressMs = ms - InputFixerManager.offsetMs;
+                InputFixerManager.currPressTick = ms - InputFixerManager.offsetMs;
                 controller.keyBufferCount += count;
                 while (controller.keyBufferCount > 0)
                 {
@@ -121,7 +120,7 @@ namespace NoStopMod.InputFixer
                 if (InputFixerManager.jumpToOtherClass)
                 {
                     InputFixerManager.jumpToOtherClass = false;
-                    __instance.angle = InputFixerManager.GetAngle(__instance, ___snappedLastAngle, InputFixerManager.currPressMs);
+                    __instance.angle = InputFixerManager.GetAngle(__instance, ___snappedLastAngle, InputFixerManager.currPressTick);
 #if DEBUG
                     {
                         double difference = __instance.angle - __instance.targetExitAngle;
@@ -135,7 +134,7 @@ namespace NoStopMod.InputFixer
 
                 if (!GCS.d_stationary)
                 {
-                    long nowMilliseconds = InputFixerManager.currFrameMs - InputFixerManager.offsetMs;
+                    long nowMilliseconds = InputFixerManager.currFrameTick - InputFixerManager.offsetMs;
                     __instance.angle = InputFixerManager.GetAngle(__instance, ___snappedLastAngle, nowMilliseconds);
 
                     if (__instance.shouldPrint)
