@@ -18,12 +18,11 @@ namespace NoStopMod.HyperRabbit
 
         private static void OnGUI(UnityModManager.ModEntry modEntry)
         {
-            GUILayout.BeginHorizontal("HyperRabbit");
-
+            GUILayout.BeginHorizontal();
             GUILayout.Label("Max otto tile per frame (5 + " + settings.maxTilePerFrame + ")");
 
             settings.maxTilePerFrame = (int) GUILayout.HorizontalSlider(settings.maxTilePerFrame, 0, 100);
-            
+
             GUILayout.EndHorizontal();
         }
 

@@ -1,14 +1,14 @@
-﻿using NoStopMod.Helper.RawInputManager;
-using NoStopMod.InputFixer.HitIgnore.KeyLimiter;
+﻿using NoStopMod.InputFixer.HitIgnore.KeyLimiter;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using JetBrains.Annotations;
+using KeyCode = SharpHook.Native.KeyCode;
 
 namespace NoStopMod.InputFixer.HitIgnore
 {
     class HitIgnoreManager
     {
-        private static Dictionary<String, bool[]> dictionary;
+        [CanBeNull] private static Dictionary<String, HashSet<KeyCode>> dictionary;
 
         public static bool scnCLS_searchMode;
         public static scrController.States scrController_state;
@@ -17,31 +17,31 @@ namespace NoStopMod.InputFixer.HitIgnore
         {
             if (GCS.sceneToLoad == null) GCS.sceneToLoad = "scnNewIntro";
 
-            dictionary = new Dictionary<string, bool[]>();
+            dictionary = new Dictionary<string, HashSet<KeyCode>>();
 
-            bool[] ignoreScnNewIntro = Enumerable.Repeat(false, 1024).ToArray();
+            HashSet<KeyCode> ignoreScnNewIntro = new HashSet<KeyCode>();
             dictionary["scnNewIntro"] = ignoreScnNewIntro;
            
-            ignoreScnNewIntro[(int)RawKeyCode.OEM_7] = true;
-            ignoreScnNewIntro[(int)RawKeyCode.KEY_0] = true;
-            ignoreScnNewIntro[(int)RawKeyCode.KEY_1] = true;
-            ignoreScnNewIntro[(int)RawKeyCode.KEY_2] = true;
-            ignoreScnNewIntro[(int)RawKeyCode.KEY_3] = true;
-            ignoreScnNewIntro[(int)RawKeyCode.KEY_4] = true;
-            ignoreScnNewIntro[(int)RawKeyCode.KEY_5] = true;
-            ignoreScnNewIntro[(int)RawKeyCode.KEY_6] = true;
-            ignoreScnNewIntro[(int)RawKeyCode.KEY_7] = true;
+            ignoreScnNewIntro.Add(KeyCode.VcQuote);
+            ignoreScnNewIntro.Add(KeyCode.Vc0);
+            ignoreScnNewIntro.Add(KeyCode.Vc1);
+            ignoreScnNewIntro.Add(KeyCode.Vc2);
+            ignoreScnNewIntro.Add(KeyCode.Vc3);
+            ignoreScnNewIntro.Add(KeyCode.Vc4);
+            ignoreScnNewIntro.Add(KeyCode.Vc5);
+            ignoreScnNewIntro.Add(KeyCode.Vc6);
+            ignoreScnNewIntro.Add(KeyCode.Vc7);
 
-            bool[] ignoreScnCLS = Enumerable.Repeat(false, 1024).ToArray();
+            HashSet<KeyCode> ignoreScnCLS = new HashSet<KeyCode>();
             dictionary["scnCLS"] = ignoreScnCLS;
-            ignoreScnCLS[(int)RawKeyCode.KEY_S] = true;
-            ignoreScnCLS[(int)RawKeyCode.DELETE] = true;
-            ignoreScnCLS[(int)RawKeyCode.KEY_F] = true;
-            ignoreScnCLS[(int)RawKeyCode.KEY_O] = true;
-            ignoreScnCLS[(int)RawKeyCode.KEY_7] = true;
-            ignoreScnCLS[(int)RawKeyCode.UP] = true;
-            ignoreScnCLS[(int)RawKeyCode.DOWN] = true;
-            
+            ignoreScnCLS.Add(KeyCode.VcS);
+            ignoreScnCLS.Add(KeyCode.VcDelete);
+            ignoreScnCLS.Add(KeyCode.VcF);
+            ignoreScnCLS.Add(KeyCode.VcO);
+            ignoreScnCLS.Add(KeyCode.Vc7);
+            ignoreScnCLS.Add(KeyCode.VcUp);
+            ignoreScnCLS.Add(KeyCode.VcDown);
+
             scnCLS_searchMode = false;
 
             if (scrController.instance != null)
@@ -52,9 +52,9 @@ namespace NoStopMod.InputFixer.HitIgnore
             KeyLimiterManager.Init();
         }
 
-        public static bool ShouldBeIgnored(RawKeyCode keyCode)
+        public static bool ShouldBeIgnored(KeyCode keyCode)
         {
-            if (keyCode == RawKeyCode.ESC) return true;
+            if (keyCode == KeyCode.VcEscape) return true;
             if (KeyLimiterManager.isChangingLimitedKeys)
             {
                 KeyLimiterManager.UpdateKeyLimiter(keyCode);
@@ -66,14 +66,14 @@ namespace NoStopMod.InputFixer.HitIgnore
                 return true;
             }
 
-            bool[] ignoreScnCLS;
+            HashSet<KeyCode> ignoreScnCLS;
             if (dictionary.TryGetValue(GCS.sceneToLoad, out ignoreScnCLS))
             {
                 if (GCS.sceneToLoad == "scnCLS" && scnCLS_searchMode)
                 {
                     return true;
                 }
-                if (ignoreScnCLS[(int)keyCode])
+                if (ignoreScnCLS.Contains(keyCode))
                 {
                     return true;
                 }
