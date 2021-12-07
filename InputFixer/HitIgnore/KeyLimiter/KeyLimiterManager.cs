@@ -1,9 +1,9 @@
-﻿using NoStopMod.Helper.RawInputManager;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityModManagerNet;
+using KeyCode = SharpHook.Native.KeyCode;
 
 namespace NoStopMod.InputFixer.HitIgnore.KeyLimiter
 {
@@ -14,7 +14,7 @@ namespace NoStopMod.InputFixer.HitIgnore.KeyLimiter
 
         public static bool isChangingLimitedKeys = false;
 
-        private static HashSet<RawKeyCode> enableKey = new HashSet<RawKeyCode>();
+        private static HashSet<KeyCode> enableKey = new HashSet<KeyCode>();
 
         public static void Init()
         {
@@ -77,12 +77,12 @@ namespace NoStopMod.InputFixer.HitIgnore.KeyLimiter
             isChangingLimitedKeys = false;
         }
 
-        public static bool IsKeyEnabled(RawKeyCode keyCode)
+        public static bool IsKeyEnabled(KeyCode keyCode)
         {
             return enableKey.Contains(keyCode);
         }
 
-        public static void UpdateKeyLimiter(RawKeyCode keyCode)
+        public static void UpdateKeyLimiter(KeyCode keyCode)
         {
             int idx = settings.limitKeys.IndexOf(keyCode);
             if (idx == -1)

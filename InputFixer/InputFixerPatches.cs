@@ -1,11 +1,11 @@
 ﻿using DG.Tweening;
 using HarmonyLib;
-using NoStopMod.Helper.RawInputManager;
 using NoStopMod.InputFixer.HitIgnore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using KeyCode = SharpHook.Native.KeyCode;
 
 namespace NoStopMod.InputFixer
 {
@@ -27,8 +27,8 @@ namespace NoStopMod.InputFixer
             public static void Postfix(scrConductor __instance, double ___dspTimeSong)
             {
                 // frameMs set
-                InputFixerManager.prevFrameMs = InputFixerManager.currFrameMs;
-                InputFixerManager.currFrameMs = InputFixerManager.stopwatch.ElapsedMilliseconds;
+                InputFixerManager.prevFrameTick = InputFixerManager.currFrameTick;
+                InputFixerManager.currFrameTick = DateTime.Now.Ticks;
 
                 // dspTime adjust
                 if (!AudioListener.pause && Application.isFocused && Time.unscaledTime - InputFixerManager.previousFrameTime < 0.1)
@@ -41,54 +41,55 @@ namespace NoStopMod.InputFixer
                 {
                     InputFixerManager.lastReportedDspTime = AudioSettings.dspTime;
                     InputFixerManager.dspTime = AudioSettings.dspTime;
-                    InputFixerManager.offsetMs = InputFixerManager.currFrameMs - (long)(InputFixerManager.dspTime * 1000);
+                    InputFixerManager.offsetMs = InputFixerManager.currFrameTick - (long)(InputFixerManager.dspTime * 10000000);
                 }
 
                 InputFixerManager.dspTimeSong = ___dspTimeSong;
 
                 // planet hit processing
-
-                long rawKeyCodesMs = 0;
-                List<RawKeyCode> rawKeyCodes = new List<RawKeyCode>();
+                long rawKeyCodesTick = 0;
+                List<KeyCode> keyCodes = new List<KeyCode>();
 
                 while (InputFixerManager.keyQueue.Any())
                 {
                     long ms;
-                    RawKeyCode rawKeyCode;
-                    InputFixerManager.keyQueue.Dequeue().Deconstruct(out ms, out rawKeyCode);
+                    ushort ushortRawKeyCode;
+                    InputFixerManager.keyQueue.Dequeue().Deconstruct(out ms, out ushortRawKeyCode);
 
-                    if (ms != rawKeyCodesMs)
+                    KeyCode rawKeyCode = (KeyCode)ushortRawKeyCode;
+
+                    if (ms != rawKeyCodesTick)
                     {
-                        ProcessKeyInputs(rawKeyCodes, rawKeyCodesMs);
-                        rawKeyCodes.Clear();
-                        rawKeyCodesMs = ms;
+                        ProcessKeyInputs(keyCodes, rawKeyCodesTick);
+                        keyCodes.Clear();
+                        rawKeyCodesTick = ms;
                     }
 
-                    rawKeyCodes.Add(rawKeyCode);
+                    keyCodes.Add(rawKeyCode);
                 }
 
-                ProcessKeyInputs(rawKeyCodes, rawKeyCodesMs);
+                ProcessKeyInputs(keyCodes, rawKeyCodesTick);
             }
 
-            private static void ProcessKeyInputs(List<RawKeyCode> rawKeyCodes, long ms)
+            private static void ProcessKeyInputs(List<KeyCode> keyCodes, long ms)
             {
                 scrController controller = scrController.instance;
                 int count = 0;
-                for (int i = 0; i < rawKeyCodes.Count(); i++)
+                for (int i = 0; i < keyCodes.Count(); i++)
                 {
-                    if (HitIgnoreManager.ShouldBeIgnored(rawKeyCodes[i])) continue;
+                    if (HitIgnoreManager.ShouldBeIgnored(keyCodes[i])) continue;
 
                     if (AudioListener.pause || RDC.auto) continue;
 #if DEBUG
                     else
                     {
-                        NoStopMod.mod.Logger.Log("Fetch Input : " + InputFixerManager.offsetMs + ", " + ms + ", " + rawKeyCodes[i]);
+                        NoStopMod.mod.Logger.Log("Fetch Input : " + InputFixerManager.offsetMs + ", " + ms + ", " + keyCodes[i]);
                     }
 #endif
                     if (++count > 4) break;
                 }
 
-                InputFixerManager.currPressMs = ms - InputFixerManager.offsetMs;
+                InputFixerManager.currPressTick = ms - InputFixerManager.offsetMs;
                 controller.keyBufferCount += count;
                 while (controller.keyBufferCount > 0)
                 {
@@ -119,7 +120,7 @@ namespace NoStopMod.InputFixer
                 if (InputFixerManager.jumpToOtherClass)
                 {
                     InputFixerManager.jumpToOtherClass = false;
-                    __instance.angle = InputFixerManager.GetAngle(__instance, ___snappedLastAngle, InputFixerManager.currPressMs);
+                    __instance.angle = InputFixerManager.GetAngle(__instance, ___snappedLastAngle, InputFixerManager.currPressTick);
 #if DEBUG
                     {
                         double difference = __instance.angle - __instance.targetExitAngle;
@@ -133,7 +134,7 @@ namespace NoStopMod.InputFixer
 
                 if (!GCS.d_stationary)
                 {
-                    long nowMilliseconds = InputFixerManager.currFrameMs - InputFixerManager.offsetMs;
+                    long nowMilliseconds = InputFixerManager.currFrameTick - InputFixerManager.offsetMs;
                     __instance.angle = InputFixerManager.GetAngle(__instance, ___snappedLastAngle, nowMilliseconds);
 
                     if (__instance.shouldPrint)
@@ -143,11 +144,11 @@ namespace NoStopMod.InputFixer
                 }
                 else
                 {
-                    if (UnityEngine.Input.GetKey(KeyCode.DownArrow))
+                    if (UnityEngine.Input.GetKey(UnityEngine.KeyCode.DownArrow))
                     {
                         __instance.angle += 0.1;
                     }
-                    if (UnityEngine.Input.GetKey(KeyCode.UpArrow))
+                    if (UnityEngine.Input.GetKey(UnityEngine.KeyCode.UpArrow))
                     {
                         __instance.angle -= 0.1;
                     }

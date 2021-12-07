@@ -1,32 +1,25 @@
-﻿using NoStopMod.Helper.RawInputManager;
 using NoStopMod.InputFixer.HitIgnore;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading;
-using UnityEngine;
-using UnityModManagerNet;
+using SharpHook;
 
 namespace NoStopMod.InputFixer
 {
     class InputFixerManager
     {
         public static InputFixerSettings settings;
-        
-        private static Thread thread;
-        public static Queue<Tuple<long, RawKeyCode>> keyQueue = new Queue<Tuple<long, RawKeyCode>>();
-        
-        public static long currPressMs;
+
+        public static Queue<Tuple<long, ushort>> keyQueue = new Queue<Tuple<long, ushort>>();
+
+        public static long currPressTick;
 
         public static bool jumpToOtherClass = false;
         public static bool editInputLimit = false;
 
-        public static HHook hhook;
-        public static Stopwatch stopwatch;
+        private static object hook;
 
-        public static long currFrameMs;
-        public static long prevFrameMs;
+        public static long currFrameTick;
+        public static long prevFrameTick;
 
         public static double dspTime;
         public static double dspTimeSong;
@@ -37,86 +30,51 @@ namespace NoStopMod.InputFixer
 
         public static double previousFrameTime;
 
-        private static HashSet<RawKeyCode> mask = new HashSet<RawKeyCode>();
-
-
         public static void Init()
         {
+            hook = new SimpleGlobalHook();
             NoStopMod.onToggleListener.Add(ToggleThread);
-            NoStopMod.onGUIListener.Add(OnGUI);
-            NoStopMod.onApplicationQuitListener.Add(_ => ToggleThread(false));
 
             settings = new InputFixerSettings();
             Settings.settings.Add(settings);
 
             HitIgnoreManager.Init();
         }
-
-        private static void OnGUI(UnityModManager.ModEntry modEntry)
-        {
-            //GUILayout.BeginVertical("Input");
-            //GUILayout.EndVertical(); 
-        }
-            
+        
         public static void ToggleThread(bool toggle)
         {
-            if (thread != null)
-            {
-                thread.Abort();
-                thread = null;
-            }
-            currFrameMs = 0;
-            prevFrameMs = 0;
+            currFrameTick = 0;
+            prevFrameTick = 0;
             if (toggle)
             {
-                thread = new Thread(() => {
-                    stopwatch?.Stop();
-                    stopwatch = new Stopwatch();
-                    stopwatch.Start();
-                    mask.Clear();
-                    keyQueue.Clear();
+                keyQueue.Clear();
+                IGlobalHook mHook = (IGlobalHook) hook;
+                if (!mHook.IsRunning)
+                {
+                    mHook.KeyPressed += HookOnKeyPressed;
+                    mHook.Start();
+#if DEBUG
+                    NoStopMod.mod.Logger.Log("Start Hook");
+#endif
+                }
 
-                    while (true)
-                    {
-                        Thread.Sleep(60000);
-                    }
-                });
-
-                thread.Start();
-                SetHooker();
             }
         }
 
-        private static void SetHooker()
+        private static void HookOnKeyPressed(object sender, KeyboardHookEventArgs e)
         {
-            hhook?.UnHook();
-            hhook = KBDHooker.Hook((nCode, wParam, lParam) =>
-            {
-                RawKeyCode code = lParam.GetKeyCode();
-                if (code.IsKeyDown(nCode, wParam, lParam))
-                {
-                    if (!mask.Contains(code))
-                    {
-                        mask.Add(code);
-                        keyQueue.Enqueue(new Tuple<long, RawKeyCode>(stopwatch.ElapsedMilliseconds, code));
-                    }
-                }
-                else if (code.IsKeyUp(nCode, wParam, lParam))
-                {
-                    mask.Remove(code);
-                }
-
-                return KBDHooker.CallNextHookEx(hhook, nCode, wParam, lParam);
-            });
+            ushort keyCode = (ushort) e.Data.KeyCode;
+            keyQueue.Enqueue(Tuple.Create(DateTime.Now.Ticks, keyCode));
+#if DEBUG
+            NoStopMod.mod.Logger.Log("eq " + keyCode);
+#endif
         }
-
-
 
         public static double GetSongPosition(scrConductor __instance, long nowTick)
         {
             if (!GCS.d_oldConductor && !GCS.d_webglConductor)
             {
-                return ((nowTick / 1000.0 - dspTimeSong - scrConductor.calibration_i) * __instance.song.pitch) - __instance.addoffset;
+                return ((nowTick / 10000000.0 - dspTimeSong - scrConductor.calibration_i) * __instance.song.pitch) - __instance.addoffset;
             }
             else
             {
