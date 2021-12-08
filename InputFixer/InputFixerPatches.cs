@@ -17,7 +17,7 @@ namespace NoStopMod.InputFixer
         {
             public static void Postfix(scrController __instance)
             {
-                InputFixerManager.ToggleThread(true);
+                InputFixerManager.InitQueue();
             }
         }
 
@@ -90,7 +90,7 @@ namespace NoStopMod.InputFixer
                 }
 
                 InputFixerManager.currPressTick = ms - InputFixerManager.offsetMs;
-                controller.keyBufferCount += count;
+                controller.keyBufferCount = count;
                 while (controller.keyBufferCount > 0)
                 {
                     controller.keyBufferCount--;
@@ -99,7 +99,6 @@ namespace NoStopMod.InputFixer
                     controller.Hit();
                 }
             }
-
         }
 
         [HarmonyPatch(typeof(scrController), "CountValidKeysPressed")]
@@ -108,6 +107,11 @@ namespace NoStopMod.InputFixer
             public static bool Prefix(scrController __instance, ref int __result)
             {
                 return false;
+            }
+
+            public static void Postfix(ref int __result)
+            {
+                __result = 0;
             }
         }
 

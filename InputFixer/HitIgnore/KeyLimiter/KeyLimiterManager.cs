@@ -61,6 +61,7 @@ namespace NoStopMod.InputFixer.HitIgnore.KeyLimiter
                 if (GUILayout.Button(isChangingLimitedKeys ? "Complete" : "Change Limited Keys", Array.Empty<GUILayoutOption>()))
                 {
                     isChangingLimitedKeys = !isChangingLimitedKeys;
+                    Settings.Save();
                 }
                 if (isChangingLimitedKeys)
                 {
@@ -75,6 +76,7 @@ namespace NoStopMod.InputFixer.HitIgnore.KeyLimiter
         private static void OnHideGUI(UnityModManager.ModEntry entry)
         {
             isChangingLimitedKeys = false;
+            Settings.Save();
         }
 
         public static bool IsKeyEnabled(KeyCode keyCode)
