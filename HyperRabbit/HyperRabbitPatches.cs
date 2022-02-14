@@ -15,7 +15,7 @@ namespace NoStopMod.HyperRabbit
                     int num = HyperRabbitManager.settings.maxTilePerFrame;
                     while (num > 0 && __instance.chosenplanet.AutoShouldHitNow())
                     {
-                        __instance.keyBufferCount = 0;
+                        __instance.keyTimes.Clear();
                         __instance.Hit();
                         num--;
                     }

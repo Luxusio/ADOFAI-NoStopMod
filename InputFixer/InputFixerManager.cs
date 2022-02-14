@@ -33,7 +33,7 @@ namespace NoStopMod.InputFixer
 
         public static double previousFrameTime;
 
-        public static HashSet<ushort> mask = new HashSet<ushort>();
+        public static readonly HashSet<ushort> mask = new HashSet<ushort>();
 
         public static bool disablingAdofaiTweaksKeyLimiter = false;
 
