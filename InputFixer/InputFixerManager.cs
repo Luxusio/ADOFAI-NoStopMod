@@ -43,6 +43,9 @@ namespace NoStopMod.InputFixer
             IGlobalHook mHook = (IGlobalHook) hook;
             mHook.KeyPressed += HookOnKeyPressed;
             mHook.KeyReleased += HookOnKeyReleased;
+            mHook.MousePressed += HookOnMousePressed;
+            mHook.MouseReleased += HookOnMouseReleased;
+            
             mHook.Start();
 
             NoStopMod.onToggleListener.Add(_ => InitQueue());
@@ -85,9 +88,30 @@ namespace NoStopMod.InputFixer
 #endif
             }
         }
+        
         private static void HookOnKeyReleased(object sender, KeyboardHookEventArgs e)
         {
-            ushort keyCode = (ushort)e.Data.KeyCode;
+            ushort keyCode = (ushort) e.Data.KeyCode;
+            mask.Remove(keyCode);
+        }
+        
+        private static void HookOnMousePressed(object sender, MouseHookEventArgs e)
+        {
+            var keyCode = (ushort) (e.Data.Button + 1000);
+
+            if (!mask.Contains(keyCode))
+            {
+                mask.Add(keyCode);
+                keyQueue.Enqueue(Tuple.Create(DateTime.Now.Ticks, keyCode));
+#if DEBUG
+                NoStopMod.mod.Logger.Log("eq " + keyCode);
+#endif
+            }
+        }
+        
+        private static void HookOnMouseReleased(object sender, MouseHookEventArgs e)
+        {
+            var keyCode = (ushort) (e.Data.Button + 1000);
             mask.Remove(keyCode);
         }
 
@@ -95,18 +119,18 @@ namespace NoStopMod.InputFixer
         {
             if (!GCS.d_oldConductor && !GCS.d_webglConductor)
             {
-                return ((nowTick / 10000000.0 - dspTimeSong - scrConductor.calibration_i) * __instance.song.pitch) - __instance.addoffset;
+                return (nowTick / 10000000.0 - dspTimeSong - scrConductor.calibration_i) * __instance.song.pitch - __instance.addoffset;
             }
             else
             {
-                return (__instance.song.time - scrConductor.calibration_i) - __instance.addoffset / __instance.song.pitch;
+                return __instance.song.time - scrConductor.calibration_i - __instance.addoffset / __instance.song.pitch;
             }
         }
 
         public static double GetAngle(scrPlanet __instance, double ___snappedLastAngle, long nowTick)
         {
             return ___snappedLastAngle + (GetSongPosition(__instance.conductor, nowTick) - __instance.conductor.lastHit) / __instance.conductor.crotchet
-                * 3.141592653598793238 * __instance.controller.speed * (double)(__instance.controller.isCW ? 1 : -1);
+                * 3.141592653598793238 * __instance.controller.speed * (__instance.controller.isCW ? 1 : -1);
         }
         
         
