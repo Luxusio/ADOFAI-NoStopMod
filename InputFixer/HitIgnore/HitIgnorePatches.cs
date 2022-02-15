@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using MonsterLove.StateMachine;
 using System;
+using JetBrains.Annotations;
 
 namespace NoStopMod.InputFixer.HitIgnore
 {
@@ -30,7 +31,7 @@ namespace NoStopMod.InputFixer.HitIgnore
         [HarmonyPatch(typeof(StateEngine), "ChangeState")]
         private static class StateEngine_ChangeState_Patch
         {
-            public static void Postfix(StateEngine __instance, Enum newState, StateTransition transition)
+            public static void Postfix([NotNull] StateEngine __instance, Enum newState, StateTransition transition)
             {
                 HitIgnoreManager.scrController_state = (scrController.States) newState;
             }

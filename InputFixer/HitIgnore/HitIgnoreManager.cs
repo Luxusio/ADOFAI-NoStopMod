@@ -8,7 +8,7 @@ namespace NoStopMod.InputFixer.HitIgnore
 {
     class HitIgnoreManager
     {
-        [CanBeNull] private static Dictionary<String, HashSet<KeyCode>> dictionary;
+        private static readonly Dictionary<String, HashSet<KeyCode>> _dictionary = new Dictionary<string, HashSet<KeyCode>>();
 
         public static bool scnCLS_searchMode;
         public static scrController.States scrController_state;
@@ -17,10 +17,8 @@ namespace NoStopMod.InputFixer.HitIgnore
         {
             if (GCS.sceneToLoad == null) GCS.sceneToLoad = "scnNewIntro";
 
-            dictionary = new Dictionary<string, HashSet<KeyCode>>();
-
             HashSet<KeyCode> ignoreScnNewIntro = new HashSet<KeyCode>();
-            dictionary["scnNewIntro"] = ignoreScnNewIntro;
+            _dictionary["scnNewIntro"] = ignoreScnNewIntro;
            
             ignoreScnNewIntro.Add(KeyCode.VcQuote);
             ignoreScnNewIntro.Add(KeyCode.Vc0);
@@ -32,15 +30,15 @@ namespace NoStopMod.InputFixer.HitIgnore
             ignoreScnNewIntro.Add(KeyCode.Vc6);
             ignoreScnNewIntro.Add(KeyCode.Vc7);
 
-            HashSet<KeyCode> ignoreScnCLS = new HashSet<KeyCode>();
-            dictionary["scnCLS"] = ignoreScnCLS;
-            ignoreScnCLS.Add(KeyCode.VcS);
-            ignoreScnCLS.Add(KeyCode.VcDelete);
-            ignoreScnCLS.Add(KeyCode.VcF);
-            ignoreScnCLS.Add(KeyCode.VcO);
-            ignoreScnCLS.Add(KeyCode.Vc7);
-            ignoreScnCLS.Add(KeyCode.VcUp);
-            ignoreScnCLS.Add(KeyCode.VcDown);
+            HashSet<KeyCode> ignoreScnCLS_ = new HashSet<KeyCode>();
+            _dictionary["scnCLS"] = ignoreScnCLS_;
+            ignoreScnCLS_.Add(KeyCode.VcS);
+            ignoreScnCLS_.Add(KeyCode.VcDelete);
+            ignoreScnCLS_.Add(KeyCode.VcF);
+            ignoreScnCLS_.Add(KeyCode.VcO);
+            ignoreScnCLS_.Add(KeyCode.Vc7);
+            ignoreScnCLS_.Add(KeyCode.VcUp);
+            ignoreScnCLS_.Add(KeyCode.VcDown);
 
             scnCLS_searchMode = false;
 
@@ -67,7 +65,7 @@ namespace NoStopMod.InputFixer.HitIgnore
             }
 
             HashSet<KeyCode> ignoreScnCLS;
-            if (dictionary.TryGetValue(GCS.sceneToLoad, out ignoreScnCLS))
+            if (_dictionary.TryGetValue(GCS.sceneToLoad, out ignoreScnCLS))
             {
                 if (GCS.sceneToLoad == "scnCLS" && scnCLS_searchMode)
                 {
