@@ -17,7 +17,7 @@ namespace NoStopMod.InputFixer.HitIgnore.KeyLimiter
             JSONNode node = json["KeyLimiter"];
 
             enable = node["enable"].AsBool;
-            limitKeys = JSONHelper.ReadArray(ref node, "limitKeys", (arrayNode) => { return (KeyCode) arrayNode.AsInt; });
+            limitKeys = JSONHelper.ReadArray(ref node, "limitKeys", (arrayNode) => { return (KeyCode) arrayNode.AsULong; });
 
         }
 
@@ -25,7 +25,7 @@ namespace NoStopMod.InputFixer.HitIgnore.KeyLimiter
         {
             JSONNode node = JSONHelper.CreateEmptyNode();
             node["enable"].AsBool = enable;
-            node["limitKeys"] = JSONHelper.WriteArray(limitKeys, (element) => { return (int) element; });
+            node["limitKeys"] = JSONHelper.WriteArray(limitKeys, (element) => { return (int) (ushort) element; });
 
             json["KeyLimiter"] = node;
         }

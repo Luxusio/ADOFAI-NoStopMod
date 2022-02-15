@@ -2,6 +2,9 @@ using NoStopMod.InputFixer.HitIgnore;
 using System;
 using System.Collections.Generic;
 using SharpHook;
+using System.Reflection;
+using UnityModManagerNet;
+using UnityEngine;
 
 namespace NoStopMod.InputFixer
 {
@@ -30,62 +33,104 @@ namespace NoStopMod.InputFixer
 
         public static double previousFrameTime;
 
+        public static readonly HashSet<ushort> mask = new HashSet<ushort>();
+
+        public static bool disablingAdofaiTweaksKeyLimiter = false;
+
         public static void Init()
         {
             hook = new SimpleGlobalHook();
-            NoStopMod.onToggleListener.Add(ToggleThread);
+            IGlobalHook mHook = (IGlobalHook) hook;
+            mHook.KeyPressed += HookOnKeyPressed;
+            mHook.KeyReleased += HookOnKeyReleased;
+            mHook.MousePressed += HookOnMousePressed;
+            mHook.MouseReleased += HookOnMouseReleased;
+            
+            mHook.Start();
+
+            NoStopMod.onToggleListener.Add(_ => InitQueue());
+            NoStopMod.onGUIListener.Add(OnGUI);
 
             settings = new InputFixerSettings();
             Settings.settings.Add(settings);
 
+            disablingAdofaiTweaksKeyLimiter = UnityModManager.FindMod("AdofaiTweaks") != null;
+
             HitIgnoreManager.Init();
         }
-        
-        public static void ToggleThread(bool toggle)
+
+        private static void OnGUI(UnityModManager.ModEntry entry)
+        {
+            if (disablingAdofaiTweaksKeyLimiter)
+            {
+                GUILayout.Label("AdofaiTweaks mod's key limiter has been disabled by NoStopMod's async input.");
+            }
+        }
+
+        public static void InitQueue()
         {
             currFrameTick = 0;
             prevFrameTick = 0;
-            if (toggle)
-            {
-                keyQueue.Clear();
-                IGlobalHook mHook = (IGlobalHook) hook;
-                if (!mHook.IsRunning)
-                {
-                    mHook.KeyPressed += HookOnKeyPressed;
-                    mHook.Start();
-#if DEBUG
-                    NoStopMod.mod.Logger.Log("Start Hook");
-#endif
-                }
-
-            }
+            keyQueue.Clear();
+            mask.Clear();
         }
 
         private static void HookOnKeyPressed(object sender, KeyboardHookEventArgs e)
         {
             ushort keyCode = (ushort) e.Data.KeyCode;
-            keyQueue.Enqueue(Tuple.Create(DateTime.Now.Ticks, keyCode));
+
+            if (!mask.Contains(keyCode))
+            {
+                mask.Add(keyCode);
+                keyQueue.Enqueue(Tuple.Create(DateTime.Now.Ticks, keyCode));
 #if DEBUG
-            NoStopMod.mod.Logger.Log("eq " + keyCode);
+                NoStopMod.mod.Logger.Log("eq " + keyCode);
 #endif
+            }
+        }
+        
+        private static void HookOnKeyReleased(object sender, KeyboardHookEventArgs e)
+        {
+            ushort keyCode = (ushort) e.Data.KeyCode;
+            mask.Remove(keyCode);
+        }
+        
+        private static void HookOnMousePressed(object sender, MouseHookEventArgs e)
+        {
+            var keyCode = (ushort) (e.Data.Button + 1000);
+
+            if (!mask.Contains(keyCode))
+            {
+                mask.Add(keyCode);
+                keyQueue.Enqueue(Tuple.Create(DateTime.Now.Ticks, keyCode));
+#if DEBUG
+                NoStopMod.mod.Logger.Log("eq " + keyCode);
+#endif
+            }
+        }
+        
+        private static void HookOnMouseReleased(object sender, MouseHookEventArgs e)
+        {
+            var keyCode = (ushort) (e.Data.Button + 1000);
+            mask.Remove(keyCode);
         }
 
         public static double GetSongPosition(scrConductor __instance, long nowTick)
         {
             if (!GCS.d_oldConductor && !GCS.d_webglConductor)
             {
-                return ((nowTick / 10000000.0 - dspTimeSong - scrConductor.calibration_i) * __instance.song.pitch) - __instance.addoffset;
+                return (nowTick / 10000000.0 - dspTimeSong - scrConductor.calibration_i) * __instance.song.pitch - __instance.addoffset;
             }
             else
             {
-                return (__instance.song.time - scrConductor.calibration_i) - __instance.addoffset / __instance.song.pitch;
+                return __instance.song.time - scrConductor.calibration_i - __instance.addoffset / __instance.song.pitch;
             }
         }
 
         public static double GetAngle(scrPlanet __instance, double ___snappedLastAngle, long nowTick)
         {
             return ___snappedLastAngle + (GetSongPosition(__instance.conductor, nowTick) - __instance.conductor.lastHit) / __instance.conductor.crotchet
-                * 3.141592653598793238 * __instance.controller.speed * (double)(__instance.controller.isCW ? 1 : -1);
+                * 3.141592653598793238 * __instance.controller.speed * (__instance.controller.isCW ? 1 : -1);
         }
         
         
