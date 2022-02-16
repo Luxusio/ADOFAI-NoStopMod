@@ -74,10 +74,14 @@ namespace NoStopMod.InputFixer
             private static void ProcessKeyInputs([NotNull] IReadOnlyList<KeyCode> keyCodes, long ms)
             {
                 var count = GetValidKeyCount(keyCodes);
+                var controller = scrController.instance;
+                if (count == 1)
+                {
+                    controller.consecMultipressCounter = 0;
+                }
 
                 InputFixerManager.currPressTick = ms - InputFixerManager.offsetMs;
                 
-                var controller = scrController.instance;
                 for (var i = 0; i < count; i++)
                 {
                     controller.keyTimes.Add(0);
