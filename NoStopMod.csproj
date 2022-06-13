@@ -131,8 +131,9 @@
     <Reference Include="Rewired_Windows_Functions, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\lib\Rewired_Windows_Functions.dll</HintPath>
     </Reference>
-    <Reference Include="SharpHook, Version=1.1.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\lib\SharpHook.dll</HintPath>
+    <Reference Include="SharpHook, Version=3.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\SharpHook.3.0.0\lib\net461\SharpHook.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Sirenix.OdinInspector.Attributes, Version=2.1.9.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\lib\Sirenix.OdinInspector.Attributes.dll</HintPath>
@@ -413,6 +414,10 @@
     <Reference Include="XTUtilities, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\lib\XTUtilities.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">

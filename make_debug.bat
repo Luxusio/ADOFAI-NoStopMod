@@ -11,7 +11,7 @@ cd ..
 copy ..\bin\Debug\NoStopMod.dll NoStopMod
 copy ..\Info.json NoStopMod
 
-xcopy ..\..\lib\common\original\SharpHook\runtimes\* NoStopMod\runtimes /e /h /k /y
+xcopy ..\..\lib\common\original\SharpHook\3.0.0\runtimes\* NoStopMod\runtimes /e /h /k /y
 
 tar -a -c -f NoStopMod-%1.zip NoStopMod
 del /f /q ../NoStopMod-%1.zip
