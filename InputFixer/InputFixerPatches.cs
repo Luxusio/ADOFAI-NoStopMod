@@ -1,4 +1,4 @@
-﻿using DG.Tweening;
+using DG.Tweening;
 using HarmonyLib;
 using NoStopMod.InputFixer.HitIgnore;
 using System;
@@ -200,10 +200,6 @@ namespace NoStopMod.InputFixer
                 }
                 Vector3 position = __instance.transform.position;
                 __instance.other.transform.position = new Vector3(position.x + Mathf.Sin(num) * __instance.cosmeticRadius, position.y + Mathf.Cos(num) * __instance.cosmeticRadius, position.z);
-                if (__instance.is3D)
-                {
-                    __instance.other.transform.position = new Vector3(position.x + Mathf.Sin((float)__instance.angle) * __instance.cosmeticRadius, position.y, position.z + Mathf.Cos((float)__instance.angle) * __instance.cosmeticRadius);
-                }
 
                 return false;
             }

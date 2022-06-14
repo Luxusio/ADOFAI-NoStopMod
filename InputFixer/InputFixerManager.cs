@@ -46,7 +46,7 @@ namespace NoStopMod.InputFixer
             mHook.MousePressed += HookOnMousePressed;
             mHook.MouseReleased += HookOnMouseReleased;
             
-            mHook.Start();
+            mHook.RunAsync();
 
             NoStopMod.onToggleListener.Add(_ => InitQueue());
             NoStopMod.onGUIListener.Add(OnGUI);
