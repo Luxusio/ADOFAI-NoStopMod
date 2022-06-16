@@ -159,49 +159,7 @@ namespace NoStopMod.InputFixer
                     return false;
                 }
 
-                if (!__instance.isChosen || __instance.conductor.crotchet == 0.0) return false;
-
-                if (!GCS.d_stationary)
-                {
-                    var nowMilliseconds = InputFixerManager.currFrameTick - InputFixerManager.offsetMs;
-                    __instance.angle = InputFixerManager.GetAngle(__instance, ___snappedLastAngle, nowMilliseconds);
-
-                    if (__instance.shouldPrint)
-                    {
-                        __instance.shouldPrint = false;
-                    }
-                }
-                else
-                {
-                    if (UnityEngine.Input.GetKey(UnityEngine.KeyCode.DownArrow))
-                    {
-                        __instance.angle += 0.1;
-                    }
-                    if (UnityEngine.Input.GetKey(UnityEngine.KeyCode.UpArrow))
-                    {
-                        __instance.angle -= 0.1;
-                    }
-                }
-                float num = (float)__instance.angle;
-                if (__instance.currfloor != null)
-                {
-                    if (__instance.controller.rotationEase != Ease.Linear)
-                    {
-                        float num2 = scrMisc.EasedAngle((float)___snappedLastAngle, (float)__instance.targetExitAngle, num, __instance.controller.rotationEase, __instance.controller.rotationEaseParts);
-                        if (!float.IsNaN(num2) && !float.IsInfinity(num2))
-                        {
-                            num = num2;
-                        }
-                    }
-                    if (__instance.controller.stickToFloor)
-                    {
-                        num -= (__instance.currfloor.transform.rotation.eulerAngles - __instance.currfloor.startRot).z * 0.017453292f;
-                    }
-                }
-                Vector3 position = __instance.transform.position;
-                __instance.other.transform.position = new Vector3(position.x + Mathf.Sin(num) * __instance.cosmeticRadius, position.y + Mathf.Cos(num) * __instance.cosmeticRadius, position.z);
-
-                return false;
+                return true;
             }
         }
         
