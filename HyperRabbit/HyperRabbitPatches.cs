@@ -12,12 +12,12 @@ namespace NoStopMod.HyperRabbit
             {
                 if (RDC.auto && scrController.isGameWorld)
                 {
-                    int num = HyperRabbitManager.settings.maxTilePerFrame;
-                    while (num > 0 && __instance.chosenplanet.AutoShouldHitNow())
+                    int lastTileNum = -1;
+                    while (__instance.chosenplanet.AutoShouldHitNow() && lastTileNum != __instance.currFloor.seqID)
                     {
+                        lastTileNum = __instance.currFloor.seqID;
                         __instance.keyTimes.Clear();
                         __instance.Hit();
-                        num--;
                     }
                 }
             }

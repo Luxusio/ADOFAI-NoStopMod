@@ -40,7 +40,6 @@
     <Compile Include="Helper\EventListener.cs" />
     <Compile Include="Helper\JSONHelper.cs" />
     <Compile Include="Helper\ReflectionField.cs" />
-    <Compile Include="HyperRabbit\HyperRabbitSettings.cs" />
     <Compile Include="InputFixer\HitIgnore\KeyLimiter\KeyLimiterManager.cs" />
     <Compile Include="InputFixer\HitIgnore\KeyLimiter\KeyLimiterSettings.cs" />
     <Compile Include="InputFixer\InputFixerManager.cs" />
@@ -49,7 +48,6 @@
     <Compile Include="InputFixer\HitIgnore\HitIgnoreManager.cs" />
     <Compile Include="InputFixer\HitIgnore\HitIgnorePatches.cs" />
     <Compile Include="Helper\SimpleGUI.cs" />
-    <Compile Include="HyperRabbit\HyperRabbitManager.cs" />
     <Compile Include="HyperRabbit\HyperRabbitPatches.cs" />
     <Compile Include="lib\SimpleJSON.cs" />
     <Compile Include="NoStopMod.cs" />

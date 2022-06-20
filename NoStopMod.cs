@@ -35,7 +35,6 @@ namespace NoStopMod
             
 
             InputFixerManager.Init();
-            HyperRabbitManager.Init();
 
             Settings.Init();
             return true;
