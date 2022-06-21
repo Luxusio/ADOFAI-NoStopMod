@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using NoStopMod.Helper;
 
 namespace NoStopMod.HyperRabbit
 {
@@ -12,13 +13,17 @@ namespace NoStopMod.HyperRabbit
             {
                 if (RDC.auto && scrController.isGameWorld)
                 {
-                    int lastTileNum = -1;
-                    while (__instance.chosenplanet.AutoShouldHitNow() && lastTileNum != __instance.currFloor.seqID)
+                    ControllerHelper.ExecuteUntilTileNotChange(__instance, () =>
                     {
-                        lastTileNum = __instance.currFloor.seqID;
-                        __instance.keyTimes.Clear();
-                        __instance.Hit();
-                    }
+                        if (__instance.chosenplanet.AutoShouldHitNow())
+                        {
+                            __instance.keyTimes.Clear();
+                            __instance.Hit();
+#if DEBUG
+                            NoStopMod.mod.Logger.Log($"otto Hit {__instance.currFloor.seqID}th tile");
+#endif
+                        }
+                    });
                 }
             }
         }

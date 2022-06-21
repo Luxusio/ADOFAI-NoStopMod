@@ -14,7 +14,7 @@ namespace NoStopMod.InputFixer
 
         public static Queue<Tuple<long, ushort>> keyQueue = new Queue<Tuple<long, ushort>>();
 
-        public static long currPressTick;
+        public static long targetSongTick;
 
         public static bool jumpToOtherClass = false;
         public static bool editInputLimit = false;
@@ -27,7 +27,7 @@ namespace NoStopMod.InputFixer
         public static double dspTime;
         public static double dspTimeSong;
 
-        public static long offsetMs;
+        public static long offsetTick;
 
         public static double lastReportedDspTime;
 
@@ -132,6 +132,40 @@ namespace NoStopMod.InputFixer
             return ___snappedLastAngle + (GetSongPosition(__instance.conductor, nowTick) - __instance.conductor.lastHit) / __instance.conductor.crotchet
                 * 3.141592653598793238 * __instance.controller.speed * (__instance.controller.isCW ? 1 : -1);
         }
+        
+        public static void Hit(scrController controller)
+        {
+            controller.keyTimes.RemoveAt(0);
+            controller.Hit();
+        }
+
+        public static void FailAction(scrController controller)
+        {
+            // @see scrController#PlayerControl_Update
+            double num1 = scrMisc.GetAdjustedAngleBoundaryInDeg(HitMarginGeneral.Counted,
+                (double) (controller.conductor.bpm * (float) controller.speed), (double) controller.conductor.song.pitch) * (Math.PI / 180.0);
+            double num2 = Math.Max(3.14159274101257, num1 * 2.0);
+
+            if (controller.noFail || controller.currFloor.isSafe)
+                num2 = num1 * 1.01;
+
+            double num3 = controller.chosenplanet.angle - controller.chosenplanet.targetExitAngle;
+
+            if (!controller.isCW)
+                num3 *= -1.0;
+
+            // fail
+            if (scrController.isGameWorld && controller.lm.listFloors.Count > controller.currFloor.seqID + 1 && num3 > num2)
+                controller.FailAction();
+        }
+        
+        public static void AdjustAngle(scrController controller, long targetTick)
+        {
+            InputFixerManager.targetSongTick = targetTick - InputFixerManager.offsetTick;
+            InputFixerManager.jumpToOtherClass = true;
+            controller.chosenplanet.Update_RefreshAngles();
+        }
+        
         
         
     }

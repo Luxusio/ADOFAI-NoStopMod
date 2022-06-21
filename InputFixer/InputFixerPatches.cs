@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
+using NoStopMod.Helper;
 using UnityEngine;
 using KeyCode = SharpHook.Native.KeyCode;
 
@@ -20,6 +21,22 @@ namespace NoStopMod.InputFixer
             public static void Postfix(scrController __instance)
             {
                 InputFixerManager.InitQueue();
+            }
+        }
+        
+        [HarmonyPatch(typeof(scrController), "PlayerControl_Update")]
+        private static class scrController_PlayerControl_Update_Patch
+        {
+            public static void Postfix(scrController __instance)
+            {
+                ControllerHelper.ExecuteUntilTileNotChange(__instance, () =>
+                {
+                    InputFixerManager.AdjustAngle(__instance, DateTime.Now.Ticks);
+                    InputFixerManager.FailAction(__instance);
+#if DEBUG
+                    NoStopMod.mod.Logger.Log($"FailAction from update {__instance.currFloor.seqID}th tile");
+#endif
+                });
             }
         }
 
@@ -43,35 +60,38 @@ namespace NoStopMod.InputFixer
                 {
                     InputFixerManager.lastReportedDspTime = AudioSettings.dspTime;
                     InputFixerManager.dspTime = AudioSettings.dspTime;
-                    InputFixerManager.offsetMs = InputFixerManager.currFrameTick - (long)(InputFixerManager.dspTime * 10000000);
+                    InputFixerManager.offsetTick = InputFixerManager.currFrameTick - (long)(InputFixerManager.dspTime * 10000000);
                 }
 
                 InputFixerManager.dspTimeSong = ___dspTimeSong;
 
                 // planet hit processing
                 long rawKeyCodesTick = 0;
-                var keyCodes = new List<KeyCode>();
+                var pressKeyCodes = new List<KeyCode>();
 
                 while (InputFixerManager.keyQueue.Any())
                 {
-                    InputFixerManager.keyQueue.Dequeue().Deconstruct(out var ms, out var ushortRawKeyCode);
+                    InputFixerManager.keyQueue.Dequeue().Deconstruct(out var eventTick, out var ushortRawKeyCode);
 
                     var rawKeyCode = (KeyCode) ushortRawKeyCode;
-
-                    if (ms != rawKeyCodesTick)
+                    
+                    if (eventTick != rawKeyCodesTick)
                     {
-                        ProcessKeyInputs(keyCodes, rawKeyCodesTick);
-                        keyCodes.Clear();
-                        rawKeyCodesTick = ms;
+                        ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick);
+                        pressKeyCodes.Clear();
+                        rawKeyCodesTick = eventTick;
                     }
 
-                    keyCodes.Add(rawKeyCode);
+                    pressKeyCodes.Add(rawKeyCode);
+
                 }
 
-                ProcessKeyInputs(keyCodes, rawKeyCodesTick);
+                ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick);
             }
 
-            private static void ProcessKeyInputs([NotNull] IReadOnlyList<KeyCode> keyCodes, long ms)
+
+
+            private static void ProcessKeyInputs([NotNull] IReadOnlyList<KeyCode> keyCodes, long eventTick)
             {
                 var count = GetValidKeyCount(keyCodes);
                 var controller = scrController.instance;
@@ -80,7 +100,14 @@ namespace NoStopMod.InputFixer
                     controller.consecMultipressCounter = 0;
                 }
 
-                InputFixerManager.currPressTick = ms - InputFixerManager.offsetMs;
+                ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
+                {
+                    InputFixerManager.AdjustAngle(controller, eventTick);
+                    InputFixerManager.FailAction(controller);
+#if DEBUG
+                    NoStopMod.mod.Logger.Log($"FailAction before hit {controller.currFloor.seqID}th tile");
+#endif
+                });
                 
                 for (var i = 0; i < count; i++)
                 {
@@ -89,10 +116,12 @@ namespace NoStopMod.InputFixer
                 
                 while (controller.keyTimes.Count > 0)
                 {
-                    AccurateHit(controller);
+                    InputFixerManager.AdjustAngle(controller, eventTick);
+                    InputFixerManager.Hit(controller);
                     if (controller.midspinInfiniteMargin)
                     {
-                        AccurateHit(controller);
+                        InputFixerManager.AdjustAngle(controller, eventTick);
+                        InputFixerManager.Hit(controller);
                     }
                 }
                 
@@ -101,13 +130,13 @@ namespace NoStopMod.InputFixer
             private static int GetValidKeyCount([NotNull] IReadOnlyList<KeyCode> keyCodes)
             {
                 var count = 0;
-                for (var i = 0; i < keyCodes.Count(); i++)
+                for (var i = 0; i < keyCodes.Count; i++)
                 {
                     if (HitIgnoreManager.ShouldBeIgnored(keyCodes[i])) continue;
 
                     if (AudioListener.pause || RDC.auto) continue;
 #if DEBUG
-                    NoStopMod.mod.Logger.Log("Fetch Input : " + InputFixerManager.offsetMs + ", " + keyCodes[i]);
+                    NoStopMod.mod.Logger.Log("Fetch Input : " + InputFixerManager.offsetTick + ", " + keyCodes[i]);
                     
 #endif
                     if (++count > 4) break;
@@ -116,14 +145,6 @@ namespace NoStopMod.InputFixer
                 return count;
             }
 
-            private static void AccurateHit(scrController controller)
-            {
-                InputFixerManager.jumpToOtherClass = true;
-                controller.chosenplanet.Update_RefreshAngles();
-                controller.keyTimes.RemoveAt(0);
-                controller.Hit();
-            }
-            
         }
 
         [HarmonyPatch(typeof(scrController), "CountValidKeysPressed")]
@@ -149,7 +170,7 @@ namespace NoStopMod.InputFixer
                 if (InputFixerManager.jumpToOtherClass)
                 {
                     InputFixerManager.jumpToOtherClass = false;
-                    __instance.angle = InputFixerManager.GetAngle(__instance, ___snappedLastAngle, InputFixerManager.currPressTick);
+                    __instance.angle = InputFixerManager.GetAngle(__instance, ___snappedLastAngle, InputFixerManager.targetSongTick);
 #if DEBUG
                     {
                         var difference = __instance.angle - __instance.targetExitAngle;

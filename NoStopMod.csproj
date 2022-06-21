@@ -37,6 +37,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Helper\Abstraction\SettingsBase.cs" />
+    <Compile Include="Helper\ControllerHelper.cs" />
     <Compile Include="Helper\EventListener.cs" />
     <Compile Include="Helper\JSONHelper.cs" />
     <Compile Include="Helper\ReflectionField.cs" />
