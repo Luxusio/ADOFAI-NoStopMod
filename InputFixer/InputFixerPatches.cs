@@ -32,6 +32,14 @@ namespace NoStopMod.InputFixer
                 ControllerHelper.ExecuteUntilTileNotChange(__instance, () =>
                 {
                     InputFixerManager.AdjustAngle(__instance, DateTime.Now.Ticks);
+                    InputFixerManager.OttoHit(__instance);
+#if DEBUG
+                    NoStopMod.mod.Logger.Log($"OttoHit before hit {__instance.currFloor.seqID}th tile");
+#endif
+                });
+                ControllerHelper.ExecuteUntilTileNotChange(__instance, () =>
+                {
+                    InputFixerManager.AdjustAngle(__instance, DateTime.Now.Ticks);
                     InputFixerManager.FailAction(__instance);
 #if DEBUG
                     NoStopMod.mod.Logger.Log($"FailAction from update {__instance.currFloor.seqID}th tile");
@@ -99,7 +107,14 @@ namespace NoStopMod.InputFixer
                 {
                     controller.consecMultipressCounter = 0;
                 }
-
+                ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
+                {
+                    InputFixerManager.AdjustAngle(controller, eventTick);
+                    InputFixerManager.OttoHit(controller);
+#if DEBUG
+                    NoStopMod.mod.Logger.Log($"OttoHit before hit {controller.currFloor.seqID}th tile");
+#endif
+                });
                 ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
                 {
                     InputFixerManager.AdjustAngle(controller, eventTick);

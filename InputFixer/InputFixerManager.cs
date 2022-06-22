@@ -158,6 +158,21 @@ namespace NoStopMod.InputFixer
             if (scrController.isGameWorld && controller.lm.listFloors.Count > controller.currFloor.seqID + 1 && num3 > num2)
                 controller.FailAction();
         }
+
+        public static void OttoHit(scrController controller)
+        {
+            bool flag1 = controller.chosenplanet.currfloor.nextfloor != null && controller.chosenplanet.currfloor.nextfloor.auto;
+            if ((RDC.auto || flag1 || controller.chosenplanet.currfloor.holdLength > -1 && controller.chosenplanet.currfloor.auto) && scrController.isGameWorld)
+            {
+                if (controller.chosenplanet.AutoShouldHitNow())
+                {
+                    if (controller.chosenplanet.currfloor.holdLength > -1)
+                        controller.chosenplanet.currfloor.holdRenderer.Hit();
+                    controller.keyTimes.Clear();
+                    controller.Hit();
+                }
+            }
+        }
         
         public static void AdjustAngle(scrController controller, long targetTick)
         {
@@ -165,8 +180,8 @@ namespace NoStopMod.InputFixer
             InputFixerManager.jumpToOtherClass = true;
             controller.chosenplanet.Update_RefreshAngles();
         }
-        
-        
-        
+
+
+
     }
 }
