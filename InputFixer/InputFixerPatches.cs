@@ -31,20 +31,21 @@ namespace NoStopMod.InputFixer
             {
                 ControllerHelper.ExecuteUntilTileNotChange(__instance, () =>
                 {
-                    InputFixerManager.AdjustAngle(__instance, DateTime.Now.Ticks);
                     InputFixerManager.OttoHit(__instance);
 #if DEBUG
                     NoStopMod.mod.Logger.Log($"OttoHit before hit {__instance.currFloor.seqID}th tile");
 #endif
                 });
-                ControllerHelper.ExecuteUntilTileNotChange(__instance, () =>
+                if (__instance.noFail)
                 {
-                    InputFixerManager.AdjustAngle(__instance, DateTime.Now.Ticks);
-                    InputFixerManager.FailAction(__instance);
+                    ControllerHelper.ExecuteUntilTileNotChange(__instance, () =>
+                    {
+                        InputFixerManager.FailAction(__instance);
 #if DEBUG
-                    NoStopMod.mod.Logger.Log($"FailAction from update {__instance.currFloor.seqID}th tile");
+                        NoStopMod.mod.Logger.Log($"FailAction from update {__instance.currFloor.seqID}th tile");
 #endif
-                });
+                    });
+                }
             }
         }
 
@@ -101,15 +102,26 @@ namespace NoStopMod.InputFixer
 
             private static void ProcessKeyInputs([NotNull] IReadOnlyList<KeyCode> keyCodes, long eventTick)
             {
+                
                 var count = GetValidKeyCount(keyCodes);
                 var controller = scrController.instance;
+                if (eventTick > 0)
+                {
+                    InputFixerManager.AdjustAngle(scrController.instance, eventTick);
+                }
+
+                if ((scrController.States) controller.GetState() != scrController.States.PlayerControl)
+                {
+                    return;
+                }
+                
+                
                 if (count == 1)
                 {
                     controller.consecMultipressCounter = 0;
                 }
                 ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
                 {
-                    InputFixerManager.AdjustAngle(controller, eventTick);
                     InputFixerManager.OttoHit(controller);
 #if DEBUG
                     NoStopMod.mod.Logger.Log($"OttoHit before hit {controller.currFloor.seqID}th tile");
@@ -117,7 +129,6 @@ namespace NoStopMod.InputFixer
                 });
                 ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
                 {
-                    InputFixerManager.AdjustAngle(controller, eventTick);
                     InputFixerManager.FailAction(controller);
 #if DEBUG
                     NoStopMod.mod.Logger.Log($"FailAction before hit {controller.currFloor.seqID}th tile");
@@ -131,13 +142,7 @@ namespace NoStopMod.InputFixer
                 
                 while (controller.keyTimes.Count > 0)
                 {
-                    InputFixerManager.AdjustAngle(controller, eventTick);
                     InputFixerManager.Hit(controller);
-                    if (controller.midspinInfiniteMargin)
-                    {
-                        InputFixerManager.AdjustAngle(controller, eventTick);
-                        InputFixerManager.Hit(controller);
-                    }
                 }
                 
             }
@@ -167,11 +172,19 @@ namespace NoStopMod.InputFixer
         {
             public static bool Prefix(scrController __instance, ref int __result)
             {
+                if ((scrController.States) __instance.GetState() != scrController.States.PlayerControl)
+                {
+                    return true;
+                }
                 return false;
             }
 
             public static void Postfix(ref int __result)
             {
+                if ((scrController.States) scrController.instance.GetState() != scrController.States.PlayerControl)
+                {
+                    return;
+                }
                 __result = 0;
             }
         }
@@ -189,7 +202,7 @@ namespace NoStopMod.InputFixer
 #if DEBUG
                     {
                         var difference = __instance.angle - __instance.targetExitAngle;
-                        NoStopMod.mod.Logger.Log("Diff : " + difference);
+                        NoStopMod.mod.Logger.Log($"angle diff={difference}, songTick={InputFixerManager.targetSongTick}, ___snappedLastAngle={___snappedLastAngle}, offsetTick={InputFixerManager.offsetTick}, targetTick={InputFixerManager.targetSongTick + InputFixerManager.offsetTick}");
                     }
 #endif
                     return false;
