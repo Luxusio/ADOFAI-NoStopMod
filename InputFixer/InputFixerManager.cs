@@ -166,10 +166,14 @@ namespace NoStopMod.InputFixer
             {
                 if (controller.chosenplanet.AutoShouldHitNow())
                 {
+                    double angle = controller.chosenplanet.angle;
+                    controller.chosenplanet.angle = controller.chosenplanet.targetExitAngle;
                     if (controller.chosenplanet.currfloor.holdLength > -1)
                         controller.chosenplanet.currfloor.holdRenderer.Hit();
                     controller.keyTimes.Clear();
                     controller.Hit();
+                    
+                    controller.chosenplanet.angle = angle;
                 }
             }
         }
