@@ -133,15 +133,18 @@ namespace NoStopMod.InputFixer
                 * 3.141592653598793238 * __instance.controller.speed * (__instance.controller.isCW ? 1 : -1);
         }
         
-        public static void Hit(scrController controller)
+        public static bool Hit(scrController controller)
         {
             // @see scrController#PlayerControl_Update
             bool flag2 = (bool) (UnityEngine.Object) controller.chosenplanet.currfloor.nextfloor && controller.chosenplanet.currfloor.nextfloor.holdLength > -1;
             double num1 = scrMisc.GetAdjustedAngleBoundaryInDeg(HitMarginGeneral.Counted, (double) (controller.conductor.bpm * (float) controller.speed), (double) controller.conductor.song.pitch) * (Math.PI / 180.0);
             float num2 = (UnityEngine.Object) controller.chosenplanet.currfloor.nextfloor != (UnityEngine.Object) null ? (float) controller.chosenplanet.currfloor.nextfloor.marginScale : 1f;
             double num3 = 1.0 - num1 * (double) num2 / controller.chosenplanet.currfloor.angleLength;
+
+#if DEBUG
+            NoStopMod.mod.Logger.Log($"{controller.keyTimes.Count > 0}, {!GCS.d_stationary}, {!GCS.d_freeroam}, {(((controller.chosenplanet.currfloor.holdLength <= -1 ? 0 : (!controller.strictHolds ? 1 : 0)) | (flag2 ? 1 : 0)) != 0 || controller.chosenplanet.currfloor.holdLength == -1 || (double) controller.chosenplanet.currfloor.holdCompletion < num3)}, {(!RDC.auto || !scrController.isGameWorld)}, {(!(bool) (UnityEngine.Object) controller.mobileMenu || (bool) (UnityEngine.Object) controller.mobileMenu && scnMobileMenu.instance.mobileMenuPhase == scnMobileMenu.MobileMenuPhase.Road)}, {(!scrController.isGameWorld || controller.chosenplanet.currfloor.seqID < controller.lm.listFloors.Count - 1)}");
+#endif
             
-            int num8 = !(bool) (UnityEngine.Object) controller.chosenplanet.currfloor.nextfloor ? 0 : (!controller.strictHolds ? 0 : (controller.chosenplanet.currfloor.nextfloor.holdLength > -1 ? 1 : 0));
             if (controller.keyTimes.Count > 0 && 
                 !GCS.d_stationary && 
                 !GCS.d_freeroam && 
@@ -150,7 +153,7 @@ namespace NoStopMod.InputFixer
                  (double) controller.chosenplanet.currfloor.holdCompletion < num3) && 
                 (!RDC.auto || !scrController.isGameWorld) && 
                 (!(bool) (UnityEngine.Object) controller.mobileMenu || (bool) (UnityEngine.Object) controller.mobileMenu && scnMobileMenu.instance.mobileMenuPhase == scnMobileMenu.MobileMenuPhase.Road) && 
-                (!scrController.isGameWorld || controller.chosenplanet.currfloor.seqID < controller.lm.listFloors.Count - 1) 
+                (!scrController.isGameWorld || controller.chosenplanet.currfloor.seqID < controller.lm.listFloors.Count - 1)
                 //&& !flag3 
                 //&& !controller.benchmarkMode
                 )
@@ -170,13 +173,18 @@ namespace NoStopMod.InputFixer
                         //controller.IterateValidKeysHeld((Action<KeyCode?>) (k => controller.holdKeys.Add(k)), (Action<KeyCode?>) (k => controller.holdKeys.Remove(k)));
                     }
                 }
+
+                return true;
             }
-            
-            // controller.keyTimes.RemoveAt(0);
-            // controller.Hit();
+            else
+            {
+                controller.keyTimes.RemoveAt(0);
+            }
+
+            return false;
         }
 
-        public static void FailAction(scrController controller)
+        public static bool FailAction(scrController controller)
         {
             // @see scrController#PlayerControl_Update
             double num1 = scrMisc.GetAdjustedAngleBoundaryInDeg(HitMarginGeneral.Counted,
@@ -196,29 +204,36 @@ namespace NoStopMod.InputFixer
                 num3 > num2)
             {
                 controller.FailAction();
-#if DEBUG
-                NoStopMod.mod.Logger.Log("Execute FailAction");
-#endif
+                return true;
             }
+
+            return false;
         }
 
-        public static void OttoHit(scrController controller)
+        public static bool OttoHit(scrController controller)
         {
             bool flag1 = controller.chosenplanet.currfloor.nextfloor != null && controller.chosenplanet.currfloor.nextfloor.auto;
             if ((RDC.auto || flag1 || controller.chosenplanet.currfloor.holdLength > -1 && controller.chosenplanet.currfloor.auto) && scrController.isGameWorld)
             {
                 if (controller.chosenplanet.AutoShouldHitNow())
                 {
-                    double angle = controller.chosenplanet.angle;
-                    controller.chosenplanet.angle = controller.chosenplanet.targetExitAngle;
+#if DEBUG
+                    NoStopMod.mod.Logger.Log($"angle {controller.chosenplanet.angle}, {controller.chosenplanet.targetExitAngle}");           
+#endif
+                    
+                    bool auto = RDC.auto;
+                    RDC.auto = true;
                     if (controller.chosenplanet.currfloor.holdLength > -1)
                         controller.chosenplanet.currfloor.holdRenderer.Hit();
                     controller.keyTimes.Clear();
                     controller.Hit();
-                    
-                    controller.chosenplanet.angle = angle;
+
+                    RDC.auto = auto;
+                    return true;
                 }
             }
+
+            return false;
         }
         
         public static void AdjustAngle(scrController controller, long targetTick)

@@ -23,31 +23,6 @@ namespace NoStopMod.InputFixer
                 InputFixerManager.InitQueue();
             }
         }
-        
-        [HarmonyPatch(typeof(scrController), "PlayerControl_Update")]
-        private static class scrController_PlayerControl_Update_Patch
-        {
-            public static void Postfix(scrController __instance)
-            {
-                ControllerHelper.ExecuteUntilTileNotChange(__instance, () =>
-                {
-                    InputFixerManager.OttoHit(__instance);
-#if DEBUG
-                    NoStopMod.mod.Logger.Log($"OttoHit before hit {__instance.currFloor.seqID}th tile");
-#endif
-                });
-                if (__instance.noFail)
-                {
-                    ControllerHelper.ExecuteUntilTileNotChange(__instance, () =>
-                    {
-                        InputFixerManager.FailAction(__instance);
-#if DEBUG
-                        NoStopMod.mod.Logger.Log($"FailAction from update {__instance.currFloor.seqID}th tile");
-#endif
-                    });
-                }
-            }
-        }
 
         [HarmonyPatch(typeof(scrConductor), "Update")]
         private static class scrConductor_Update_Patch
@@ -107,12 +82,42 @@ namespace NoStopMod.InputFixer
                 var controller = scrController.instance;
                 if (eventTick > 0)
                 {
+                    var originalAngle = controller.chosenplanet.angle;
                     InputFixerManager.AdjustAngle(scrController.instance, eventTick);
+#if DEBUG
+                    NoStopMod.mod.Logger.Log($"AdjustAngle {eventTick} ticks, angle {originalAngle}->{controller.chosenplanet.angle}");
+#endif
                 }
-
-                if ((scrController.States) controller.GetState() != scrController.States.PlayerControl)
+                else
                 {
-                    return;
+                    InputFixerManager.AdjustAngle(scrController.instance, InputFixerManager.currFrameTick);
+                }
+                
+                if ((scrController.States) controller.GetState() == scrController.States.PlayerControl)
+                {
+                    ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
+                    {
+                        var success = InputFixerManager.OttoHit(controller);
+#if DEBUG
+                        if (success)
+                        {
+                            NoStopMod.mod.Logger.Log($"OttoHit before hit {controller.currFloor.seqID}th tile");
+                        }
+#endif
+                    });
+                    if (controller.noFail)
+                    {
+                        ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
+                        {
+                            var success = InputFixerManager.FailAction(controller);
+#if DEBUG
+                            if (success)
+                            {
+                                NoStopMod.mod.Logger.Log($"FailAction from update {controller.currFloor.seqID}th tile");
+                            }
+#endif
+                        });
+                    }
                 }
                 
                 
@@ -120,21 +125,7 @@ namespace NoStopMod.InputFixer
                 {
                     controller.consecMultipressCounter = 0;
                 }
-                ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
-                {
-                    InputFixerManager.OttoHit(controller);
-#if DEBUG
-                    NoStopMod.mod.Logger.Log($"OttoHit before hit {controller.currFloor.seqID}th tile");
-#endif
-                });
-                ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
-                {
-                    InputFixerManager.FailAction(controller);
-#if DEBUG
-                    NoStopMod.mod.Logger.Log($"FailAction before hit {controller.currFloor.seqID}th tile");
-#endif
-                });
-                
+
                 for (var i = 0; i < count; i++)
                 {
                     controller.keyTimes.Add(0);
@@ -144,7 +135,6 @@ namespace NoStopMod.InputFixer
                 {
                     InputFixerManager.Hit(controller);
                 }
-                
             }
 
             private static int GetValidKeyCount([NotNull] IReadOnlyList<KeyCode> keyCodes)
