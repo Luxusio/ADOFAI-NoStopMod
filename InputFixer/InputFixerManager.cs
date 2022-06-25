@@ -67,6 +67,8 @@ namespace NoStopMod.InputFixer
             {
                 GUILayout.Label("AdofaiTweaks mod's key limiter has been disabled by NoStopMod's async input.");
             }
+            
+            settings.insertKeyOnWindowFocus = GUILayout.Toggle(settings.insertKeyOnWindowFocus, "Insert key on window focus");
         }
 
         public static void InitQueue()

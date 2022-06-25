@@ -83,7 +83,17 @@ namespace NoStopMod.InputFixer
 
             private static void ProcessKeyInputs([NotNull] IReadOnlyList<KeyCode> keyCodes, long eventTick, bool inputReleased)
             {
-                var count = GetValidKeyCount(keyCodes);
+                int count;
+                if (InputFixerManager.settings.insertKeyOnWindowFocus && !Application.isFocused)
+                {
+                    count = 0;
+                }
+                else
+                {
+                    count = GetValidKeyCount(keyCodes);
+                }
+                
+                
                 var controller = scrController.instance;
                 if (eventTick > 0)
                 {
