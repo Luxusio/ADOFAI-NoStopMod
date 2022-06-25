@@ -1,4 +1,3 @@
-using DG.Tweening;
 using HarmonyLib;
 using NoStopMod.InputFixer.HitIgnore;
 using System;
@@ -51,33 +50,39 @@ namespace NoStopMod.InputFixer
 
                 // planet hit processing
                 long rawKeyCodesTick = 0;
+                bool inputReleased = false;
                 var pressKeyCodes = new List<KeyCode>();
 
                 while (InputFixerManager.keyQueue.Any())
                 {
-                    InputFixerManager.keyQueue.Dequeue().Deconstruct(out var eventTick, out var ushortRawKeyCode);
-
+                    InputFixerManager.keyQueue.Dequeue().Deconstruct(out var eventTick, out var ushortRawKeyCode, out var press);
+                    
                     var rawKeyCode = (KeyCode) ushortRawKeyCode;
                     
                     if (eventTick != rawKeyCodesTick)
                     {
-                        ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick);
+                        ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick, inputReleased);
                         pressKeyCodes.Clear();
                         rawKeyCodesTick = eventTick;
                     }
 
-                    pressKeyCodes.Add(rawKeyCode);
-
+                    if (press)
+                    {
+                        pressKeyCodes.Add(rawKeyCode);
+                    }
+                    else
+                    {
+                        inputReleased = true;
+                    }
                 }
 
-                ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick);
+                ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick, inputReleased);
             }
 
 
 
-            private static void ProcessKeyInputs([NotNull] IReadOnlyList<KeyCode> keyCodes, long eventTick)
+            private static void ProcessKeyInputs([NotNull] IReadOnlyList<KeyCode> keyCodes, long eventTick, bool inputReleased)
             {
-                
                 var count = GetValidKeyCount(keyCodes);
                 var controller = scrController.instance;
                 if (eventTick > 0)
@@ -95,6 +100,7 @@ namespace NoStopMod.InputFixer
                 
                 if ((scrController.States) controller.GetState() == scrController.States.PlayerControl)
                 {
+                    InputFixerManager.HoldHit(controller, inputReleased);
                     ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
                     {
                         var success = InputFixerManager.OttoHit(controller);
@@ -178,6 +184,52 @@ namespace NoStopMod.InputFixer
                 __result = 0;
             }
         }
+        
+        [HarmonyPatch(typeof(scrController), "ValidInputWasTriggered")]
+        private static class scrController_ValidInputWasTriggered_Patch
+        {
+            public static bool Prefix(scrController __instance, ref bool __result)
+            {               
+                if ((scrController.States) __instance.GetState() != scrController.States.PlayerControl)
+                {
+                    return true;
+                }
+                __result = false;
+                return false;
+            }
+
+            public static void Postfix(ref bool __result)
+            {
+                if ((scrController.States) scrController.instance.GetState() != scrController.States.PlayerControl)
+                {
+                    return;
+                }
+                __result = false;
+            }
+        }
+        
+        [HarmonyPatch(typeof(scrController), "ValidInputWasReleased")]
+        private static class scrController_ValidInputWasReleased_Patch
+        {
+            public static bool Prefix(scrController __instance, ref bool __result)
+            {
+                if ((scrController.States) __instance.GetState() != scrController.States.PlayerControl)
+                {
+                    return true;
+                }
+                __result = false;
+                return false;
+            }
+
+            public static void Postfix(ref bool __result)
+            {
+                if ((scrController.States) scrController.instance.GetState() != scrController.States.PlayerControl)
+                {
+                    return;
+                }
+                __result = false;
+            }
+        }
 
         [HarmonyPatch(typeof(scrPlanet), "Update_RefreshAngles")]
         private static class scrPlanet_Update_RefreshAngles_Patch
@@ -192,7 +244,7 @@ namespace NoStopMod.InputFixer
 #if DEBUG
                     {
                         var difference = __instance.angle - __instance.targetExitAngle;
-                        NoStopMod.mod.Logger.Log($"angle diff={difference}, songTick={InputFixerManager.targetSongTick}, ___snappedLastAngle={___snappedLastAngle}, offsetTick={InputFixerManager.offsetTick}, targetTick={InputFixerManager.targetSongTick + InputFixerManager.offsetTick}");
+                        //NoStopMod.mod.Logger.Log($"angle diff={difference}, songTick={InputFixerManager.targetSongTick}, ___snappedLastAngle={___snappedLastAngle}, offsetTick={InputFixerManager.offsetTick}, targetTick={InputFixerManager.targetSongTick + InputFixerManager.offsetTick}");
                     }
 #endif
                     return false;
