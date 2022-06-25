@@ -53,26 +53,33 @@ namespace NoStopMod.InputFixer
                 bool inputReleased = false;
                 var pressKeyCodes = new List<KeyCode>();
 
-                while (InputFixerManager.keyQueue.Any())
+                
+                
+                while (InputFixerManager.keyQueue.TryDequeue(out var keyEvent))
                 {
-                    InputFixerManager.keyQueue.Dequeue().Deconstruct(out var eventTick, out var ushortRawKeyCode, out var press);
-                    
-                    var rawKeyCode = (KeyCode) ushortRawKeyCode;
-                    
-                    if (eventTick != rawKeyCodesTick)
+                    if (keyEvent.tick != rawKeyCodesTick)
                     {
                         ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick, inputReleased);
+                        rawKeyCodesTick = keyEvent.tick;
                         pressKeyCodes.Clear();
-                        rawKeyCodesTick = eventTick;
+                        inputReleased = false;
                     }
-
-                    if (press)
+                    
+                    if (keyEvent.press)
                     {
-                        pressKeyCodes.Add(rawKeyCode);
+                        if (!InputFixerManager.keyMask.Contains(keyEvent.keyCode))
+                        {
+                            InputFixerManager.keyMask.Add(keyEvent.keyCode);
+                            pressKeyCodes.Add((KeyCode) keyEvent.keyCode);
+                        }
                     }
                     else
                     {
-                        inputReleased = true;
+                        InputFixerManager.keyMask.Remove(keyEvent.keyCode);
+                        if (InputFixerManager.keyMask.Count == 0)
+                        {
+                            inputReleased = true;
+                        }
                     }
                 }
 

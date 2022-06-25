@@ -1,5 +1,6 @@
 using NoStopMod.InputFixer.HitIgnore;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using SharpHook;
@@ -15,7 +16,7 @@ namespace NoStopMod.InputFixer
     {
         public static InputFixerSettings settings;
 
-        public static Queue<Tuple<long, ushort, bool>> keyQueue = new Queue<Tuple<long, ushort, bool>>();
+        public static ConcurrentQueue<KeyEvent> keyQueue = new();
 
         public static long targetSongTick;
 
@@ -36,7 +37,7 @@ namespace NoStopMod.InputFixer
 
         public static double previousFrameTime;
 
-        public static readonly HashSet<ushort> mask = new HashSet<ushort>();
+        public static readonly HashSet<ushort> keyMask = new HashSet<ushort>();
 
         public static bool disablingAdofaiTweaksKeyLimiter = false;
 
@@ -96,8 +97,11 @@ namespace NoStopMod.InputFixer
         {
             currFrameTick = 0;
             prevFrameTick = 0;
-            keyQueue.Clear();
-            mask.Clear();
+            while (keyQueue.TryDequeue(out _))
+            {
+                // do nothing
+            }
+            keyMask.Clear();
         }
         
         public static void StartHook()
@@ -165,43 +169,25 @@ namespace NoStopMod.InputFixer
         private static void HookOnKeyPressed(object sender, KeyboardHookEventArgs e)
         {
             ushort keyCode = (ushort) e.Data.KeyCode;
-
-            if (!mask.Contains(keyCode))
-            {
-                mask.Add(keyCode);
-                keyQueue.Enqueue(Tuple.Create(DateTime.Now.Ticks, keyCode, true));
-#if DEBUG
-                NoStopMod.mod.Logger.Log("eq " + keyCode);
-#endif
-            }
+            keyQueue.Enqueue(new KeyEvent(DateTime.Now.Ticks, keyCode, true));
         }
 
         private static void HookOnKeyReleased(object sender, KeyboardHookEventArgs e)
         {
             ushort keyCode = (ushort) e.Data.KeyCode;
-            mask.Remove(keyCode);
-            keyQueue.Enqueue(Tuple.Create(DateTime.Now.Ticks, keyCode, false));
+            keyQueue.Enqueue(new KeyEvent(DateTime.Now.Ticks, keyCode, false));
         }
 
         private static void HookOnMousePressed(object sender, MouseHookEventArgs e)
         {
             var keyCode = (ushort) (e.Data.Button + 1000);
-
-            if (!mask.Contains(keyCode))
-            {
-                mask.Add(keyCode);
-                keyQueue.Enqueue(Tuple.Create(DateTime.Now.Ticks, keyCode, true));
-#if DEBUG
-                NoStopMod.mod.Logger.Log("eq " + keyCode);
-#endif
-            }
+            keyQueue.Enqueue(new KeyEvent(DateTime.Now.Ticks, keyCode, true));
         }
         
         private static void HookOnMouseReleased(object sender, MouseHookEventArgs e)
         {
             var keyCode = (ushort) (e.Data.Button + 1000);
-            mask.Remove(keyCode);
-            keyQueue.Enqueue(Tuple.Create(DateTime.Now.Ticks, keyCode, false));
+            keyQueue.Enqueue(new KeyEvent(DateTime.Now.Ticks, keyCode, false));
         }
 
         public static double GetSongPosition(scrConductor __instance, long nowTick)
