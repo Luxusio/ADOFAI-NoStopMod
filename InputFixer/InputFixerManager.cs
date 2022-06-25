@@ -1,6 +1,7 @@
 using NoStopMod.InputFixer.HitIgnore;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using SharpHook;
 using DG.Tweening;
 using DG.Tweening.Core;
@@ -21,7 +22,7 @@ namespace NoStopMod.InputFixer
         public static bool jumpToOtherClass = false;
         public static bool editInputLimit = false;
 
-        private static object hook;
+        private static object hook_;
 
         public static long currFrameTick;
         public static long prevFrameTick;
@@ -39,19 +40,20 @@ namespace NoStopMod.InputFixer
 
         public static bool disablingAdofaiTweaksKeyLimiter = false;
 
+        private static Thread inputHookThread;
+
         public static void Init()
         {
-            hook = new SimpleGlobalHook();
-            IGlobalHook mHook = (IGlobalHook) hook;
+            IGlobalHook mHook = new SimpleGlobalHook();
             mHook.KeyPressed += HookOnKeyPressed;
             mHook.KeyReleased += HookOnKeyReleased;
             mHook.MousePressed += HookOnMousePressed;
             mHook.MouseReleased += HookOnMouseReleased;
-            
-            mHook.RunAsync();
+            hook_ = mHook;
 
-            NoStopMod.onToggleListener.Add(_ => InitQueue());
+            NoStopMod.onToggleListener.Add(OnToggle);
             NoStopMod.onGUIListener.Add(OnGUI);
+            NoStopMod.onApplicationQuitListener.Add(OnApplicationQuit);
 
             settings = new InputFixerSettings();
             Settings.settings.Add(settings);
@@ -70,6 +72,25 @@ namespace NoStopMod.InputFixer
             
             settings.insertKeyOnWindowFocus = GUILayout.Toggle(settings.insertKeyOnWindowFocus, "Insert key on window focus");
         }
+        
+        public static void OnToggle(bool toggle)
+        {
+            InitQueue();
+            if (toggle)
+            {
+                StartHook();
+            }
+            else
+            {
+                StopHook();
+            }
+
+        }
+
+        public static void OnApplicationQuit(scrController controller)
+        {
+            StopHook();
+        }
 
         public static void InitQueue()
         {
@@ -78,6 +99,68 @@ namespace NoStopMod.InputFixer
             keyQueue.Clear();
             mask.Clear();
         }
+        
+        public static void StartHook()
+        {
+            inputHookThread = new Thread(() =>
+            {
+
+                bool stopHook = false;
+                try
+                {
+                    IGlobalHook mHook = new SimpleGlobalHook();
+                    mHook.KeyPressed += HookOnKeyPressed;
+                    mHook.KeyReleased += HookOnKeyReleased;
+                    mHook.MousePressed += HookOnMousePressed;
+                    mHook.MouseReleased += HookOnMouseReleased;
+                    hook_ = mHook;
+                    
+                    mHook.Run();
+                }
+                catch (HookException e)
+                {
+                    if (e.GetBaseException() is ThreadAbortException)
+                    {
+                        stopHook = true;
+                    }
+                    else
+                    {
+                        NoStopMod.mod.Logger.Error($"Exception while hook run : {e}");
+                    }
+                }
+                catch (Exception e)
+                {
+                    NoStopMod.mod.Logger.Error($"Exception while hook run : {e}");
+                }
+                finally
+                {
+                    if (!stopHook)
+                    {
+                        StartHook();
+                    }
+                }
+            });
+            
+            inputHookThread.Start();
+        }
+
+        public static void StopHook()
+        {
+            try
+            {
+                if (inputHookThread != null && inputHookThread.IsAlive)
+                {
+                    inputHookThread.Abort();
+                }
+
+                ((IGlobalHook) hook_).Dispose();
+            }
+            catch (Exception e)
+            {
+                NoStopMod.mod.Logger.Error($"Exception while StopHook : {e}");
+            }
+        }
+
 
         private static void HookOnKeyPressed(object sender, KeyboardHookEventArgs e)
         {
