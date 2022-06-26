@@ -135,8 +135,8 @@ namespace NoStopMod.InputFixer
                             {
                                 NoStopMod.mod.Logger.Log($"FailAction from update {controller.currFloor.seqID}th tile");
                             }
-                        }
 #endif
+                        }
                     });
                 
                 }
