@@ -102,21 +102,18 @@ namespace NoStopMod.InputFixer
                 
                 
                 var controller = scrController.instance;
-                if (eventTick > 0)
-                {
-                    var originalAngle = controller.chosenplanet.angle;
-                    InputFixerManager.AdjustAngle(scrController.instance, eventTick);
-#if DEBUG
-                    NoStopMod.mod.Logger.Log($"AdjustAngle {eventTick} ticks, angle {originalAngle}->{controller.chosenplanet.angle}");
-#endif
-                }
-                else
-                {
-                    InputFixerManager.AdjustAngle(scrController.instance, InputFixerManager.currFrameTick);
-                }
-                
+
+
                 if ((scrController.States) controller.GetState() == scrController.States.PlayerControl)
                 {
+
+                    var targetTick = eventTick != 0 ? eventTick : InputFixerManager.currFrameTick;
+                    var originalAngle = controller.chosenplanet.angle;
+                    InputFixerManager.AdjustAngle(scrController.instance, targetTick);
+#if DEBUG
+                    NoStopMod.mod.Logger.Log($"AdjustAngle {targetTick} ticks, angle {originalAngle}->{controller.chosenplanet.angle}");
+#endif
+                    
                     InputFixerManager.HoldHit(controller, inputReleased);
                     ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
                     {
@@ -128,9 +125,9 @@ namespace NoStopMod.InputFixer
                         }
 #endif
                     });
-                    if (controller.noFail)
+                    ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
                     {
-                        ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
+                        if (InputFixerManager.CanPlayerHit(controller))
                         {
                             var success = InputFixerManager.FailAction(controller);
 #if DEBUG
@@ -139,8 +136,9 @@ namespace NoStopMod.InputFixer
                                 NoStopMod.mod.Logger.Log($"FailAction from update {controller.currFloor.seqID}th tile");
                             }
 #endif
-                        });
-                    }
+                        }
+                    });
+                
                 }
                 
                 
@@ -271,6 +269,6 @@ namespace NoStopMod.InputFixer
             }
         }
         
-        
     }
+    
 }

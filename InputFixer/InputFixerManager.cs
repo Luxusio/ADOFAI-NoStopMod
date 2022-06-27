@@ -285,6 +285,33 @@ namespace NoStopMod.InputFixer
             return false;
         }
 
+        public static bool CanPlayerHit(scrController controller)
+        {
+            // code from Hit
+            bool flag2 = (bool) (UnityEngine.Object) controller.chosenplanet.currfloor.nextfloor && controller.chosenplanet.currfloor.nextfloor.holdLength > -1;
+            double num1 = scrMisc.GetAdjustedAngleBoundaryInDeg(HitMarginGeneral.Counted, (double) (controller.conductor.bpm * (float) controller.speed), (double) controller.conductor.song.pitch) * (Math.PI / 180.0);
+            float num2 = (UnityEngine.Object) controller.chosenplanet.currfloor.nextfloor != (UnityEngine.Object) null ? (float) controller.chosenplanet.currfloor.nextfloor.marginScale : 1f;
+            double num3 = 1.0 - num1 * (double) num2 / controller.chosenplanet.currfloor.angleLength;
+
+#if DEBUG
+            NoStopMod.mod.Logger.Log($"{controller.keyTimes.Count > 0}, {!GCS.d_stationary}, {!GCS.d_freeroam}, {(((controller.chosenplanet.currfloor.holdLength <= -1 ? 0 : (!controller.strictHolds ? 1 : 0)) | (flag2 ? 1 : 0)) != 0 || controller.chosenplanet.currfloor.holdLength == -1 || (double) controller.chosenplanet.currfloor.holdCompletion < num3)}, {(!RDC.auto || !scrController.isGameWorld)}, {(!(bool) (UnityEngine.Object) controller.mobileMenu || (bool) (UnityEngine.Object) controller.mobileMenu && scnMobileMenu.instance.mobileMenuPhase == scnMobileMenu.MobileMenuPhase.Road)}, {(!scrController.isGameWorld || controller.chosenplanet.currfloor.seqID < controller.lm.listFloors.Count - 1)}");
+#endif
+
+            return controller.keyTimes.Count > 0 &&
+                   !GCS.d_stationary &&
+                   !GCS.d_freeroam &&
+                   (((controller.chosenplanet.currfloor.holdLength <= -1 ? 0 : (!controller.strictHolds ? 1 : 0)) |
+                     (flag2 ? 1 : 0)) != 0 ||
+                    controller.chosenplanet.currfloor.holdLength == -1 ||
+                    (double) controller.chosenplanet.currfloor.holdCompletion < num3) &&
+                   (!RDC.auto || !scrController.isGameWorld) &&
+                   (!(bool) (UnityEngine.Object) controller.mobileMenu ||
+                    (bool) (UnityEngine.Object) controller.mobileMenu &&
+                    scnMobileMenu.instance.mobileMenuPhase == scnMobileMenu.MobileMenuPhase.Road) &&
+                   (!scrController.isGameWorld ||
+                    controller.chosenplanet.currfloor.seqID < controller.lm.listFloors.Count - 1);
+        }
+
         public static bool OttoHit(scrController controller)
         {
             bool flag1 = controller.chosenplanet.currfloor.nextfloor != null && controller.chosenplanet.currfloor.nextfloor.auto;
