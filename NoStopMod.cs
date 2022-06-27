@@ -2,7 +2,6 @@
 using HarmonyLib;
 using UnityModManagerNet;
 using NoStopMod.InputFixer;
-using NoStopMod.HyperRabbit;
 using NoStopMod.Helper;
 using System;
 using UnityEngine;
@@ -35,7 +34,6 @@ namespace NoStopMod
             
 
             InputFixerManager.Init();
-            HyperRabbitManager.Init();
 
             Settings.Init();
             return true;

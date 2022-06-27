@@ -12,15 +12,16 @@ namespace NoStopMod.InputFixer.HitIgnore
 
         public static bool scnCLS_searchMode;
         public static scrController.States scrController_state;
-        
+
         public static void Init()
         {
             if (GCS.sceneToLoad == null) GCS.sceneToLoad = "scnNewIntro";
 
             HashSet<KeyCode> ignoreScnNewIntro = new HashSet<KeyCode>();
             _dictionary["scnNewIntro"] = ignoreScnNewIntro;
-           
+
             ignoreScnNewIntro.Add(KeyCode.VcQuote);
+            ignoreScnNewIntro.Add(KeyCode.VcBackquote);
             ignoreScnNewIntro.Add(KeyCode.Vc0);
             ignoreScnNewIntro.Add(KeyCode.Vc1);
             ignoreScnNewIntro.Add(KeyCode.Vc2);
@@ -38,7 +39,18 @@ namespace NoStopMod.InputFixer.HitIgnore
             ignoreScnCLS_.Add(KeyCode.VcO);
             ignoreScnCLS_.Add(KeyCode.Vc7);
             ignoreScnCLS_.Add(KeyCode.VcUp);
+            ignoreScnCLS_.Add(KeyCode.VcNumPadUp);
             ignoreScnCLS_.Add(KeyCode.VcDown);
+            ignoreScnCLS_.Add(KeyCode.VcNumPadDown);
+
+            HashSet<KeyCode> ignoreScnTaroMenu0 = new HashSet<KeyCode>();
+            _dictionary["scnTaroMenu0"] = ignoreScnTaroMenu0;
+            ignoreScnTaroMenu0.Add(KeyCode.Vc1);
+            ignoreScnTaroMenu0.Add(KeyCode.Vc2);
+            ignoreScnTaroMenu0.Add(KeyCode.Vc3);
+            ignoreScnTaroMenu0.Add(KeyCode.Vc4);
+            ignoreScnTaroMenu0.Add(KeyCode.Vc5);
+            ignoreScnTaroMenu0.Add(KeyCode.Vc6);
 
             scnCLS_searchMode = false;
 
@@ -52,6 +64,10 @@ namespace NoStopMod.InputFixer.HitIgnore
 
         public static bool ShouldBeIgnored(KeyCode keyCode)
         {
+#if DEBUG
+            NoStopMod.mod.Logger.Log($"scene : {GCS.sceneToLoad}, keyCode: {keyCode}");
+#endif
+            
             if (keyCode == KeyCode.VcEscape) return true;
             if (KeyLimiterManager.isChangingLimitedKeys)
             {

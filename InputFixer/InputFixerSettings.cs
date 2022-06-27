@@ -1,12 +1,12 @@
 ﻿using NoStopMod.Helper;
 using NoStopMod.Helper.Abstraction;
 using SimpleJSON;
-using System;
 
 namespace NoStopMod.InputFixer
 {
     class InputFixerSettings : SettingsBase
     {
+        public bool insertKeyOnWindowFocus = true;
         //public bool enableAsync = false;
         //public bool enableKeyLimit = false;
 
@@ -14,16 +14,13 @@ namespace NoStopMod.InputFixer
         {
             JSONNode node = json["InputFixer"];
 
-            //enableAsync = node["enableAsync"].AsBool;
-            //enableKeyLimit = node["enableKeyLimit"].AsBool;
-            JSONArray array = node["LimitKeys"].AsArray;
+            insertKeyOnWindowFocus = node["insertKeyOnWindowFocus"].AsBool;
         }
 
         public void Save(ref JSONNode json)
         {
             JSONNode node = JSONHelper.CreateEmptyNode();
-            //node["enableAsync"].AsBool = enableAsync;
-            //node["enableKeyLimit"].AsBool = enableKeyLimit;
+            node["insertKeyOnWindowFocus"].AsBool = insertKeyOnWindowFocus;
 
             json["InputFixer"] = node;
         }

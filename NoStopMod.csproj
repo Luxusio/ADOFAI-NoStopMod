@@ -14,6 +14,7 @@
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
+    <LangVersion>9</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -36,10 +37,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Helper\Abstraction\SettingsBase.cs" />
+    <Compile Include="Helper\ControllerHelper.cs" />
     <Compile Include="Helper\EventListener.cs" />
     <Compile Include="Helper\JSONHelper.cs" />
     <Compile Include="Helper\ReflectionField.cs" />
-    <Compile Include="HyperRabbit\HyperRabbitSettings.cs" />
     <Compile Include="InputFixer\HitIgnore\KeyLimiter\KeyLimiterManager.cs" />
     <Compile Include="InputFixer\HitIgnore\KeyLimiter\KeyLimiterSettings.cs" />
     <Compile Include="InputFixer\InputFixerManager.cs" />
@@ -48,8 +49,7 @@
     <Compile Include="InputFixer\HitIgnore\HitIgnoreManager.cs" />
     <Compile Include="InputFixer\HitIgnore\HitIgnorePatches.cs" />
     <Compile Include="Helper\SimpleGUI.cs" />
-    <Compile Include="HyperRabbit\HyperRabbitManager.cs" />
-    <Compile Include="HyperRabbit\HyperRabbitPatches.cs" />
+    <Compile Include="InputFixer\KeyEvent.cs" />
     <Compile Include="lib\SimpleJSON.cs" />
     <Compile Include="NoStopMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -74,6 +74,9 @@
     <Reference Include="dnlib, Version=3.0.0.0, Culture=neutral, PublicKeyToken=50e96378b6e77999">
       <HintPath>..\lib\dnlib.dll</HintPath>
     </Reference>
+    <Reference Include="DotNetZip, Version=1.16.0.0, Culture=neutral, PublicKeyToken=6583c7c814667745">
+      <HintPath>..\lib\DotNetZip.dll</HintPath>
+    </Reference>
     <Reference Include="DOTween, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\lib\DOTween.dll</HintPath>
     </Reference>
@@ -97,9 +100,6 @@
     </Reference>
     <Reference Include="I18N.West, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756">
       <HintPath>..\lib\I18N.West.dll</HintPath>
-    </Reference>
-    <Reference Include="Ionic.Zip, Version=1.9.1.9000, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\lib\Ionic.Zip.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Data.Sqlite, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756">
       <HintPath>..\lib\Mono.Data.Sqlite.dll</HintPath>
@@ -131,77 +131,54 @@
     <Reference Include="Rewired_Windows_Functions, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\lib\Rewired_Windows_Functions.dll</HintPath>
     </Reference>
-    <Reference Include="SharpHook, Version=1.1.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\lib\SharpHook.dll</HintPath>
-    </Reference>
-    <Reference Include="Sirenix.OdinInspector.Attributes, Version=2.1.9.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\lib\Sirenix.OdinInspector.Attributes.dll</HintPath>
-    </Reference>
-    <Reference Include="Sirenix.OdinInspector.CompatibilityLayer, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\lib\Sirenix.OdinInspector.CompatibilityLayer.dll</HintPath>
-    </Reference>
-    <Reference Include="Sirenix.Serialization, Version=2.1.9.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\lib\Sirenix.Serialization.dll</HintPath>
-    </Reference>
-    <Reference Include="Sirenix.Serialization.Config, Version=2.1.9.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\lib\Sirenix.Serialization.Config.dll</HintPath>
-    </Reference>
-    <Reference Include="Sirenix.Utilities, Version=2.1.9.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\lib\Sirenix.Utilities.dll</HintPath>
+    <Reference Include="SharpHook, Version=3.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\lib\common\SharpHook.dll</HintPath>
     </Reference>
     <Reference Include="System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-      <HintPath>..\lib\System.dll</HintPath>
     </Reference>
     <Reference Include="System.ComponentModel.DataAnnotations, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
-      <HintPath>..\lib\System.ComponentModel.DataAnnotations.dll</HintPath>
     </Reference>
     <Reference Include="System.Configuration, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\lib\System.Configuration.dll</HintPath>
     </Reference>
     <Reference Include="System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-      <HintPath>..\lib\System.Data.dll</HintPath>
     </Reference>
     <Reference Include="System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\lib\System.Design.dll</HintPath>
     </Reference>
     <Reference Include="System.DirectoryServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\lib\System.DirectoryServices.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\lib\System.Drawing.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\lib\System.Drawing.Design.dll</HintPath>
     </Reference>
     <Reference Include="System.EnterpriseServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\lib\System.EnterpriseServices.dll</HintPath>
     </Reference>
     <Reference Include="System.Numerics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-      <HintPath>..\lib\System.Numerics.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization.Formatters.Soap, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\lib\System.Runtime.Serialization.Formatters.Soap.dll</HintPath>
     </Reference>
     <Reference Include="System.Security, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\lib\System.Security.dll</HintPath>
     </Reference>
     <Reference Include="System.Transactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-      <HintPath>..\lib\System.Transactions.dll</HintPath>
     </Reference>
     <Reference Include="System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\lib\System.Web.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.ApplicationServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
-      <HintPath>..\lib\System.Web.ApplicationServices.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Services, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\lib\System.Web.Services.dll</HintPath>
     </Reference>
-    <Reference Include="System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-      <HintPath>..\lib\System.Windows.Forms.dll</HintPath>
+    <Reference Include="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     </Reference>
-    <Reference Include="System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <Reference Include="System.Xml">
       <HintPath>..\lib\System.Xml.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Addressables, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\lib\Unity.Addressables.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.ResourceManager, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\lib\Unity.ResourceManager.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.ScriptableBuildPipeline, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\lib\Unity.ScriptableBuildPipeline.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\lib\Unity.TextMeshPro.dll</HintPath>
@@ -284,6 +261,9 @@
     <Reference Include="UnityEngine.LocalizationModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\lib\UnityEngine.LocalizationModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.NVIDIAModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\lib\UnityEngine.NVIDIAModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\lib\UnityEngine.ParticleSystemModule.dll</HintPath>
     </Reference>
@@ -329,8 +309,11 @@
     <Reference Include="UnityEngine.TerrainPhysicsModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\lib\UnityEngine.TerrainPhysicsModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.TextCoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\lib\UnityEngine.TextCoreModule.dll</HintPath>
+    <Reference Include="UnityEngine.TextCoreFontEngineModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\lib\UnityEngine.TextCoreFontEngineModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextCoreTextEngineModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\lib\UnityEngine.TextCoreTextEngineModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\lib\UnityEngine.TextRenderingModule.dll</HintPath>
@@ -417,7 +400,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Exec Command="taskkill /f /im &quot;A Dance*&quot; || exit 0" />
-    <Exec Command="make_debug.bat 1.2.7" />
+    <Exec Command="make_debug.bat 1.2.8" />
     <Exec Command="del /f /q &quot;C:\Program Files (x86)\Steam\steamapps\common\A Dance of Fire and Ice\Mods\NoStopMod\NoStopMod.dll&quot; || exit 0" />
     <Exec Command="ping -n 6 127.0.0.1 &gt; nul" />
     <Exec Command="copy &quot;$(TargetPath)&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\A Dance of Fire and Ice\Mods\NoStopMod\NoStopMod.dll&quot;" />

@@ -1,10 +1,10 @@
-﻿using DG.Tweening;
 using HarmonyLib;
 using NoStopMod.InputFixer.HitIgnore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
+using NoStopMod.Helper;
 using UnityEngine;
 using KeyCode = SharpHook.Native.KeyCode;
 
@@ -43,45 +43,110 @@ namespace NoStopMod.InputFixer
                 {
                     InputFixerManager.lastReportedDspTime = AudioSettings.dspTime;
                     InputFixerManager.dspTime = AudioSettings.dspTime;
-                    InputFixerManager.offsetMs = InputFixerManager.currFrameTick - (long)(InputFixerManager.dspTime * 10000000);
+                    InputFixerManager.offsetTick = InputFixerManager.currFrameTick - (long)(InputFixerManager.dspTime * 10000000);
                 }
 
                 InputFixerManager.dspTimeSong = ___dspTimeSong;
 
                 // planet hit processing
                 long rawKeyCodesTick = 0;
-                var keyCodes = new List<KeyCode>();
+                bool inputReleased = false;
+                var pressKeyCodes = new List<KeyCode>();
 
-                while (InputFixerManager.keyQueue.Any())
+                
+                
+                while (InputFixerManager.keyQueue.TryDequeue(out var keyEvent))
                 {
-                    InputFixerManager.keyQueue.Dequeue().Deconstruct(out var ms, out var ushortRawKeyCode);
-
-                    var rawKeyCode = (KeyCode) ushortRawKeyCode;
-
-                    if (ms != rawKeyCodesTick)
+                    if (keyEvent.tick != rawKeyCodesTick)
                     {
-                        ProcessKeyInputs(keyCodes, rawKeyCodesTick);
-                        keyCodes.Clear();
-                        rawKeyCodesTick = ms;
+                        ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick, inputReleased);
+                        rawKeyCodesTick = keyEvent.tick;
+                        pressKeyCodes.Clear();
+                        inputReleased = false;
                     }
-
-                    keyCodes.Add(rawKeyCode);
+                    
+                    if (keyEvent.press)
+                    {
+                        if (!InputFixerManager.keyMask.Contains(keyEvent.keyCode))
+                        {
+                            InputFixerManager.keyMask.Add(keyEvent.keyCode);
+                            pressKeyCodes.Add((KeyCode) keyEvent.keyCode);
+                        }
+                    }
+                    else
+                    {
+                        InputFixerManager.keyMask.Remove(keyEvent.keyCode);
+                        if (InputFixerManager.keyMask.Count == 0)
+                        {
+                            inputReleased = true;
+                        }
+                    }
                 }
 
-                ProcessKeyInputs(keyCodes, rawKeyCodesTick);
+                ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick, inputReleased);
             }
 
-            private static void ProcessKeyInputs([NotNull] IReadOnlyList<KeyCode> keyCodes, long ms)
+
+
+            private static void ProcessKeyInputs([NotNull] IReadOnlyList<KeyCode> keyCodes, long eventTick, bool inputReleased)
             {
-                var count = GetValidKeyCount(keyCodes);
+                int count;
+                if (InputFixerManager.settings.insertKeyOnWindowFocus && !Application.isFocused)
+                {
+                    count = 0;
+                }
+                else
+                {
+                    count = GetValidKeyCount(keyCodes);
+                }
+                
+                
                 var controller = scrController.instance;
+
+
+                if ((scrController.States) controller.GetState() == scrController.States.PlayerControl)
+                {
+
+                    var targetTick = eventTick != 0 ? eventTick : InputFixerManager.currFrameTick;
+                    var originalAngle = controller.chosenplanet.angle;
+                    InputFixerManager.AdjustAngle(scrController.instance, targetTick);
+#if DEBUG
+                    NoStopMod.mod.Logger.Log($"AdjustAngle {targetTick} ticks, angle {originalAngle}->{controller.chosenplanet.angle}");
+#endif
+                    
+                    InputFixerManager.HoldHit(controller, inputReleased);
+                    ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
+                    {
+                        var success = InputFixerManager.OttoHit(controller);
+#if DEBUG
+                        if (success)
+                        {
+                            NoStopMod.mod.Logger.Log($"OttoHit before hit {controller.currFloor.seqID}th tile");
+                        }
+#endif
+                    });
+                    ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
+                    {
+                        if (InputFixerManager.CanPlayerHit(controller))
+                        {
+                            var success = InputFixerManager.FailAction(controller);
+#if DEBUG
+                            if (success)
+                            {
+                                NoStopMod.mod.Logger.Log($"FailAction from update {controller.currFloor.seqID}th tile");
+                            }
+#endif
+                        }
+                    });
+                
+                }
+                
+                
                 if (count == 1)
                 {
                     controller.consecMultipressCounter = 0;
                 }
 
-                InputFixerManager.currPressTick = ms - InputFixerManager.offsetMs;
-                
                 for (var i = 0; i < count; i++)
                 {
                     controller.keyTimes.Add(0);
@@ -89,25 +154,20 @@ namespace NoStopMod.InputFixer
                 
                 while (controller.keyTimes.Count > 0)
                 {
-                    AccurateHit(controller);
-                    if (controller.midspinInfiniteMargin)
-                    {
-                        AccurateHit(controller);
-                    }
+                    InputFixerManager.Hit(controller);
                 }
-                
             }
 
             private static int GetValidKeyCount([NotNull] IReadOnlyList<KeyCode> keyCodes)
             {
                 var count = 0;
-                for (var i = 0; i < keyCodes.Count(); i++)
+                for (var i = 0; i < keyCodes.Count; i++)
                 {
                     if (HitIgnoreManager.ShouldBeIgnored(keyCodes[i])) continue;
 
                     if (AudioListener.pause || RDC.auto) continue;
 #if DEBUG
-                    NoStopMod.mod.Logger.Log("Fetch Input : " + InputFixerManager.offsetMs + ", " + keyCodes[i]);
+                    NoStopMod.mod.Logger.Log("Fetch Input : " + InputFixerManager.offsetTick + ", " + keyCodes[i]);
                     
 #endif
                     if (++count > 4) break;
@@ -116,14 +176,6 @@ namespace NoStopMod.InputFixer
                 return count;
             }
 
-            private static void AccurateHit(scrController controller)
-            {
-                InputFixerManager.jumpToOtherClass = true;
-                controller.chosenplanet.Update_RefreshAngles();
-                controller.keyTimes.RemoveAt(0);
-                controller.Hit();
-            }
-            
         }
 
         [HarmonyPatch(typeof(scrController), "CountValidKeysPressed")]
@@ -131,12 +183,66 @@ namespace NoStopMod.InputFixer
         {
             public static bool Prefix(scrController __instance, ref int __result)
             {
+                if ((scrController.States) __instance.GetState() != scrController.States.PlayerControl)
+                {
+                    return true;
+                }
                 return false;
             }
 
             public static void Postfix(ref int __result)
             {
+                if ((scrController.States) scrController.instance.GetState() != scrController.States.PlayerControl)
+                {
+                    return;
+                }
                 __result = 0;
+            }
+        }
+        
+        [HarmonyPatch(typeof(scrController), "ValidInputWasTriggered")]
+        private static class scrController_ValidInputWasTriggered_Patch
+        {
+            public static bool Prefix(scrController __instance, ref bool __result)
+            {               
+                if ((scrController.States) __instance.GetState() != scrController.States.PlayerControl)
+                {
+                    return true;
+                }
+                __result = false;
+                return false;
+            }
+
+            public static void Postfix(ref bool __result)
+            {
+                if ((scrController.States) scrController.instance.GetState() != scrController.States.PlayerControl)
+                {
+                    return;
+                }
+                __result = false;
+            }
+        }
+        
+        [HarmonyPatch(typeof(scrController), "ValidInputWasReleased")]
+        private static class scrController_ValidInputWasReleased_Patch
+        {
+            public static bool Prefix(scrController __instance, ref bool __result)
+            {
+                if ((scrController.States) __instance.GetState() != scrController.States.PlayerControl)
+                {
+                    return true;
+                }
+                __result = false;
+                return false;
+            }
+
+            public static void Postfix(ref bool __result)
+            {
+                if ((scrController.States) scrController.instance.GetState() != scrController.States.PlayerControl)
+                {
+                    return;
+                }
+                __result = false;
             }
         }
 
@@ -149,66 +255,20 @@ namespace NoStopMod.InputFixer
                 if (InputFixerManager.jumpToOtherClass)
                 {
                     InputFixerManager.jumpToOtherClass = false;
-                    __instance.angle = InputFixerManager.GetAngle(__instance, ___snappedLastAngle, InputFixerManager.currPressTick);
+                    __instance.angle = InputFixerManager.GetAngle(__instance, ___snappedLastAngle, InputFixerManager.targetSongTick);
 #if DEBUG
                     {
                         var difference = __instance.angle - __instance.targetExitAngle;
-                        NoStopMod.mod.Logger.Log("Diff : " + difference);
+                        //NoStopMod.mod.Logger.Log($"angle diff={difference}, songTick={InputFixerManager.targetSongTick}, ___snappedLastAngle={___snappedLastAngle}, offsetTick={InputFixerManager.offsetTick}, targetTick={InputFixerManager.targetSongTick + InputFixerManager.offsetTick}");
                     }
 #endif
                     return false;
                 }
 
-                if (!__instance.isChosen || __instance.conductor.crotchet == 0.0) return false;
-
-                if (!GCS.d_stationary)
-                {
-                    var nowMilliseconds = InputFixerManager.currFrameTick - InputFixerManager.offsetMs;
-                    __instance.angle = InputFixerManager.GetAngle(__instance, ___snappedLastAngle, nowMilliseconds);
-
-                    if (__instance.shouldPrint)
-                    {
-                        __instance.shouldPrint = false;
-                    }
-                }
-                else
-                {
-                    if (UnityEngine.Input.GetKey(UnityEngine.KeyCode.DownArrow))
-                    {
-                        __instance.angle += 0.1;
-                    }
-                    if (UnityEngine.Input.GetKey(UnityEngine.KeyCode.UpArrow))
-                    {
-                        __instance.angle -= 0.1;
-                    }
-                }
-                float num = (float)__instance.angle;
-                if (__instance.currfloor != null)
-                {
-                    if (__instance.controller.rotationEase != Ease.Linear)
-                    {
-                        float num2 = scrMisc.EasedAngle((float)___snappedLastAngle, (float)__instance.targetExitAngle, num, __instance.controller.rotationEase, __instance.controller.rotationEaseParts);
-                        if (!float.IsNaN(num2) && !float.IsInfinity(num2))
-                        {
-                            num = num2;
-                        }
-                    }
-                    if (__instance.controller.stickToFloor)
-                    {
-                        num -= (__instance.currfloor.transform.rotation.eulerAngles - __instance.currfloor.startRot).z * 0.017453292f;
-                    }
-                }
-                Vector3 position = __instance.transform.position;
-                __instance.other.transform.position = new Vector3(position.x + Mathf.Sin(num) * __instance.cosmeticRadius, position.y + Mathf.Cos(num) * __instance.cosmeticRadius, position.z);
-                if (__instance.is3D)
-                {
-                    __instance.other.transform.position = new Vector3(position.x + Mathf.Sin((float)__instance.angle) * __instance.cosmeticRadius, position.y, position.z + Mathf.Cos((float)__instance.angle) * __instance.cosmeticRadius);
-                }
-
-                return false;
+                return true;
             }
         }
         
-        
     }
+    
 }
