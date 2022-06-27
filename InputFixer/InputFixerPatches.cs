@@ -104,14 +104,16 @@ namespace NoStopMod.InputFixer
                 var controller = scrController.instance;
 
 
-                if ((scrController.States) controller.GetState() == scrController.States.PlayerControl)
+                if ((scrController.States) controller.GetState() == scrController.States.PlayerControl && 
+                    InputFixerManager.CanPlayerHit(controller) && 
+                    (scrController.States) InputFixerManager.DestinationStateReflectionField.GetValue(controller.stateMachine).state == scrController.States.PlayerControl)
                 {
 
                     var targetTick = eventTick != 0 ? eventTick : InputFixerManager.currFrameTick;
                     var originalAngle = controller.chosenplanet.angle;
                     InputFixerManager.AdjustAngle(scrController.instance, targetTick);
 #if DEBUG
-                    NoStopMod.mod.Logger.Log($"AdjustAngle {targetTick} ticks, angle {originalAngle}->{controller.chosenplanet.angle}");
+                    NoStopMod.mod.Logger.Log($"AdjustAngle SongTime {(targetTick - InputFixerManager.offsetTick) / 1000000.0 - InputFixerManager.dspTimeSong - scrConductor.calibration_i}s, angle {originalAngle}->{controller.chosenplanet.angle}");
 #endif
                     
                     InputFixerManager.HoldHit(controller, inputReleased);
@@ -127,16 +129,17 @@ namespace NoStopMod.InputFixer
                     });
                     ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
                     {
-                        if (InputFixerManager.CanPlayerHit(controller))
-                        {
-                            var success = InputFixerManager.FailAction(controller);
+                        var success = InputFixerManager.FailAction(controller);
 #if DEBUG
-                            if (success)
+                        if (success)
+                        {
+                            NoStopMod.mod.Logger.Log($"FailAction from update {controller.currFloor.seqID}th tile");
+                            if (controller.currFloor.seqID == 1)
                             {
-                                NoStopMod.mod.Logger.Log($"FailAction from update {controller.currFloor.seqID}th tile");
+                                throw new Exception("test noStopMod");
                             }
-#endif
                         }
+#endif
                     });
                 
                 }
@@ -168,7 +171,6 @@ namespace NoStopMod.InputFixer
                     if (AudioListener.pause || RDC.auto) continue;
 #if DEBUG
                     NoStopMod.mod.Logger.Log("Fetch Input : " + InputFixerManager.offsetTick + ", " + keyCodes[i]);
-                    
 #endif
                     if (++count > 4) break;
                 }

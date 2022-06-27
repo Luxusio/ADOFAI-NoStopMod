@@ -7,6 +7,8 @@ using SharpHook;
 using DG.Tweening;
 using DG.Tweening.Core;
 using DG.Tweening.Plugins.Options;
+using MonsterLove.StateMachine;
+using NoStopMod.Helper;
 using UnityModManagerNet;
 using UnityEngine;
 
@@ -16,6 +18,8 @@ namespace NoStopMod.InputFixer
     {
         public static InputFixerSettings settings;
 
+        public static readonly ReflectionField<StateMapping> DestinationStateReflectionField = new("destinationState");
+        
         public static ConcurrentQueue<KeyEvent> keyQueue = new();
 
         public static long targetSongTick;
@@ -294,11 +298,10 @@ namespace NoStopMod.InputFixer
             double num3 = 1.0 - num1 * (double) num2 / controller.chosenplanet.currfloor.angleLength;
 
 #if DEBUG
-            NoStopMod.mod.Logger.Log($"{controller.keyTimes.Count > 0}, {!GCS.d_stationary}, {!GCS.d_freeroam}, {(((controller.chosenplanet.currfloor.holdLength <= -1 ? 0 : (!controller.strictHolds ? 1 : 0)) | (flag2 ? 1 : 0)) != 0 || controller.chosenplanet.currfloor.holdLength == -1 || (double) controller.chosenplanet.currfloor.holdCompletion < num3)}, {(!RDC.auto || !scrController.isGameWorld)}, {(!(bool) (UnityEngine.Object) controller.mobileMenu || (bool) (UnityEngine.Object) controller.mobileMenu && scnMobileMenu.instance.mobileMenuPhase == scnMobileMenu.MobileMenuPhase.Road)}, {(!scrController.isGameWorld || controller.chosenplanet.currfloor.seqID < controller.lm.listFloors.Count - 1)}");
+            //NoStopMod.mod.Logger.Log($"{controller.keyTimes.Count > 0}, {!GCS.d_stationary}, {!GCS.d_freeroam}, {(((controller.chosenplanet.currfloor.holdLength <= -1 ? 0 : (!controller.strictHolds ? 1 : 0)) | (flag2 ? 1 : 0)) != 0 || controller.chosenplanet.currfloor.holdLength == -1 || (double) controller.chosenplanet.currfloor.holdCompletion < num3)}, {(!RDC.auto || !scrController.isGameWorld)}, {(!(bool) (UnityEngine.Object) controller.mobileMenu || (bool) (UnityEngine.Object) controller.mobileMenu && scnMobileMenu.instance.mobileMenuPhase == scnMobileMenu.MobileMenuPhase.Road)}, {(!scrController.isGameWorld || controller.chosenplanet.currfloor.seqID < controller.lm.listFloors.Count - 1)}");
 #endif
 
-            return controller.keyTimes.Count > 0 &&
-                   !GCS.d_stationary &&
+            return !GCS.d_stationary &&
                    !GCS.d_freeroam &&
                    (((controller.chosenplanet.currfloor.holdLength <= -1 ? 0 : (!controller.strictHolds ? 1 : 0)) |
                      (flag2 ? 1 : 0)) != 0 ||
