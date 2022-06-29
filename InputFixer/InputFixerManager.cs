@@ -416,9 +416,13 @@ namespace NoStopMod.InputFixer
 
         public static void AdjustAngle(scrController controller, long targetTick)
         {
+            var originalAngle = controller.chosenplanet.angle;
             InputFixerManager.targetSongTick = targetTick - InputFixerManager.offsetTick;
             InputFixerManager.jumpToOtherClass = true;
             controller.chosenplanet.Update_RefreshAngles();
+#if DEBUG
+            NoStopMod.mod.Logger.Log($"AdjustAngle SongTime {(targetTick - InputFixerManager.offsetTick) / 1000000.0 - InputFixerManager.dspTimeSong - scrConductor.calibration_i}s, angle {originalAngle}->{controller.chosenplanet.angle}");
+#endif
         }
 
     }

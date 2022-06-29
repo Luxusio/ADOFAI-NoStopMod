@@ -102,6 +102,7 @@ namespace NoStopMod.InputFixer
                 
                 
                 var controller = scrController.instance;
+                var targetTick = eventTick != 0 ? eventTick : InputFixerManager.currFrameTick;
 
 
                 if ((scrController.States) controller.GetState() == scrController.States.PlayerControl && 
@@ -109,16 +110,12 @@ namespace NoStopMod.InputFixer
                     (scrController.States) InputFixerManager.DestinationStateReflectionField.GetValue(controller.stateMachine).state == scrController.States.PlayerControl)
                 {
 
-                    var targetTick = eventTick != 0 ? eventTick : InputFixerManager.currFrameTick;
-                    var originalAngle = controller.chosenplanet.angle;
                     InputFixerManager.AdjustAngle(scrController.instance, targetTick);
-#if DEBUG
-                    NoStopMod.mod.Logger.Log($"AdjustAngle SongTime {(targetTick - InputFixerManager.offsetTick) / 1000000.0 - InputFixerManager.dspTimeSong - scrConductor.calibration_i}s, angle {originalAngle}->{controller.chosenplanet.angle}");
-#endif
-                    
                     InputFixerManager.HoldHit(controller, inputReleased);
+                    
                     ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
                     {
+                        InputFixerManager.AdjustAngle(scrController.instance, targetTick);
                         var success = InputFixerManager.OttoHit(controller);
 #if DEBUG
                         if (success)
@@ -129,6 +126,7 @@ namespace NoStopMod.InputFixer
                     });
                     ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
                     {
+                        InputFixerManager.AdjustAngle(scrController.instance, targetTick);
                         var success = InputFixerManager.FailAction(controller);
 #if DEBUG
                         if (success)
@@ -157,6 +155,7 @@ namespace NoStopMod.InputFixer
                 
                 while (controller.keyTimes.Count > 0)
                 {
+                    InputFixerManager.AdjustAngle(scrController.instance, targetTick);
                     InputFixerManager.Hit(controller);
                 }
             }
