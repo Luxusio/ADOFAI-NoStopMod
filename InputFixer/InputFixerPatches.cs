@@ -104,59 +104,11 @@ namespace NoStopMod.InputFixer
                 var controller = scrController.instance;
                 var targetTick = eventTick != 0 ? eventTick : InputFixerManager.currFrameTick;
 
-
-                if ((scrController.States) controller.GetState() == scrController.States.PlayerControl && 
-                    InputFixerManager.CanPlayerHit(controller) && 
-                    (scrController.States) InputFixerManager.DestinationStateReflectionField.GetValue(controller.stateMachine).state == scrController.States.PlayerControl)
+                if ((scrController.States) controller.GetState() == scrController.States.PlayerControl &&
+                    (scrController.States) InputFixerManager.DestinationStateReflectionField
+                        .GetValue(controller.stateMachine).state == scrController.States.PlayerControl)
                 {
-
-                    InputFixerManager.AdjustAngle(scrController.instance, targetTick);
-                    InputFixerManager.HoldHit(controller, inputReleased);
-                    
-                    ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
-                    {
-                        InputFixerManager.AdjustAngle(scrController.instance, targetTick);
-                        var success = InputFixerManager.OttoHit(controller);
-#if DEBUG
-                        if (success)
-                        {
-                            NoStopMod.mod.Logger.Log($"OttoHit before hit {controller.currFloor.seqID}th tile");
-                        }
-#endif
-                    });
-                    ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
-                    {
-                        InputFixerManager.AdjustAngle(scrController.instance, targetTick);
-                        var success = InputFixerManager.FailAction(controller);
-#if DEBUG
-                        if (success)
-                        {
-                            NoStopMod.mod.Logger.Log($"FailAction from update {controller.currFloor.seqID}th tile");
-                            if (controller.currFloor.seqID == 1)
-                            {
-                                throw new Exception("test noStopMod");
-                            }
-                        }
-#endif
-                    });
-                
-                }
-                
-                
-                if (count == 1)
-                {
-                    controller.consecMultipressCounter = 0;
-                }
-
-                for (var i = 0; i < count; i++)
-                {
-                    controller.keyTimes.Add(0);
-                }
-                
-                while (controller.keyTimes.Count > 0)
-                {
-                    InputFixerManager.AdjustAngle(scrController.instance, targetTick);
-                    InputFixerManager.Hit(controller);
+                    InputFixerManager.PlayerControl_Update(controller, inputReleased, count, targetTick);
                 }
             }
 
@@ -198,6 +150,25 @@ namespace NoStopMod.InputFixer
                     return;
                 }
                 __result = 0;
+            }
+        }
+        
+        [HarmonyPatch(typeof(scrController), "PlayerControl_Update")]
+        private static class scrController_PlayerControl_Update_Patch
+        {
+            public static bool Prefix(scrController __instance)
+            {
+                return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(scrController), "holding", MethodType.Getter)]
+        private static class scrController_holding_Patch
+        {
+            public static bool Prefix(scrController __instance, ref bool __result)
+            {
+                __result = InputFixerManager.holdKeys.Count != 0;
+                return false;
             }
         }
         
