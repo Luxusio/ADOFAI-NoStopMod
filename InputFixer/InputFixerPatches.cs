@@ -53,6 +53,7 @@ namespace NoStopMod.InputFixer
                 bool inputReleased = false;
                 var pressKeyCodes = new List<KeyCode>();
 
+                InputFixerManager.validKeyWasTriggered = false;
                 
                 
                 while (InputFixerManager.keyQueue.TryDequeue(out var keyEvent))
@@ -71,6 +72,7 @@ namespace NoStopMod.InputFixer
                         {
                             InputFixerManager.keyMask.Add(keyEvent.keyCode);
                             pressKeyCodes.Add((KeyCode) keyEvent.keyCode);
+                            InputFixerManager.validKeyWasTriggered = true;
                         }
                     }
                     else
@@ -176,22 +178,14 @@ namespace NoStopMod.InputFixer
         private static class scrController_ValidInputWasTriggered_Patch
         {
             public static bool Prefix(scrController __instance, ref bool __result)
-            {               
-                if ((scrController.States) __instance.GetState() != scrController.States.PlayerControl)
-                {
-                    return true;
-                }
-                __result = false;
+            {
+                __result = InputFixerManager.validKeyWasTriggered;
                 return false;
             }
 
             public static void Postfix(ref bool __result)
             {
-                if ((scrController.States) scrController.instance.GetState() != scrController.States.PlayerControl)
-                {
-                    return;
-                }
-                __result = false;
+                return;
             }
         }
         

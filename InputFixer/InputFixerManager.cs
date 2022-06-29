@@ -45,6 +45,8 @@ namespace NoStopMod.InputFixer
         public static readonly HashSet<ushort> keyMask = new();
         public static readonly HashSet<ushort?> holdKeys = new();
 
+        public static bool validKeyWasTriggered = false;
+
         public static bool disablingAdofaiTweaksKeyLimiter = false;
 
         private static Thread inputHookThread;
