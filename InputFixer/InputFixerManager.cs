@@ -19,10 +19,10 @@ namespace NoStopMod.InputFixer
     {
         public static InputFixerSettings settings;
 
-        public static readonly ReflectionField<StateMapping> DestinationStateReflectionField = new("destinationState");
-        public static readonly ReflectionField<bool> BenchmarkModeReflectionField = new("benchmarkMode");
-        public static readonly ReflectionField<bool> ExitingToMainMenuReflectionField = new("exitingToMainMenu");
-        public static readonly ReflectionField<bool> ValidInputWasReleasedThisFrameReflectionField = new("validInputWasReleasedThisFrame");
+        public static readonly ReflectionField<StateEngine, StateMapping> DestinationStateReflectionField = new("destinationState");
+        public static readonly ReflectionField<scrController, bool> BenchmarkModeReflectionField = new("benchmarkMode");
+        public static readonly ReflectionField<scrController, bool> ExitingToMainMenuReflectionField = new("exitingToMainMenu");
+        public static readonly ReflectionField<scrController, bool> ValidInputWasReleasedThisFrameReflectionField = new("validInputWasReleasedThisFrame");
 
         public static ConcurrentQueue<KeyEvent> keyQueue = new();
 
@@ -231,13 +231,7 @@ namespace NoStopMod.InputFixer
         public static void PlayerControl_Update(scrController controller, long targetTick)
         {
            		//printe ($"paused {paused} || chosenplanet.currfloor == null {chosenplanet.currfloor == null} || isCutscene {isCutscene} == {paused || chosenplanet.currfloor == null || isCutscene}");
-
-#if  DEBUG
-	        if (countValidKeysPressed > 0)
-	        {
-		        NoStopMod.mod.Logger.Log($"PlayerControl_Update(${ValidInputWasReleasedThisFrameReflectionField.GetValue(controller)}, ${InputFixerManager.countValidKeysPressed}, ${targetTick}), {controller.currFloor.seqID}th tile");
-	        }
-#endif
+	        
 			if (controller.paused || controller.chosenplanet.currfloor == null || controller.isCutscene)
 				return;
 			// 대부분의 변수 선언, 각도 계산 로직 등은 ExecuteUntilTileNotChange block안으로 들어갔습니다.
@@ -288,7 +282,7 @@ namespace NoStopMod.InputFixer
 				{
 					controller.FailAction();
 #if  DEBUG
-					NoStopMod.mod.Logger.Log($"FailAction from update {controller.currFloor.seqID}th tile");
+					NoStopMod.mod.Logger.Log($"CheckForFail FailAction from update {controller.currFloor.seqID}th tile");
 #endif
 				}
 			});
@@ -375,8 +369,8 @@ namespace NoStopMod.InputFixer
 
 				float marginScale = controller.chosenplanet.currfloor.nextfloor != null ? (float)controller.chosenplanet.currfloor.nextfloor.marginScale : 1;
 				var holdMargin = 1.0f - ((minAngleMargin * marginScale) / controller.chosenplanet.currfloor.angleLength);
-
 				
+				// for scene
 				if (!controller.gameworld && controller.chosenplanet.currfloor.holdLength > -1)
 				{
 					float holdAngleLength = Mathf.PI * (controller.chosenplanet.currfloor.holdLength * 2 + 1);
@@ -442,6 +436,7 @@ namespace NoStopMod.InputFixer
 					}
 				}
 				
+				// for in-game
 				if (controller.gameworld && ValidInputWasReleasedThisFrameReflectionField.GetValue(controller) && !nextTileIsAuto &&
 				    !controller.chosenplanet.currfloor.auto)
 				{

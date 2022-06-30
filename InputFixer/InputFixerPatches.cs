@@ -74,7 +74,10 @@ namespace NoStopMod.InputFixer
                     else
                     {
                         InputFixerManager.keyMask.Remove(keyEvent.keyCode);
-                        InputFixerManager.validKeyWasReleased = true;
+                        if (InputFixerManager.keyMask.Count == 0)
+                        {
+                            InputFixerManager.validKeyWasReleased = true;
+                        }
                     }
                 }
 
@@ -85,6 +88,11 @@ namespace NoStopMod.InputFixer
 
             private static void ProcessKeyInputs([NotNull] IReadOnlyList<KeyCode> keyCodes, long eventTick)
             {
+#if  DEBUG
+                {
+                    NoStopMod.mod.Logger.Log("-");
+                }
+#endif
                 if (InputFixerManager.settings.insertKeyOnWindowFocus && !Application.isFocused)
                 {
                     InputFixerManager.countValidKeysPressed = 0;
@@ -98,8 +106,18 @@ namespace NoStopMod.InputFixer
                 var controller = scrController.instance;
                 var targetTick = eventTick != 0 ? eventTick : InputFixerManager.currFrameTick;
 
-                if ((scrController.States) controller.GetState() == scrController.States.PlayerControl &&
-                    (scrController.States) InputFixerManager.DestinationStateReflectionField.GetValue(controller.stateMachine).state == scrController.States.PlayerControl)
+                
+                scrController.States state = (scrController.States) controller.GetState();
+                scrController.States targetState = (scrController.States) InputFixerManager.DestinationStateReflectionField.GetValue(controller.stateMachine).state;
+                
+#if  DEBUG
+                if (InputFixerManager.countValidKeysPressed > 0 || InputFixerManager.validKeyWasReleased)
+                {
+                    NoStopMod.mod.Logger.Log($"PlayerControl before ({state}, {targetState}, {InputFixerManager.validKeyWasReleased}, {InputFixerManager.countValidKeysPressed}, {targetTick}), {controller.currFloor.seqID}th tile");
+                }
+#endif
+                if (state == scrController.States.PlayerControl &&
+                    targetState == scrController.States.PlayerControl)
                 {
                     InputFixerManager.PlayerControl_Update(controller, targetTick);
                 }
@@ -200,7 +218,7 @@ namespace NoStopMod.InputFixer
                 return true;
             }
         }
-        
+
     }
     
 }
