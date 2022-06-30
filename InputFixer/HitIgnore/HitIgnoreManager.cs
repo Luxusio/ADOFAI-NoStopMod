@@ -51,6 +51,15 @@ namespace NoStopMod.InputFixer.HitIgnore
             ignoreScnTaroMenu0.Add(KeyCode.Vc4);
             ignoreScnTaroMenu0.Add(KeyCode.Vc5);
             ignoreScnTaroMenu0.Add(KeyCode.Vc6);
+            
+            HashSet<KeyCode> ignoreScnTaroMenu3 = new HashSet<KeyCode>();
+            _dictionary["scnTaroMenu3"] = ignoreScnTaroMenu3;
+            ignoreScnTaroMenu3.Add(KeyCode.Vc0);
+            ignoreScnTaroMenu3.Add(KeyCode.Vc1);
+            ignoreScnTaroMenu3.Add(KeyCode.Vc2);
+            ignoreScnTaroMenu3.Add(KeyCode.Vc3);
+            ignoreScnTaroMenu3.Add(KeyCode.Vc4);
+            ignoreScnTaroMenu3.Add(KeyCode.Vc5);
 
             scnCLS_searchMode = false;
 
