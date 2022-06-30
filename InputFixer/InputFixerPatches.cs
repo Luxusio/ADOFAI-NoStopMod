@@ -49,6 +49,7 @@ namespace NoStopMod.InputFixer
                 InputFixerManager.dspTimeSong = ___dspTimeSong;
 
                 // planet hit processing
+                InputFixerManager.validKeyWasReleased = false;
                 long rawKeyCodesTick = 0;
                 var pressKeyCodes = new List<KeyCode>();
 
@@ -57,6 +58,7 @@ namespace NoStopMod.InputFixer
                     if (keyEvent.tick != rawKeyCodesTick)
                     {
                         ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick);
+                        InputFixerManager.validKeyWasReleased = false;
                         rawKeyCodesTick = keyEvent.tick;
                         pressKeyCodes.Clear();
                     }
@@ -72,6 +74,7 @@ namespace NoStopMod.InputFixer
                     else
                     {
                         InputFixerManager.keyMask.Remove(keyEvent.keyCode);
+                        InputFixerManager.validKeyWasReleased = true;
                     }
                 }
 
@@ -96,8 +99,7 @@ namespace NoStopMod.InputFixer
                 var targetTick = eventTick != 0 ? eventTick : InputFixerManager.currFrameTick;
 
                 if ((scrController.States) controller.GetState() == scrController.States.PlayerControl &&
-                    (scrController.States) InputFixerManager.DestinationStateReflectionField
-                        .GetValue(controller.stateMachine).state == scrController.States.PlayerControl)
+                    (scrController.States) InputFixerManager.DestinationStateReflectionField.GetValue(controller.stateMachine).state == scrController.States.PlayerControl)
                 {
                     InputFixerManager.PlayerControl_Update(controller, targetTick);
                 }

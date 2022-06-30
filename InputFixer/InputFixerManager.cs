@@ -51,8 +51,8 @@ namespace NoStopMod.InputFixer
         // scope : each timing
         public static readonly HashSet<ushort> keyMask = new();
         //public static bool validKeyWasTriggered = false;
-        public static readonly HashSet<ushort?> holdKeys = new();
-        // public static bool validKeyWasReleased = false;
+        public static readonly HashSet<ushort> holdKeys = new();
+        public static bool validKeyWasReleased = false;
         public static int countValidKeysPressed;
 		
         //
@@ -244,7 +244,12 @@ namespace NoStopMod.InputFixer
 			// block 안으로 들어가는건 함수로 빼주길 바람.
 
 			ValidInputWasReleasedThisFrameReflectionField.SetValue(controller, controller.ValidInputWasReleased());
-
+#if DEBUG
+	        if (ValidInputWasReleasedThisFrameReflectionField.GetValue(controller))
+	        {
+		        NoStopMod.mod.Logger.Log("Valid input was released this frame");
+	        }
+#endif
 
 			//Taro: fail if we let go before 45 degrees from the end.
 			//currfloor.holdCompletion and currfloor.angleLength vars are used for this.
@@ -630,7 +635,7 @@ namespace NoStopMod.InputFixer
 			}
         }
         
-        public static void IterateValidKeysHeld(scrController controller, Action<ushort?> foundHeld, Action<ushort?> foundSpecial)
+        public static void IterateValidKeysHeld(scrController controller, Action<ushort> foundHeld, Action<ushort> foundSpecial)
         {
 	        // Luxus가 막음 (여기부터)
 	        // TOUCH
@@ -746,26 +751,27 @@ namespace NoStopMod.InputFixer
 	        // }
 	        // else
 	        {
-		        bool holding = controller.holding;
-		        
-		        
+		        // bool holding = controller.holding;
+
+		        List<ushort> list = new();
 		        foreach (var holdKey in InputFixerManager.holdKeys)
 		        {
 			        
-			        {
+			        
 				        // if (key == KeyCode.Joystick8Button0 && !controller.dpadInputChecker.holdingX || key == KeyCode.Joystick8Button1 && !controller.dpadInputChecker.holdingY || !Input.GetKey(key))
 					       //  InputFixerManager.holdKeys.RemoveAt(index);
-					       if (!holdKey.HasValue)
-					       {
+
 						       //InputFixerManager.holdKeys.Remove(holdKey);
-					       }
-					       else if (!InputFixerManager.keyMask.Contains(holdKey.Value))
-					       {
-						       InputFixerManager.holdKeys.Remove(holdKey.Value);
-					       }
-			        }
+					       
+					if (!InputFixerManager.keyMask.Contains(holdKey))
+					{
+						list.Add(holdKey);
+					}
 			        
-			        
+		        }
+		        foreach (var removeKey in list)
+		        {
+			        InputFixerManager.holdKeys.Remove(removeKey);
 		        }
 		        
 		        // for (int index = InputFixerManager.holdKeys.Count - 1; index >= 0; --index)
@@ -783,10 +789,11 @@ namespace NoStopMod.InputFixer
 					     //    InputFixerManager.holdKeys.RemoveAt(index);
 			       //  }
 		        // }
-		        if (holding && InputFixerManager.holdKeys.Count == 0)
-			        return true;
+// 		        
+// 		        if (holding && InputFixerManager.holdKeys.Count == 0)
+// 			        return true;
 	        }
-	        return false;
+	        return InputFixerManager.validKeyWasReleased;
         }
         
         public static bool ValidInputWasTriggered(scrController controller)
