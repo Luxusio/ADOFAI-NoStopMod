@@ -11,6 +11,7 @@ using MonsterLove.StateMachine;
 using NoStopMod.Helper;
 using UnityModManagerNet;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace NoStopMod.InputFixer
 {
@@ -20,6 +21,8 @@ namespace NoStopMod.InputFixer
 
         public static readonly ReflectionField<StateMapping> DestinationStateReflectionField = new("destinationState");
         public static readonly ReflectionField<bool> BenchmarkModeReflectionField = new("benchmarkMode");
+        public static readonly ReflectionField<bool> ExitingToMainMenuReflectionField = new("exitingToMainMenu");
+        public static readonly ReflectionField<bool> ValidInputWasReleasedThisFrameReflectionField = new("validInputWasReleasedThisFrame");
 
         public static ConcurrentQueue<KeyEvent> keyQueue = new();
 
@@ -42,11 +45,19 @@ namespace NoStopMod.InputFixer
 
         public static double previousFrameTime;
 
+
+        
+        //////////////////////////////////////////////////////////
+        // scope : each timing
         public static readonly HashSet<ushort> keyMask = new();
+        //public static bool validKeyWasTriggered = false;
         public static readonly HashSet<ushort?> holdKeys = new();
-
-        public static bool validKeyWasTriggered = false;
-
+        // public static bool validKeyWasReleased = false;
+        public static int countValidKeysPressed;
+		
+        //
+        //////////////////////////////////////////////////////////
+        
         public static bool disablingAdofaiTweaksKeyLimiter = false;
 
         private static Thread inputHookThread;
@@ -217,20 +228,22 @@ namespace NoStopMod.InputFixer
         }
 
         
-        public static void PlayerControl_Update(scrController controller, bool validInputWasReleasedThisFrame, int countValidKeysPressed, long targetTick)
+        public static void PlayerControl_Update(scrController controller, long targetTick)
         {
            		//printe ($"paused {paused} || chosenplanet.currfloor == null {chosenplanet.currfloor == null} || isCutscene {isCutscene} == {paused || chosenplanet.currfloor == null || isCutscene}");
 
 #if  DEBUG
 	        if (countValidKeysPressed > 0)
 	        {
-		        NoStopMod.mod.Logger.Log($"PlayerControl_Update(${validInputWasReleasedThisFrame}, ${countValidKeysPressed}, ${targetTick}), {controller.currFloor.seqID}th tile");
+		        NoStopMod.mod.Logger.Log($"PlayerControl_Update(${ValidInputWasReleasedThisFrameReflectionField.GetValue(controller)}, ${InputFixerManager.countValidKeysPressed}, ${targetTick}), {controller.currFloor.seqID}th tile");
 	        }
 #endif
 			if (controller.paused || controller.chosenplanet.currfloor == null || controller.isCutscene)
 				return;
+			// 대부분의 변수 선언, 각도 계산 로직 등은 ExecuteUntilTileNotChange block안으로 들어갔습니다.
+			// block 안으로 들어가는건 함수로 빼주길 바람.
 
-			// controller.validInputWasReleasedThisFrame = controller.ValidInputWasReleased(); // Luxus가 막음
+			ValidInputWasReleasedThisFrameReflectionField.SetValue(controller, controller.ValidInputWasReleased());
 
 
 			//Taro: fail if we let go before 45 degrees from the end.
@@ -326,10 +339,9 @@ namespace NoStopMod.InputFixer
 				bool nextTileIsAuto = controller.chosenplanet.currfloor.nextfloor != null &&
 				                      controller.chosenplanet.currfloor.nextfloor.auto;
 
-				if (countValidKeysPressed > 0 && // controller.ValidInputWasTriggered() &&
-				    (!nextTileIsAuto || (nextTileIsAuto && controller.chosenplanet.currfloor.freeroam)))
+				if (controller.ValidInputWasTriggered() && (!nextTileIsAuto || (nextTileIsAuto && controller.chosenplanet.currfloor.freeroam)))
 				{
-					int newPressCount = countValidKeysPressed;
+					int newPressCount = InputFixerManager.countValidKeysPressed;
 
 					for (var i = 0; i < newPressCount; i++)
 					{
@@ -342,7 +354,7 @@ namespace NoStopMod.InputFixer
 				}
 			}
 
-			bool alreadyHitHoldEnding = false;
+			// bool alreadyHitHoldEnding = false;
 
 			{ // 홀드는 한 타이밍에 한개씩만 처리
 				InputFixerManager.AdjustAngle(scrController.instance, targetTick);
@@ -365,7 +377,7 @@ namespace NoStopMod.InputFixer
 					float holdAngleLength = Mathf.PI * (controller.chosenplanet.currfloor.holdLength * 2 + 1);
 					holdMargin = 1.0f - ((minAngleMargin * 1f) / holdAngleLength);
 
-					if (validInputWasReleasedThisFrame)
+					if ((ValidInputWasReleasedThisFrameReflectionField.GetValue(controller)) || (controller.ValidInputWasTriggered() && !controller.strictHolds))
 					{
 						// a > 0.97 && a < 1.03 (1 + (1-0.97))
 						if (controller.chosenplanet.currfloor.holdCompletion > holdMargin)
@@ -424,10 +436,8 @@ namespace NoStopMod.InputFixer
 						controller.LockInput(0.4f);
 					}
 				}
-
-				//printe ($"gameworld {gameworld} && validInputWasReleasedThisFrame {validInputWasReleasedThisFrame} && !nextTileIsAuto {!nextTileIsAuto} && !chosenplanet.currfloor.auto {!chosenplanet.currfloor.auto} : {gameworld && validInputWasReleasedThisFrame && !nextTileIsAuto && !chosenplanet.currfloor.auto}");
-
-				if (controller.gameworld && validInputWasReleasedThisFrame && !nextTileIsAuto &&
+				
+				if (controller.gameworld && ValidInputWasReleasedThisFrameReflectionField.GetValue(controller) && !nextTileIsAuto &&
 				    !controller.chosenplanet.currfloor.auto)
 				{
 					//printe("Input Released");
@@ -456,7 +466,7 @@ namespace NoStopMod.InputFixer
 							controller.chosenplanet.currfloor.holdRenderer.Hit();
 
 							controller.Hit();
-							alreadyHitHoldEnding = true;
+							// alreadyHitHoldEnding = true;
 							//this would be used for making "release" timing be required for hitting the landing tile
 							
 #if  DEBUG
@@ -479,11 +489,11 @@ namespace NoStopMod.InputFixer
 				if (!RDC.auto && !BenchmarkModeReflectionField.GetValue(controller) &&
 				    controller.chosenplanet.AutoShouldHitNow() && controller.chosenplanet.currfloor.holdLength > -1
 				    && GCS.checkpointNum == controller.chosenplanet.currfloor.seqID
-				    && !alreadyHitHoldEnding
+				    // && !alreadyHitHoldEnding
 				    && (scrController.States) controller.GetState() != scrController.States.Fail
 				    && (scrController.States) controller.GetState() != scrController.States.Fail2)
 				{
-					alreadyHitHoldEnding = true;
+					// alreadyHitHoldEnding = true;
 					controller.Hit();
 #if  DEBUG
 					NoStopMod.mod.Logger.Log($"Taro Hit from update {controller.currFloor.seqID}th tile");
@@ -525,18 +535,6 @@ namespace NoStopMod.InputFixer
 				}
 			});
 
-			// bool alreadyHitHoldEnding = false;
-			// //Taro: auto hit the next tile if it's a hold!
-			// if (!RDC.auto && !benchmarkMode && chosenplanet.AutoShouldHitNow () && chosenplanet.currfloor.holdLength > -1
-			// && (scrController.States)controller.GetState () != scrController.States.Fail
-			// && (scrController.States)controller.GetState () != scrController.States.Fail2)
-			// {
-			// alreadyHitHoldEnding = true;
-			// Hit ();
-			// }
-
-			// print("floor taps: " + tapsCount);
-
 			bool consecHold = controller.chosenplanet.currfloor.nextfloor && (controller.strictHolds && controller.chosenplanet.currfloor.nextfloor.holdLength > -1);
 
 
@@ -569,7 +567,7 @@ namespace NoStopMod.InputFixer
 				                                   scnMobileMenu.MobileMenuPhase.Road))
 				    && (!controller.gameworld ||
 				        controller.chosenplanet.currfloor.seqID < controller.lm.listFloors.Count - 1)
-				    && !alreadyHitHoldEnding //don't use this input!
+				    // && !alreadyHitHoldEnding //don't use this input!
 				    && !BenchmarkModeReflectionField.GetValue(controller))
 				{
 
@@ -734,6 +732,100 @@ namespace NoStopMod.InputFixer
 	        //     foundHeld (KeyCode.Joystick8Button1);
 	        // }
 	        // Luxus가 막음 (여기까지)
+        }
+
+        public static bool ValidInputWasReleased(scrController controller)
+        {
+	        // if (ADOBase.isMobile)
+	        // {
+		       //  if (this.holdKeys.Count != 0 && Input.touchCount == 0 && !Input.anyKey)
+		       //  {
+			      //   this.holdKeys.Clear();
+			      //   return true;
+		       //  }
+	        // }
+	        // else
+	        {
+		        bool holding = controller.holding;
+		        
+		        
+		        foreach (var holdKey in InputFixerManager.holdKeys)
+		        {
+			        
+			        {
+				        // if (key == KeyCode.Joystick8Button0 && !controller.dpadInputChecker.holdingX || key == KeyCode.Joystick8Button1 && !controller.dpadInputChecker.holdingY || !Input.GetKey(key))
+					       //  InputFixerManager.holdKeys.RemoveAt(index);
+					       if (!holdKey.HasValue)
+					       {
+						       //InputFixerManager.holdKeys.Remove(holdKey);
+					       }
+					       else if (!InputFixerManager.keyMask.Contains(holdKey.Value))
+					       {
+						       InputFixerManager.holdKeys.Remove(holdKey.Value);
+					       }
+			        }
+			        
+			        
+		        }
+		        
+		        // for (int index = InputFixerManager.holdKeys.Count - 1; index >= 0; --index)
+		        // {
+			       //  ushort? holdKey = InputFixerManager.holdKeys[index];
+			       //  if (!holdKey.HasValue)
+			       //  {
+				      //   InputFixerManager.holdKeys.RemoveAt(index);
+			       //  }
+			       //  else
+			       //  {
+				      //   holdKey = InputFixerManager.holdKeys[index];
+				      //   KeyCode key = holdKey.Value;
+				      //   if (key == KeyCode.Joystick8Button0 && !controller.dpadInputChecker.holdingX || key == KeyCode.Joystick8Button1 && !controller.dpadInputChecker.holdingY || !Input.GetKey(key))
+					     //    InputFixerManager.holdKeys.RemoveAt(index);
+			       //  }
+		        // }
+		        if (holding && InputFixerManager.holdKeys.Count == 0)
+			        return true;
+	        }
+	        return false;
+        }
+        
+        public static bool ValidInputWasTriggered(scrController controller)
+        {
+	        if (ExitingToMainMenuReflectionField.GetValue(controller))
+		        return false;
+	        // bool flag1 = false;
+	        // if (ADOBase.isMobile)
+	        // {
+		       //  foreach (Touch touch in Input.touches)
+		       //  {
+			      //   if (touch.phase == TouchPhase.Began && !controller.IsScreenPointInsideUIElements(touch.position))
+			      //   {
+				     //    flag1 = true;
+				     //    break;
+			      //   }
+		       //  }
+	        // }
+
+	        bool flag2;
+	        // if (ADOBase.isMobile)
+	        // {
+		       //  flag2 = ((!Input.anyKeyDown || Input.GetKeyDown(KeyCode.Mouse0)
+			      //   ? 0
+			      //   : (!Input.GetKeyDown(KeyCode.Mouse1) ? 1 : 0)) | (flag1 ? 1 : 0)) != 0;
+	        // }
+	        // else
+	        {
+		        bool flag3 = false;
+		        //if (Input.GetKeyDown(KeyCode.Mouse0) || Input.GetKeyDown(KeyCode.Mouse1))
+		        if (keyMask.Contains((ushort) (1000 + SharpHook.Native.MouseButton.Button1)) || keyMask.Contains((ushort) (1000 + SharpHook.Native.MouseButton.Button2)))
+			        flag3 = EventSystem.current.IsPointerOverGameObject();
+		        if (controller.isCutscene)
+			        flag3 = false;
+		        //flag2 = (Input.anyKeyDown || controller.dpadInputChecker.anyDirDown) && !flag3 && !controller.paused;
+		        flag2 = keyMask.Count > 0 && !flag3 && !controller.paused;
+	        }
+
+	        return flag2 && controller.CountValidKeysPressed() > 0;
         }
         
         public static void AdjustAngle(scrController controller, long targetTick)

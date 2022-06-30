@@ -75,18 +75,14 @@ namespace NoStopMod.InputFixer.HitIgnore
                 return true;
             }
 
-            if (scrController_state != scrController.States.PlayerControl)
+            if (GCS.sceneToLoad == "scnCLS" && scnCLS_searchMode)
             {
                 return true;
             }
-
+            
             HashSet<KeyCode> ignoreScnCLS;
             if (_dictionary.TryGetValue(GCS.sceneToLoad, out ignoreScnCLS))
             {
-                if (GCS.sceneToLoad == "scnCLS" && scnCLS_searchMode)
-                {
-                    return true;
-                }
                 if (ignoreScnCLS.Contains(keyCode))
                 {
                     return true;
