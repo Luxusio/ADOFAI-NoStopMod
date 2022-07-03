@@ -33,15 +33,17 @@ namespace NoStopMod.InputFixer.HitIgnore
 
             HashSet<KeyCode> ignoreScnCLS_ = new HashSet<KeyCode>();
             _dictionary["scnCLS"] = ignoreScnCLS_;
-            ignoreScnCLS_.Add(KeyCode.VcS);
-            ignoreScnCLS_.Add(KeyCode.VcDelete);
-            ignoreScnCLS_.Add(KeyCode.VcF);
-            ignoreScnCLS_.Add(KeyCode.VcO);
-            ignoreScnCLS_.Add(KeyCode.Vc7);
             ignoreScnCLS_.Add(KeyCode.VcUp);
             ignoreScnCLS_.Add(KeyCode.VcNumPadUp);
             ignoreScnCLS_.Add(KeyCode.VcDown);
             ignoreScnCLS_.Add(KeyCode.VcNumPadDown);
+            ignoreScnCLS_.Add(KeyCode.VcR);
+            ignoreScnCLS_.Add(KeyCode.VcS);
+            ignoreScnCLS_.Add(KeyCode.VcDelete);
+            ignoreScnCLS_.Add(KeyCode.VcI);
+            ignoreScnCLS_.Add(KeyCode.VcF);
+            ignoreScnCLS_.Add(KeyCode.VcO);
+            ignoreScnCLS_.Add(KeyCode.VcN);
 
             HashSet<KeyCode> ignoreScnTaroMenu0 = new HashSet<KeyCode>();
             _dictionary["scnTaroMenu0"] = ignoreScnTaroMenu0;
@@ -82,6 +84,20 @@ namespace NoStopMod.InputFixer.HitIgnore
             {
                 KeyLimiterManager.UpdateKeyLimiter(keyCode);
                 return true;
+            }
+            
+            if (scrController_state != scrController.States.PlayerControl && !scrController.instance.isEditingLevel && scrController.instance.uiController.difficultyUIMode != DifficultyUIMode.DontShow)
+            {
+                if (keyCode is KeyCode.VcNumPadLeft 
+                            or KeyCode.VcLeft)
+                {
+                    return true;
+                }
+                if (keyCode is KeyCode.VcNumPadRight 
+                    or KeyCode.VcRight)
+                {
+                    return true;
+                }
             }
 
             if (GCS.sceneToLoad == "scnCLS" && scnCLS_searchMode)
