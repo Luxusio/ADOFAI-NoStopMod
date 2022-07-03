@@ -28,6 +28,8 @@ namespace NoStopMod.InputFixer
         [HarmonyPatch(typeof(scrConductor), "Update")]
         private static class scrConductor_Update_Patch
         {
+            private static readonly UnityEngine.KeyCode[] UnityKeyCodes = (UnityEngine.KeyCode[]) Enum.GetValues(typeof(UnityEngine.KeyCode));
+
             public static void Postfix(scrConductor __instance, double ___dspTimeSong)
             {
                 // frameMs set
@@ -72,6 +74,9 @@ namespace NoStopMod.InputFixer
                     {
                         if (!InputFixerManager.keyMask.Contains(keyEvent.keyCode))
                         {
+#if DEBUG
+                            NoStopMod.mod.Logger.Log($"press {(KeyCode) keyEvent.keyCode}");
+#endif
                             InputFixerManager.keyMask.Add(keyEvent.keyCode);
                             InputFixerManager.keyDownMask.Add(keyEvent.keyCode);
                             pressKeyCodes.Add((KeyCode) keyEvent.keyCode);
@@ -79,14 +84,72 @@ namespace NoStopMod.InputFixer
                     }
                     else
                     {
-                        InputFixerManager.keyMask.Remove(keyEvent.keyCode);
-                        if (InputFixerManager.keyMask.Count == 0)
+                        if (InputFixerManager.keyMask.Remove(keyEvent.keyCode))
                         {
-                            InputFixerManager.validKeyWasReleased = true;
+#if DEBUG
+                            NoStopMod.mod.Logger.Log($"release {(KeyCode) keyEvent.keyCode}");
+#endif
+                            
+                            if (InputFixerManager.keyMask.Count == 0)
+                            {
+                                InputFixerManager.validKeyWasReleased = true;
+                            }
                         }
                     }
                 }
 
+                // 키 씹힘 안정화
+                LinkedList<ushort> ignoredPressKeys = new(); // 씹힌 키 목록
+                LinkedList<ushort> ignoredReleaseKeys = new(); // 씹힌 키 목록
+                foreach (var keyCode in UnityKeyCodes)
+                {
+                    if (Input.GetKeyDown(keyCode))
+                    {
+                        var nativeKeyCode = KeyCodeHelper.ToNativeKeyCode(keyCode);
+                        if (!InputFixerManager.keyMask.Contains(nativeKeyCode))
+                        {
+                            NoStopMod.mod.Logger.Log($"Fix troll press key {(KeyCode) nativeKeyCode}");
+                            ignoredPressKeys.AddLast(nativeKeyCode);
+                        }
+                    }
+                    else if (Input.GetKeyUp(keyCode))
+                    {
+                        var nativeKeyCode = KeyCodeHelper.ToNativeKeyCode(keyCode);
+                        if (InputFixerManager.keyMask.Contains(nativeKeyCode))
+                        {
+                            ignoredReleaseKeys.AddLast(nativeKeyCode);
+                            NoStopMod.mod.Logger.Log($"Fix troll release key {(KeyCode) nativeKeyCode}");
+                        }
+                    }
+                }
+                
+                if (ignoredPressKeys.Count > 0 || ignoredReleaseKeys.Count > 0)
+                {
+                    if (rawKeyCodesTick != InputFixerManager.currFrameTick)
+                    {
+                        ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick);
+                        InputFixerManager.validKeyWasReleased = false;
+                        rawKeyCodesTick = InputFixerManager.currFrameTick;
+                        pressKeyCodes.Clear();
+                        InputFixerManager.keyDownMask.Clear();
+                    }
+                    
+                    
+                    InputFixerManager.validKeyWasReleased = ignoredReleaseKeys.Count > 0;
+
+                    foreach (var ignoredPressKey in ignoredPressKeys)
+                    {
+                        pressKeyCodes.Add((KeyCode) ignoredPressKey);
+                        InputFixerManager.keyMask.Add(ignoredPressKey);
+                        InputFixerManager.keyDownMask.Add(ignoredPressKey);
+                    }
+                    
+                    foreach (var ignoredReleaseKey in ignoredReleaseKeys)
+                    {
+                        InputFixerManager.keyMask.Remove(ignoredReleaseKey);
+                    }
+                }
+                
                 ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick);
             }
 
@@ -117,10 +180,10 @@ namespace NoStopMod.InputFixer
                 scrController.States targetState = (scrController.States) InputFixerManager.DestinationStateReflectionField.GetValue(controller.stateMachine).state;
                 
 #if  DEBUG
-                if (InputFixerManager.countValidKeysPressed > 0 || InputFixerManager.validKeyWasReleased)
-                {
-                    NoStopMod.mod.Logger.Log($"PlayerControl before ({state}, {targetState}, {InputFixerManager.validKeyWasReleased}, {InputFixerManager.countValidKeysPressed}, {targetTick}), {controller.currFloor.seqID}th tile");
-                }
+                // if (InputFixerManager.countValidKeysPressed > 0 || InputFixerManager.validKeyWasReleased)
+                // {
+                //     NoStopMod.mod.Logger.Log($"PlayerControl before ({state}, {targetState}, {InputFixerManager.validKeyWasReleased}, {InputFixerManager.countValidKeysPressed}, {targetTick}), {controller.currFloor.seqID}th tile");
+                // }
 #endif
                 if (state == scrController.States.PlayerControl &&
                     targetState == scrController.States.PlayerControl)
@@ -137,9 +200,6 @@ namespace NoStopMod.InputFixer
                     if (HitIgnoreManager.ShouldBeIgnored(keyCodes[i])) continue;
 
                     // if (AudioListener.pause || RDC.auto) continue;
-#if DEBUG
-                    NoStopMod.mod.Logger.Log("Fetch Input : " + InputFixerManager.offsetTick + ", " + keyCodes[i]);
-#endif
                     if (++count > 4) break;
                 }
 

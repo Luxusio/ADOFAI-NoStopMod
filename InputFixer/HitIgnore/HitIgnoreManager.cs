@@ -76,7 +76,7 @@ namespace NoStopMod.InputFixer.HitIgnore
         public static bool ShouldBeIgnored(KeyCode keyCode)
         {
 #if DEBUG
-            NoStopMod.mod.Logger.Log($"scene : {GCS.sceneToLoad}, keyCode: {keyCode}");
+            //NoStopMod.mod.Logger.Log($"scene : {GCS.sceneToLoad}, keyCode: {keyCode}");
 #endif
             
             if (keyCode == KeyCode.VcEscape) return true;
