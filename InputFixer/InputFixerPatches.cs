@@ -218,7 +218,19 @@ namespace NoStopMod.InputFixer
                 return true;
             }
         }
-
+        
+        [HarmonyPatch(typeof(scrCreditsText), "Start")]
+        private static class scrCreditsText_Start_Patch
+        {
+            public static void Postfix(scrCreditsText __instance)
+            {
+                if (scnLevelSelectTaro.instance != null && scnLevelSelectTaro.instance.scene.creditsContentCopy == null)
+                {
+                    scnLevelSelectTaro.instance.scene.creditsContentCopy = __instance.contentCopy;
+                }
+            }
+        }
+        
     }
     
 }
