@@ -50,6 +50,7 @@ namespace NoStopMod.InputFixer
         //////////////////////////////////////////////////////////
         // scope : each timing
         public static readonly HashSet<ushort> keyMask = new();
+        public static readonly HashSet<ushort> keyDownMask = new();
         //public static bool validKeyWasTriggered = false;
         public static readonly HashSet<ushort> holdKeys = new();
         public static bool validKeyWasReleased = false;
@@ -819,17 +820,17 @@ namespace NoStopMod.InputFixer
 	        {
 		        bool flag3 = false;
 		        //if (Input.GetKeyDown(KeyCode.Mouse0) || Input.GetKeyDown(KeyCode.Mouse1))
-		        if (keyMask.Contains((ushort) (1000 + SharpHook.Native.MouseButton.Button1)) || keyMask.Contains((ushort) (1000 + SharpHook.Native.MouseButton.Button2)))
+		        if (keyDownMask.Contains((ushort) (1000 + SharpHook.Native.MouseButton.Button1)) || keyDownMask.Contains((ushort) (1000 + SharpHook.Native.MouseButton.Button2)))
 			        flag3 = EventSystem.current.IsPointerOverGameObject();
 		        if (controller.isCutscene)
 			        flag3 = false;
 		        //flag2 = (Input.anyKeyDown || controller.dpadInputChecker.anyDirDown) && !flag3 && !controller.paused;
-		        flag2 = keyMask.Count > 0 && !flag3 && !controller.paused;
+		        flag2 = keyDownMask.Count > 0 && !flag3 && !controller.paused;
 	        }
 
 	        return flag2 && controller.CountValidKeysPressed() > 0;
         }
-        
+
         public static void AdjustAngle(scrController controller, long targetTick)
         {
 #if DEBUG

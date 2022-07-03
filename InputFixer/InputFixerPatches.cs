@@ -3,8 +3,10 @@ using NoStopMod.InputFixer.HitIgnore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using JetBrains.Annotations;
 using NoStopMod.Helper;
+using Rewired.Utils;
 using UnityEngine;
 using KeyCode = SharpHook.Native.KeyCode;
 
@@ -51,6 +53,7 @@ namespace NoStopMod.InputFixer
                 // planet hit processing
                 InputFixerManager.validKeyWasReleased = false;
                 long rawKeyCodesTick = 0;
+                InputFixerManager.keyDownMask.Clear();
                 var pressKeyCodes = new List<KeyCode>();
 
                 while (InputFixerManager.keyQueue.TryDequeue(out var keyEvent))
@@ -61,6 +64,7 @@ namespace NoStopMod.InputFixer
                         InputFixerManager.validKeyWasReleased = false;
                         rawKeyCodesTick = keyEvent.tick;
                         pressKeyCodes.Clear();
+                        InputFixerManager.keyDownMask.Clear();
                     }
                     
                     if (keyEvent.press)
@@ -68,6 +72,7 @@ namespace NoStopMod.InputFixer
                         if (!InputFixerManager.keyMask.Contains(keyEvent.keyCode))
                         {
                             InputFixerManager.keyMask.Add(keyEvent.keyCode);
+                            InputFixerManager.keyDownMask.Add(keyEvent.keyCode);
                             pressKeyCodes.Add((KeyCode) keyEvent.keyCode);
                         }
                     }
@@ -90,7 +95,7 @@ namespace NoStopMod.InputFixer
             {
 #if  DEBUG
                 {
-                    NoStopMod.mod.Logger.Log("-");
+                    //NoStopMod.mod.Logger.Log("-");
                 }
 #endif
                 if (InputFixerManager.settings.insertKeyOnWindowFocus && !Application.isFocused)
@@ -182,6 +187,13 @@ namespace NoStopMod.InputFixer
             {
                 // __result = InputFixerManager.validKeyWasTriggered;
                 __result = InputFixerManager.ValidInputWasTriggered(__instance);
+                
+#if DEBUG
+                if (__result)
+                {
+                    NoStopMod.mod.Logger.Log($"ValidInputWasTriggered!!!!");
+                }
+#endif
                 return false;
             }
         }
