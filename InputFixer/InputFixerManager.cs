@@ -40,6 +40,7 @@ namespace NoStopMod.InputFixer
         public static double dspTimeSong;
 
         public static long offsetTick;
+        public static bool offsetTickUpdated = false;
 
         public static double lastReportedDspTime;
 
@@ -233,7 +234,7 @@ namespace NoStopMod.InputFixer
         {
            		//printe ($"paused {paused} || chosenplanet.currfloor == null {chosenplanet.currfloor == null} || isCutscene {isCutscene} == {paused || chosenplanet.currfloor == null || isCutscene}");
 	        
-			if (controller.paused || controller.chosenplanet.currfloor == null || controller.isCutscene)
+			if (controller.paused || controller.chosenplanet.currfloor == null || controller.isCutscene || !offsetTickUpdated)
 				return;
 			// 대부분의 변수 선언, 각도 계산 로직 등은 ExecuteUntilTileNotChange block안으로 들어갔습니다.
 			// block 안으로 들어가는건 함수로 빼주길 바람.

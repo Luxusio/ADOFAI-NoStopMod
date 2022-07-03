@@ -46,6 +46,7 @@ namespace NoStopMod.InputFixer
                     InputFixerManager.lastReportedDspTime = AudioSettings.dspTime;
                     InputFixerManager.dspTime = AudioSettings.dspTime;
                     InputFixerManager.offsetTick = InputFixerManager.currFrameTick - (long)(InputFixerManager.dspTime * 10000000);
+                    InputFixerManager.offsetTickUpdated = true;
                 }
 
                 InputFixerManager.dspTimeSong = ___dspTimeSong;
@@ -240,6 +241,15 @@ namespace NoStopMod.InputFixer
                 {
                     scnLevelSelectTaro.instance.scene.creditsContentCopy = __instance.contentCopy;
                 }
+            }
+        }
+
+        [HarmonyPatch(typeof(scrController), "TogglePauseGame")]
+        private static class scrController_TogglePauseGame_Patch
+        {
+            public static void Postfix()
+            {
+                InputFixerManager.offsetTickUpdated = false;
             }
         }
         
