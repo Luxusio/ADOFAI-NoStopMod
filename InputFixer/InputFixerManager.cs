@@ -150,12 +150,12 @@ namespace NoStopMod.InputFixer
                     }
                     else
                     {
-                        NoStopMod.mod.Logger.Error($"Exception while hook run : {e}");
+                        NoStopMod.mod.Logger.Error($"[{Time.frameCount}] Exception while hook run : {e}");
                     }
                 }
                 catch (Exception e)
                 {
-                    NoStopMod.mod.Logger.Error($"Exception while hook run : {e}");
+                    NoStopMod.mod.Logger.Error($"[{Time.frameCount}] Exception while hook run : {e}");
                 }
                 finally
                 {
@@ -182,7 +182,7 @@ namespace NoStopMod.InputFixer
             }
             catch (Exception e)
             {
-                NoStopMod.mod.Logger.Error($"Exception while StopHook : {e}");
+                NoStopMod.mod.Logger.Error($"[{Time.frameCount}] Exception while StopHook : {e}");
             }
         }
 
@@ -243,7 +243,7 @@ namespace NoStopMod.InputFixer
 #if DEBUG
 	        if (ValidInputWasReleasedThisFrameReflectionField.GetValue(controller))
 	        {
-		        NoStopMod.mod.Logger.Log("Valid input was released this frame");
+		        NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Valid input was released this frame");
 	        }
 #endif
 
@@ -284,7 +284,7 @@ namespace NoStopMod.InputFixer
 				{
 					controller.FailAction();
 #if  DEBUG
-					NoStopMod.mod.Logger.Log($"CheckForFail FailAction from update {controller.currFloor.seqID}th tile");
+					NoStopMod.mod.Logger.Log($"[{Time.frameCount}] CheckForFail FailAction from update {controller.currFloor.seqID}th tile");
 #endif
 				}
 			});
@@ -313,7 +313,7 @@ namespace NoStopMod.InputFixer
 						controller.keyTimes.Clear(); //important so autohit isnt detected as a multipress
 						controller.Hit();
 #if  DEBUG
-						NoStopMod.mod.Logger.Log($"Otto Hit from update {controller.currFloor.seqID}th tile");
+						NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Otto Hit from update {controller.currFloor.seqID}th tile");
 #endif
 
 						RDC.auto = auto;
@@ -388,7 +388,7 @@ namespace NoStopMod.InputFixer
 
 							controller.Hit();
 #if  DEBUG
-							NoStopMod.mod.Logger.Log($"hold Hit from update {controller.currFloor.seqID}th tile");
+							NoStopMod.mod.Logger.Log($"[{Time.frameCount}] hold Hit from update {controller.currFloor.seqID}th tile");
 #endif
 						}
 						else
@@ -456,7 +456,7 @@ namespace NoStopMod.InputFixer
 							{
 								controller.FailAction();
 #if  DEBUG
-								NoStopMod.mod.Logger.Log($"Hold FailAction from update {controller.currFloor.seqID}th tile");
+								NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Hold FailAction from update {controller.currFloor.seqID}th tile");
 #endif
 							}
 								
@@ -472,7 +472,7 @@ namespace NoStopMod.InputFixer
 							//this would be used for making "release" timing be required for hitting the landing tile
 							
 #if  DEBUG
-							NoStopMod.mod.Logger.Log($"nextTileIsHold Hit from update {controller.currFloor.seqID}th tile");
+							NoStopMod.mod.Logger.Log($"[{Time.frameCount}] nextTileIsHold Hit from update {controller.currFloor.seqID}th tile");
 #endif
 						}
 					}

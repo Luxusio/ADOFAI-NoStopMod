@@ -75,7 +75,7 @@ namespace NoStopMod.InputFixer
                         if (!InputFixerManager.keyMask.Contains(keyEvent.keyCode))
                         {
 #if DEBUG
-                            NoStopMod.mod.Logger.Log($"press {(KeyCode) keyEvent.keyCode}");
+                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] press {(KeyCode) keyEvent.keyCode}");
 #endif
                             InputFixerManager.keyMask.Add(keyEvent.keyCode);
                             InputFixerManager.keyDownMask.Add(keyEvent.keyCode);
@@ -87,7 +87,7 @@ namespace NoStopMod.InputFixer
                         if (InputFixerManager.keyMask.Remove(keyEvent.keyCode))
                         {
 #if DEBUG
-                            NoStopMod.mod.Logger.Log($"release {(KeyCode) keyEvent.keyCode}");
+                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] release {(KeyCode) keyEvent.keyCode}");
 #endif
                             
                             if (InputFixerManager.keyMask.Count == 0)
@@ -108,7 +108,9 @@ namespace NoStopMod.InputFixer
                         var nativeKeyCode = KeyCodeHelper.ToNativeKeyCode(keyCode);
                         if (!InputFixerManager.keyMask.Contains(nativeKeyCode))
                         {
-                            NoStopMod.mod.Logger.Log($"Fix troll press key {(KeyCode) nativeKeyCode}");
+#if DEBUG
+                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Fix troll press key {(KeyCode) nativeKeyCode}");
+#endif
                             ignoredPressKeys.AddLast(nativeKeyCode);
                         }
                     }
@@ -117,8 +119,10 @@ namespace NoStopMod.InputFixer
                         var nativeKeyCode = KeyCodeHelper.ToNativeKeyCode(keyCode);
                         if (InputFixerManager.keyMask.Contains(nativeKeyCode))
                         {
+#if DEBUG
+                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Fix troll release key {(KeyCode) nativeKeyCode}");
+#endif
                             ignoredReleaseKeys.AddLast(nativeKeyCode);
-                            NoStopMod.mod.Logger.Log($"Fix troll release key {(KeyCode) nativeKeyCode}");
                         }
                     }
                 }
@@ -252,7 +256,7 @@ namespace NoStopMod.InputFixer
 #if DEBUG
                 if (__result)
                 {
-                    NoStopMod.mod.Logger.Log($"ValidInputWasTriggered!!!!");
+                    NoStopMod.mod.Logger.Log($"[{Time.frameCount}] ValidInputWasTriggered!!!!");
                 }
 #endif
                 return false;
