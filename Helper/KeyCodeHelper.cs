@@ -149,10 +149,10 @@ namespace NoStopMod.Helper
             d[UnityEngine.KeyCode.Mouse4] = (ushort) (1000 + MouseButton.Button5);
 
         }
-
-        public static ushort ToNativeKeyCode(UnityEngine.KeyCode keyCode)
+        
+        public static bool TryToNativeKeyCode(UnityEngine.KeyCode keyCode, out ushort nativeKeyCode)
         {
-            return UnityToNativeKeyCodeDictionary[keyCode];
+            return UnityToNativeKeyCodeDictionary.TryGetValue(keyCode, out nativeKeyCode);
         }
 
     }

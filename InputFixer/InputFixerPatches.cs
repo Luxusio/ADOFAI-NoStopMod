@@ -2,11 +2,8 @@ using HarmonyLib;
 using NoStopMod.InputFixer.HitIgnore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using JetBrains.Annotations;
 using NoStopMod.Helper;
-using Rewired.Utils;
 using UnityEngine;
 using KeyCode = SharpHook.Native.KeyCode;
 
@@ -28,7 +25,6 @@ namespace NoStopMod.InputFixer
         [HarmonyPatch(typeof(scrConductor), "Update")]
         private static class scrConductor_Update_Patch
         {
-            private static readonly UnityEngine.KeyCode[] UnityKeyCodes = (UnityEngine.KeyCode[]) Enum.GetValues(typeof(UnityEngine.KeyCode));
 
             public static void Postfix(scrConductor __instance, double ___dspTimeSong)
             {
@@ -101,30 +97,32 @@ namespace NoStopMod.InputFixer
                 // 키 씹힘 안정화
                 LinkedList<ushort> ignoredPressKeys = new(); // 씹힌 키 목록
                 LinkedList<ushort> ignoredReleaseKeys = new(); // 씹힌 키 목록
-                foreach (var keyCode in UnityKeyCodes)
+                foreach (var keyCode in InputFixerManager.UnityKeyCodes)
                 {
-                    if (Input.GetKeyDown(keyCode))
+                    if (KeyCodeHelper.TryToNativeKeyCode(keyCode, out var nativeKeyCode))
                     {
-                        var nativeKeyCode = KeyCodeHelper.ToNativeKeyCode(keyCode);
-                        if (!InputFixerManager.keyMask.Contains(nativeKeyCode))
+                        if (Input.GetKeyUp(keyCode))
                         {
+                            if (InputFixerManager.keyMask.Contains(nativeKeyCode))
+                            {
 #if DEBUG
-                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Fix troll press key {(KeyCode) nativeKeyCode}");
+                                NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Fix troll release key {(KeyCode) nativeKeyCode}, ({Input.GetKeyUp(keyCode)} || !{Input.GetKey(keyCode)})");
 #endif
-                            ignoredPressKeys.AddLast(nativeKeyCode);
+                                ignoredReleaseKeys.AddLast(nativeKeyCode);
+                            }
+                        }
+                        else if (Input.GetKeyDown(keyCode))
+                        {
+                            if (!InputFixerManager.keyMask.Contains(nativeKeyCode))
+                            {
+#if DEBUG
+                                NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Fix troll press key {(KeyCode) nativeKeyCode}");
+#endif
+                                ignoredPressKeys.AddLast(nativeKeyCode);
+                            }
                         }
                     }
-                    else if (Input.GetKeyUp(keyCode))
-                    {
-                        var nativeKeyCode = KeyCodeHelper.ToNativeKeyCode(keyCode);
-                        if (InputFixerManager.keyMask.Contains(nativeKeyCode))
-                        {
-#if DEBUG
-                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Fix troll release key {(KeyCode) nativeKeyCode}");
-#endif
-                            ignoredReleaseKeys.AddLast(nativeKeyCode);
-                        }
-                    }
+
                 }
                 
                 if (ignoredPressKeys.Count > 0 || ignoredReleaseKeys.Count > 0)

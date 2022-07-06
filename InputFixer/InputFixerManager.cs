@@ -1,12 +1,12 @@
 using NoStopMod.InputFixer.HitIgnore;
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using SharpHook;
 using DG.Tweening;
-using DG.Tweening.Core;
-using DG.Tweening.Plugins.Options;
 using MonsterLove.StateMachine;
 using NoStopMod.Helper;
 using UnityModManagerNet;
@@ -46,7 +46,7 @@ namespace NoStopMod.InputFixer
 
         public static double previousFrameTime;
 
-
+        public static UnityEngine.KeyCode[] UnityKeyCodes;
         
         //////////////////////////////////////////////////////////
         // scope : each timing
@@ -81,7 +81,19 @@ namespace NoStopMod.InputFixer
             Settings.settings.Add(settings);
 
             disablingAdofaiTweaksKeyLimiter = UnityModManager.FindMod("AdofaiTweaks") != null;
+            
+            var allKeyCodes = new ArrayList(Enum.GetValues(typeof(UnityEngine.KeyCode)));
 
+            UnityKeyCodes = (from UnityEngine.KeyCode keyCode in allKeyCodes  
+	            where KeyCodeHelper.TryToNativeKeyCode(keyCode, out _)  
+	            select keyCode).ToArray();
+
+            var notAvailableKeys = (from UnityEngine.KeyCode keyCode in allKeyCodes
+	            where !KeyCodeHelper.TryToNativeKeyCode(keyCode, out _)
+	            select keyCode).ToArray();
+
+            NoStopMod.mod.Logger.Log($"Cannot find valid matching Unity Key code ({String.Join(", ", notAvailableKeys)})");
+            
             HitIgnoreManager.Init();
         }
 
@@ -234,7 +246,7 @@ namespace NoStopMod.InputFixer
         {
            		//printe ($"paused {paused} || chosenplanet.currfloor == null {chosenplanet.currfloor == null} || isCutscene {isCutscene} == {paused || chosenplanet.currfloor == null || isCutscene}");
 	        
-			if (controller.paused || controller.chosenplanet.currfloor == null || controller.isCutscene || !offsetTickUpdated)
+			if (controller.paused || controller.chosenplanet.currfloor == null || controller.isCutscene)
 				return;
 			// 대부분의 변수 선언, 각도 계산 로직 등은 ExecuteUntilTileNotChange block안으로 들어갔습니다.
 			// block 안으로 들어가는건 함수로 빼주길 바람.
@@ -834,6 +846,10 @@ namespace NoStopMod.InputFixer
 
         public static void AdjustAngle(scrController controller, long targetTick)
         {
+	        if (!offsetTickUpdated)
+	        {
+		        return;
+	        }
 #if DEBUG
             var originalAngle = controller.chosenplanet.angle;
 #endif
