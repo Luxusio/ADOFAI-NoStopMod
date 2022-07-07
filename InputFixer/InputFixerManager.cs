@@ -54,7 +54,6 @@ namespace NoStopMod.InputFixer
         public static readonly HashSet<ushort> keyDownMask = new();
         //public static bool validKeyWasTriggered = false;
         public static readonly HashSet<ushort> holdKeys = new();
-        public static bool validKeyWasReleased = false;
         public static int countValidKeysPressed;
 		
         //
@@ -760,7 +759,7 @@ namespace NoStopMod.InputFixer
 	        // }
 	        // else
 	        {
-		        // bool holding = controller.holding;
+		        bool holding = controller.holding;
 
 		        List<ushort> list = new();
 		        foreach (var holdKey in InputFixerManager.holdKeys)
@@ -798,11 +797,11 @@ namespace NoStopMod.InputFixer
 					     //    InputFixerManager.holdKeys.RemoveAt(index);
 			       //  }
 		        // }
-// 		        
-// 		        if (holding && InputFixerManager.holdKeys.Count == 0)
-// 			        return true;
+		        
+		        if (holding && InputFixerManager.holdKeys.Count == 0)
+			        return true;
 	        }
-	        return InputFixerManager.validKeyWasReleased;
+	        return false;
         }
         
         public static bool ValidInputWasTriggered(scrController controller)

@@ -50,7 +50,6 @@ namespace NoStopMod.InputFixer
                 InputFixerManager.dspTimeSong = ___dspTimeSong;
 
                 // planet hit processing
-                InputFixerManager.validKeyWasReleased = false;
                 long rawKeyCodesTick = 0;
                 InputFixerManager.keyDownMask.Clear();
                 var pressKeyCodes = new List<KeyCode>();
@@ -60,7 +59,6 @@ namespace NoStopMod.InputFixer
                     if (keyEvent.tick != rawKeyCodesTick)
                     {
                         ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick);
-                        InputFixerManager.validKeyWasReleased = false;
                         rawKeyCodesTick = keyEvent.tick;
                         pressKeyCodes.Clear();
                         InputFixerManager.keyDownMask.Clear();
@@ -85,11 +83,6 @@ namespace NoStopMod.InputFixer
 #if DEBUG
                             NoStopMod.mod.Logger.Log($"[{Time.frameCount}] release {(KeyCode) keyEvent.keyCode}");
 #endif
-                            
-                            if (InputFixerManager.keyMask.Count == 0)
-                            {
-                                InputFixerManager.validKeyWasReleased = true;
-                            }
                         }
                     }
                 }
@@ -130,14 +123,10 @@ namespace NoStopMod.InputFixer
                     if (rawKeyCodesTick != InputFixerManager.currFrameTick)
                     {
                         ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick);
-                        InputFixerManager.validKeyWasReleased = false;
                         rawKeyCodesTick = InputFixerManager.currFrameTick;
                         pressKeyCodes.Clear();
                         InputFixerManager.keyDownMask.Clear();
                     }
-                    
-                    
-                    InputFixerManager.validKeyWasReleased = ignoredReleaseKeys.Count > 0;
 
                     foreach (var ignoredPressKey in ignoredPressKeys)
                     {
