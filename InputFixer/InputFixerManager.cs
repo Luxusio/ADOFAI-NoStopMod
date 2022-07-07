@@ -52,7 +52,6 @@ namespace NoStopMod.InputFixer
         // scope : each timing
         public static readonly HashSet<ushort> keyMask = new();
         public static readonly HashSet<ushort> keyDownMask = new();
-        //public static bool validKeyWasTriggered = false;
         public static readonly HashSet<ushort> holdKeys = new();
         public static int countValidKeysPressed;
 		
@@ -80,18 +79,12 @@ namespace NoStopMod.InputFixer
             Settings.settings.Add(settings);
 
             disablingAdofaiTweaksKeyLimiter = UnityModManager.FindMod("AdofaiTweaks") != null;
+
+            var allUnityKeyCodes = (UnityEngine.KeyCode[]) Enum.GetValues(typeof(UnityEngine.KeyCode));
             
-            var allKeyCodes = new ArrayList(Enum.GetValues(typeof(UnityEngine.KeyCode)));
-
-            UnityKeyCodes = (from UnityEngine.KeyCode keyCode in allKeyCodes  
-	            where KeyCodeHelper.TryToNativeKeyCode(keyCode, out _)  
+            UnityKeyCodes = (from UnityEngine.KeyCode keyCode in allUnityKeyCodes
+	            where KeyCodeHelper.TryToNativeKeyCode(keyCode, out _) 
 	            select keyCode).ToArray();
-
-            var notAvailableKeys = (from UnityEngine.KeyCode keyCode in allKeyCodes
-	            where !KeyCodeHelper.TryToNativeKeyCode(keyCode, out _)
-	            select keyCode).ToArray();
-
-            NoStopMod.mod.Logger.Log($"Cannot find valid matching Unity Key code ({String.Join(", ", notAvailableKeys)})");
             
             HitIgnoreManager.Init();
         }

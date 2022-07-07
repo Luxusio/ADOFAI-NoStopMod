@@ -139,6 +139,7 @@ namespace NoStopMod.Helper
             d[UnityEngine.KeyCode.PageDown] = (ushort) KeyCode.VcNumPadPageDown;
             d[UnityEngine.KeyCode.Insert] = (ushort) KeyCode.VcNumPadInsert;
             d[UnityEngine.KeyCode.Delete] = (ushort) KeyCode.VcNumPadDelete;
+            d[UnityEngine.KeyCode.LeftApple] = (ushort) KeyCode.VcLeftMeta;
             //d[UnityEngine.KeyCode.None] = (ushort) KeyCode.CharUndefined;
             
             //d[UnityEngine.KeyCode.None] = (ushort) (1000 + MouseButton.NoButton);
