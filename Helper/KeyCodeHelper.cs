@@ -106,9 +106,7 @@ namespace NoStopMod.Helper
             d[UnityEngine.KeyCode.F14] = (ushort) KeyCode.VcF14;
             d[UnityEngine.KeyCode.F15] = (ushort) KeyCode.VcF15;
             d[UnityEngine.KeyCode.Underscore] = (ushort) KeyCode.VcUnderscore;
-            d[UnityEngine.KeyCode.Comma] = (ushort) KeyCode.VcNumPadComma;
             d[UnityEngine.KeyCode.KeypadEquals] = (ushort) KeyCode.VcNumPadEquals;
-            d[UnityEngine.KeyCode.KeypadEnter] = (ushort) KeyCode.VcNumPadEnter;
             d[UnityEngine.KeyCode.RightControl] = (ushort) KeyCode.VcRightControl;
             d[UnityEngine.KeyCode.KeypadDivide] = (ushort) KeyCode.VcNumPadDivide;
             d[UnityEngine.KeyCode.Print] = (ushort) KeyCode.VcPrintscreen;
@@ -125,20 +123,10 @@ namespace NoStopMod.Helper
             d[UnityEngine.KeyCode.Menu] = (ushort) KeyCode.VcContextMenu;
             d[UnityEngine.KeyCode.UpArrow] = (ushort) KeyCode.VcUp;
             d[UnityEngine.KeyCode.LeftArrow] = (ushort) KeyCode.VcLeft;
-            d[UnityEngine.KeyCode.Clear] = (ushort) KeyCode.VcClear;
+            d[UnityEngine.KeyCode.Clear] = (ushort) KeyCode.VcEnter;
             d[UnityEngine.KeyCode.RightArrow] = (ushort) KeyCode.VcRight;
             d[UnityEngine.KeyCode.DownArrow] = (ushort) KeyCode.VcDown;
-            d[UnityEngine.KeyCode.Home] = (ushort) KeyCode.VcNumPadHome;
-            d[UnityEngine.KeyCode.UpArrow] = (ushort) KeyCode.VcNumPadUp;
-            d[UnityEngine.KeyCode.PageUp] = (ushort) KeyCode.VcNumPadPageUp;
-            d[UnityEngine.KeyCode.LeftArrow] = (ushort) KeyCode.VcNumPadLeft;
-            d[UnityEngine.KeyCode.Clear] = (ushort) KeyCode.VcNumPadClear;
-            d[UnityEngine.KeyCode.RightArrow] = (ushort) KeyCode.VcNumPadRight;
-            d[UnityEngine.KeyCode.End] = (ushort) KeyCode.VcNumPadEnd;
-            d[UnityEngine.KeyCode.DownArrow] = (ushort) KeyCode.VcNumPadDown;
-            d[UnityEngine.KeyCode.PageDown] = (ushort) KeyCode.VcNumPadPageDown;
-            d[UnityEngine.KeyCode.Insert] = (ushort) KeyCode.VcNumPadInsert;
-            d[UnityEngine.KeyCode.Delete] = (ushort) KeyCode.VcNumPadDelete;
+            d[UnityEngine.KeyCode.KeypadEnter] = (ushort) KeyCode.VcNumPadEnter;
             d[UnityEngine.KeyCode.LeftApple] = (ushort) KeyCode.VcLeftMeta;
             //d[UnityEngine.KeyCode.None] = (ushort) KeyCode.CharUndefined;
             
