@@ -78,6 +78,12 @@ namespace NoStopMod.InputFixer
                             InputFixerManager.keyDownMask.Add(keyCode);
                             pressKeyCodes.Add((KeyCode) keyCode);
                         }
+#if DEBUG
+                        else
+                        {
+                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] press fail {(KeyCode) keyCode}");
+                        }
+#endif
                     }
                     else
                     {
@@ -87,6 +93,12 @@ namespace NoStopMod.InputFixer
                             NoStopMod.mod.Logger.Log($"[{Time.frameCount}] release {(KeyCode) keyCode}");
 #endif
                         }
+#if DEBUG
+                        else
+                        {
+                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] release fail {(KeyCode) keyCode}");
+                        }
+#endif 
                     }
                 }
 
