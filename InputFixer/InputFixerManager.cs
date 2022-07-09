@@ -45,8 +45,6 @@ namespace NoStopMod.InputFixer
         public static double lastReportedDspTime;
 
         public static double previousFrameTime;
-
-        public static UnityEngine.KeyCode[] UnityKeyCodes;
         
         //////////////////////////////////////////////////////////
         // scope : each timing
@@ -80,12 +78,6 @@ namespace NoStopMod.InputFixer
 
             disablingAdofaiTweaksKeyLimiter = UnityModManager.FindMod("AdofaiTweaks") != null;
 
-            var allUnityKeyCodes = (UnityEngine.KeyCode[]) Enum.GetValues(typeof(UnityEngine.KeyCode));
-            
-            UnityKeyCodes = (from UnityEngine.KeyCode keyCode in allUnityKeyCodes
-	            where KeyCodeHelper.TryToNativeKeyCode(keyCode, out _) 
-	            select keyCode).ToArray();
-            
             HitIgnoreManager.Init();
         }
 

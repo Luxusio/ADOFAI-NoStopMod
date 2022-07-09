@@ -20,7 +20,6 @@ namespace NoStopMod.InputFixer.HitIgnore
             HashSet<KeyCode> ignoreScnNewIntro = new HashSet<KeyCode>();
             _dictionary["scnNewIntro"] = ignoreScnNewIntro;
 
-            ignoreScnNewIntro.Add(KeyCode.VcQuote);
             ignoreScnNewIntro.Add(KeyCode.VcBackquote);
             ignoreScnNewIntro.Add(KeyCode.Vc0);
             ignoreScnNewIntro.Add(KeyCode.Vc1);

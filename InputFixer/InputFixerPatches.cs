@@ -2,6 +2,7 @@ using HarmonyLib;
 using NoStopMod.InputFixer.HitIgnore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using NoStopMod.Helper;
 using UnityEngine;
@@ -63,25 +64,27 @@ namespace NoStopMod.InputFixer
                         pressKeyCodes.Clear();
                         InputFixerManager.keyDownMask.Clear();
                     }
+
+                    ushort keyCode = KeyCodeHelper.ConvertNativeKeyCode(keyEvent.keyCode);
                     
                     if (keyEvent.press)
                     {
-                        if (!InputFixerManager.keyMask.Contains(keyEvent.keyCode))
+                        if (!InputFixerManager.keyMask.Contains(keyCode))
                         {
 #if DEBUG
-                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] press {(KeyCode) keyEvent.keyCode}");
+                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] press {(KeyCode) keyCode}");
 #endif
-                            InputFixerManager.keyMask.Add(keyEvent.keyCode);
-                            InputFixerManager.keyDownMask.Add(keyEvent.keyCode);
-                            pressKeyCodes.Add((KeyCode) keyEvent.keyCode);
+                            InputFixerManager.keyMask.Add(keyCode);
+                            InputFixerManager.keyDownMask.Add(keyCode);
+                            pressKeyCodes.Add((KeyCode) keyCode);
                         }
                     }
                     else
                     {
-                        if (InputFixerManager.keyMask.Remove(keyEvent.keyCode))
+                        if (InputFixerManager.keyMask.Remove(keyCode))
                         {
 #if DEBUG
-                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] release {(KeyCode) keyEvent.keyCode}");
+                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] release {(KeyCode) keyCode}");
 #endif
                         }
                     }
@@ -90,46 +93,44 @@ namespace NoStopMod.InputFixer
                 // 키 씹힘 안정화
                 LinkedList<ushort> ignoredPressKeys = new(); // 씹힌 키 목록
                 LinkedList<ushort> ignoredReleaseKeys = new(); // 씹힌 키 목록
-                foreach (var keyCode in InputFixerManager.UnityKeyCodes)
-                {
-                    if (KeyCodeHelper.TryToNativeKeyCode(keyCode, out var nativeKeyCode))
-                    {
-                        if (Input.GetKeyUp(keyCode))
-                        {
-                            if (InputFixerManager.keyMask.Contains(nativeKeyCode))
-                            {
-#if DEBUG
-                                NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Fix troll release key {(KeyCode) nativeKeyCode}, {keyCode}");
-#endif
-                                ignoredReleaseKeys.AddLast(nativeKeyCode);
-                            }
-#if DEBUG
-                            else
-                            {
-                                NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Just release key {(KeyCode) nativeKeyCode}, {keyCode}");
-                            }
-#endif
-                        }
-                        else if (Input.GetKeyDown(keyCode))
-                        {
-                            if (!InputFixerManager.keyMask.Contains(nativeKeyCode))
-                            {
-#if DEBUG
-                                NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Fix troll press key {(KeyCode) nativeKeyCode}, {keyCode}");
-#endif
-                                ignoredPressKeys.AddLast(nativeKeyCode);
-                            }
-#if DEBUG
-                            else
-                            {
-                                NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Just press key {(KeyCode) nativeKeyCode}, {keyCode}");
-                            }
-#endif
-                        }
-                    }
 
+                for (int i = 0; i < KeyCodeHelper.UnityNativeKeyCodeList.Count; i++)
+                {
+                    var tuple = KeyCodeHelper.UnityNativeKeyCodeList[i];
+                    if (Input.GetKeyUp(tuple.Item1))
+                    {
+                        if (InputFixerManager.keyMask.Contains(tuple.Item2))
+                        {
+#if DEBUG
+                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Fix troll release key {(KeyCode) tuple.Item2}, {tuple.Item1}");
+#endif
+                            ignoredReleaseKeys.AddLast(tuple.Item2);
+                        }
+#if DEBUG
+                        else
+                        {
+                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Just release key {(KeyCode) tuple.Item2}, {tuple.Item1}");
+                        }
+#endif
+                    }
+                    else if (Input.GetKeyDown(tuple.Item1))
+                    {
+                        if (!InputFixerManager.keyMask.Contains(tuple.Item2))
+                        {
+#if DEBUG
+                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Fix troll press key {(KeyCode) tuple.Item2}, {tuple.Item1}");
+#endif
+                            ignoredPressKeys.AddLast(tuple.Item2);
+                        }
+#if DEBUG
+                        else
+                        {
+                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Just press key {(KeyCode) tuple.Item2}, {tuple.Item1}");
+                        }
+#endif
+                    }
                 }
-                
+
                 if (ignoredPressKeys.Count > 0 || ignoredReleaseKeys.Count > 0)
                 {
                     if (rawKeyCodesTick != InputFixerManager.currFrameTick)
