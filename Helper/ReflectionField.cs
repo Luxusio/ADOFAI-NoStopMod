@@ -4,44 +4,44 @@ using System.Reflection;
 
 namespace NoStopMod.Helper
 {
-    public class ReflectionField<T>
+    public class ReflectionField<T, TV>
     {
-        private static FieldInfo fieldInfo;
+        private FieldInfo _fieldInfo;
 
-        private readonly string[] fieldNames;
+        private readonly string[] _fieldNames;
 
         public ReflectionField(params string[] fieldNames)
         {
-            this.fieldNames = fieldNames;
+            this._fieldNames = fieldNames;
         }
 
         public FieldInfo GetFieldInfo(Type type)
         {
-            if (fieldInfo == null)
+            if (_fieldInfo == null)
             {
-                for (int i=0;i < fieldNames.Count();i++)
+                for (int i = 0; i < _fieldNames.Count(); i++)
                 {
-                    fieldInfo = type.GetField(fieldNames[i], 
+                    _fieldInfo = type.GetField(_fieldNames[i], 
                         BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | 
                         BindingFlags.GetField | BindingFlags.SetField | BindingFlags.GetProperty | BindingFlags.SetProperty);
-                    if (fieldInfo != null) break;
+                    if (_fieldInfo != null) break;
                 }
-                if (fieldInfo == null)
+                if (_fieldInfo == null)
                 {
-                    NoStopMod.mod.Logger.Error("Cannot find fieldInfo : (type=" + type + ", name" + fieldNames + ")");
+                    NoStopMod.mod.Logger.Error("Cannot find fieldInfo : (type=" + type + ", name" + _fieldNames + ")");
                 }
             }
-            return fieldInfo;
+            return _fieldInfo;
         }
 
-        public void SetValue(object obj, T value)
+        public void SetValue(T obj, TV value)
         {
             GetFieldInfo(obj.GetType())?.SetValue(obj, value);
         }
         
-        public T GetValue(object obj)
+        public TV GetValue(T obj)
         {
-            return (T) GetFieldInfo(obj.GetType())?.GetValue(obj);
+            return (TV) GetFieldInfo(obj.GetType())?.GetValue(obj);
         }
 
     }
