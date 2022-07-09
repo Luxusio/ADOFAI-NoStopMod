@@ -99,20 +99,32 @@ namespace NoStopMod.InputFixer
                             if (InputFixerManager.keyMask.Contains(nativeKeyCode))
                             {
 #if DEBUG
-                                NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Fix troll release key {(KeyCode) nativeKeyCode}, ({Input.GetKeyUp(keyCode)} || !{Input.GetKey(keyCode)})");
+                                NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Fix troll release key {(KeyCode) nativeKeyCode}, {keyCode}");
 #endif
                                 ignoredReleaseKeys.AddLast(nativeKeyCode);
                             }
+#if DEBUG
+                            else
+                            {
+                                NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Just release key {(KeyCode) nativeKeyCode}, {keyCode}");
+                            }
+#endif
                         }
                         else if (Input.GetKeyDown(keyCode))
                         {
                             if (!InputFixerManager.keyMask.Contains(nativeKeyCode))
                             {
 #if DEBUG
-                                NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Fix troll press key {(KeyCode) nativeKeyCode}");
+                                NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Fix troll press key {(KeyCode) nativeKeyCode}, {keyCode}");
 #endif
                                 ignoredPressKeys.AddLast(nativeKeyCode);
                             }
+#if DEBUG
+                            else
+                            {
+                                NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Just press key {(KeyCode) nativeKeyCode}, {keyCode}");
+                            }
+#endif
                         }
                     }
 
