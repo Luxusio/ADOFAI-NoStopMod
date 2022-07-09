@@ -93,7 +93,6 @@ namespace NoStopMod.InputFixer
         
         public static void OnToggle(bool toggle)
         {
-            InitQueue();
             if (toggle)
             {
                 StartHook();
@@ -110,17 +109,6 @@ namespace NoStopMod.InputFixer
             StopHook();
         }
 
-        public static void InitQueue()
-        {
-            currFrameTick = 0;
-            prevFrameTick = 0;
-            while (keyQueue.TryDequeue(out _))
-            {
-                // do nothing
-            }
-            keyMask.Clear();
-        }
-        
         public static void StartHook()
         {
             inputHookThread = new Thread(() =>

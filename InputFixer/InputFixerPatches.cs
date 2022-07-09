@@ -13,15 +13,6 @@ namespace NoStopMod.InputFixer
     
     public static class AsyncInputPatches
     {
-        
-        [HarmonyPatch(typeof(scrController), "Awake")]
-        private static class scrController_Awake_Patch
-        {
-            public static void Postfix(scrController __instance)
-            {
-                InputFixerManager.InitQueue();
-            }
-        }
 
         [HarmonyPatch(typeof(scrConductor), "Update")]
         private static class scrConductor_Update_Patch
