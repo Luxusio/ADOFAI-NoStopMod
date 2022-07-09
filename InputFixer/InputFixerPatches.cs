@@ -13,19 +13,11 @@ namespace NoStopMod.InputFixer
     
     public static class AsyncInputPatches
     {
-        
-        [HarmonyPatch(typeof(scrController), "Awake")]
-        private static class scrController_Awake_Patch
-        {
-            public static void Postfix(scrController __instance)
-            {
-                InputFixerManager.InitQueue();
-            }
-        }
 
         [HarmonyPatch(typeof(scrConductor), "Update")]
         private static class scrConductor_Update_Patch
         {
+
             public static void Postfix(scrConductor __instance, double ___dspTimeSong)
             {
                 // frameMs set
@@ -44,117 +36,166 @@ namespace NoStopMod.InputFixer
                     InputFixerManager.lastReportedDspTime = AudioSettings.dspTime;
                     InputFixerManager.dspTime = AudioSettings.dspTime;
                     InputFixerManager.offsetTick = InputFixerManager.currFrameTick - (long)(InputFixerManager.dspTime * 10000000);
+                    InputFixerManager.offsetTickUpdated = true;
                 }
 
                 InputFixerManager.dspTimeSong = ___dspTimeSong;
 
                 // planet hit processing
                 long rawKeyCodesTick = 0;
-                bool inputReleased = false;
+                InputFixerManager.keyDownMask.Clear();
                 var pressKeyCodes = new List<KeyCode>();
 
-                
-                
                 while (InputFixerManager.keyQueue.TryDequeue(out var keyEvent))
                 {
                     if (keyEvent.tick != rawKeyCodesTick)
                     {
-                        ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick, inputReleased);
+                        ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick);
                         rawKeyCodesTick = keyEvent.tick;
                         pressKeyCodes.Clear();
-                        inputReleased = false;
+                        InputFixerManager.keyDownMask.Clear();
                     }
+
+                    ushort keyCode = KeyCodeHelper.ConvertNativeKeyCode(keyEvent.keyCode);
                     
                     if (keyEvent.press)
                     {
-                        if (!InputFixerManager.keyMask.Contains(keyEvent.keyCode))
+                        if (!InputFixerManager.keyMask.Contains(keyCode))
                         {
-                            InputFixerManager.keyMask.Add(keyEvent.keyCode);
-                            pressKeyCodes.Add((KeyCode) keyEvent.keyCode);
+#if DEBUG
+                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] press {(KeyCode) keyCode}");
+#endif
+                            InputFixerManager.keyMask.Add(keyCode);
+                            InputFixerManager.keyDownMask.Add(keyCode);
+                            pressKeyCodes.Add((KeyCode) keyCode);
                         }
+#if DEBUG
+                        else
+                        {
+                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] press fail {(KeyCode) keyCode}");
+                        }
+#endif
                     }
                     else
                     {
-                        InputFixerManager.keyMask.Remove(keyEvent.keyCode);
-                        if (InputFixerManager.keyMask.Count == 0)
+                        if (InputFixerManager.keyMask.Remove(keyCode))
                         {
-                            inputReleased = true;
+#if DEBUG
+                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] release {(KeyCode) keyCode}");
+#endif
                         }
+#if DEBUG
+                        else
+                        {
+                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] release fail {(KeyCode) keyCode}");
+                        }
+#endif 
                     }
                 }
 
-                ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick, inputReleased);
+                // 키 씹힘 안정화
+                LinkedList<ushort> ignoredPressKeys = new(); // 씹힌 키 목록
+                LinkedList<ushort> ignoredReleaseKeys = new(); // 씹힌 키 목록
+
+                for (int i = 0; i < KeyCodeHelper.UnityNativeKeyCodeList.Count; i++)
+                {
+                    var tuple = KeyCodeHelper.UnityNativeKeyCodeList[i];
+                    if (Input.GetKeyUp(tuple.Item1))
+                    {
+                        if (InputFixerManager.keyMask.Contains(tuple.Item2))
+                        {
+#if DEBUG
+                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Fix troll release key {(KeyCode) tuple.Item2}, {tuple.Item1}");
+#endif
+                            ignoredReleaseKeys.AddLast(tuple.Item2);
+                        }
+#if DEBUG
+                        else
+                        {
+                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Just release key {(KeyCode) tuple.Item2}, {tuple.Item1}");
+                        }
+#endif
+                    }
+                    else if (Input.GetKeyDown(tuple.Item1))
+                    {
+                        if (!InputFixerManager.keyMask.Contains(tuple.Item2))
+                        {
+#if DEBUG
+                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Fix troll press key {(KeyCode) tuple.Item2}, {tuple.Item1}");
+#endif
+                            ignoredPressKeys.AddLast(tuple.Item2);
+                        }
+#if DEBUG
+                        else
+                        {
+                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Just press key {(KeyCode) tuple.Item2}, {tuple.Item1}");
+                        }
+#endif
+                    }
+                }
+
+                if (ignoredPressKeys.Count > 0 || ignoredReleaseKeys.Count > 0)
+                {
+                    if (rawKeyCodesTick != InputFixerManager.currFrameTick)
+                    {
+                        ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick);
+                        rawKeyCodesTick = InputFixerManager.currFrameTick;
+                        pressKeyCodes.Clear();
+                        InputFixerManager.keyDownMask.Clear();
+                    }
+
+                    foreach (var ignoredPressKey in ignoredPressKeys)
+                    {
+                        pressKeyCodes.Add((KeyCode) ignoredPressKey);
+                        InputFixerManager.keyMask.Add(ignoredPressKey);
+                        InputFixerManager.keyDownMask.Add(ignoredPressKey);
+                    }
+                    
+                    foreach (var ignoredReleaseKey in ignoredReleaseKeys)
+                    {
+                        InputFixerManager.keyMask.Remove(ignoredReleaseKey);
+                    }
+                }
+                
+                ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick);
             }
 
 
 
-            private static void ProcessKeyInputs([NotNull] IReadOnlyList<KeyCode> keyCodes, long eventTick, bool inputReleased)
+            private static void ProcessKeyInputs([NotNull] IReadOnlyList<KeyCode> keyCodes, long eventTick)
             {
-                int count;
+#if  DEBUG
+                {
+                    //NoStopMod.mod.Logger.Log("-");
+                }
+#endif
                 if (InputFixerManager.settings.insertKeyOnWindowFocus && !Application.isFocused)
                 {
-                    count = 0;
+                    InputFixerManager.countValidKeysPressed = 0;
                 }
                 else
                 {
-                    count = GetValidKeyCount(keyCodes);
+                    InputFixerManager.countValidKeysPressed = GetValidKeyCount(keyCodes);
                 }
-                
-                
+
+
                 var controller = scrController.instance;
+                var targetTick = eventTick != 0 ? eventTick : InputFixerManager.currFrameTick;
 
-
-                if ((scrController.States) controller.GetState() == scrController.States.PlayerControl)
-                {
-
-                    var targetTick = eventTick != 0 ? eventTick : InputFixerManager.currFrameTick;
-                    var originalAngle = controller.chosenplanet.angle;
-                    InputFixerManager.AdjustAngle(scrController.instance, targetTick);
-#if DEBUG
-                    NoStopMod.mod.Logger.Log($"AdjustAngle {targetTick} ticks, angle {originalAngle}->{controller.chosenplanet.angle}");
+                
+                scrController.States state = (scrController.States) controller.GetState();
+                scrController.States targetState = (scrController.States) InputFixerManager.DestinationStateReflectionField.GetValue(controller.stateMachine).state;
+                
+#if  DEBUG
+                // if (InputFixerManager.countValidKeysPressed > 0 || InputFixerManager.validKeyWasReleased)
+                // {
+                //     NoStopMod.mod.Logger.Log($"PlayerControl before ({state}, {targetState}, {InputFixerManager.validKeyWasReleased}, {InputFixerManager.countValidKeysPressed}, {targetTick}), {controller.currFloor.seqID}th tile");
+                // }
 #endif
-                    
-                    InputFixerManager.HoldHit(controller, inputReleased);
-                    ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
-                    {
-                        var success = InputFixerManager.OttoHit(controller);
-#if DEBUG
-                        if (success)
-                        {
-                            NoStopMod.mod.Logger.Log($"OttoHit before hit {controller.currFloor.seqID}th tile");
-                        }
-#endif
-                    });
-                    ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
-                    {
-                        if (InputFixerManager.CanPlayerHit(controller))
-                        {
-                            var success = InputFixerManager.FailAction(controller);
-#if DEBUG
-                            if (success)
-                            {
-                                NoStopMod.mod.Logger.Log($"FailAction from update {controller.currFloor.seqID}th tile");
-                            }
-#endif
-                        }
-                    });
-                
-                }
-                
-                
-                if (count == 1)
+                if (state == scrController.States.PlayerControl &&
+                    targetState == scrController.States.PlayerControl)
                 {
-                    controller.consecMultipressCounter = 0;
-                }
-
-                for (var i = 0; i < count; i++)
-                {
-                    controller.keyTimes.Add(0);
-                }
-                
-                while (controller.keyTimes.Count > 0)
-                {
-                    InputFixerManager.Hit(controller);
+                    InputFixerManager.PlayerControl_Update(controller, targetTick);
                 }
             }
 
@@ -165,11 +206,7 @@ namespace NoStopMod.InputFixer
                 {
                     if (HitIgnoreManager.ShouldBeIgnored(keyCodes[i])) continue;
 
-                    if (AudioListener.pause || RDC.auto) continue;
-#if DEBUG
-                    NoStopMod.mod.Logger.Log("Fetch Input : " + InputFixerManager.offsetTick + ", " + keyCodes[i]);
-                    
-#endif
+                    // if (AudioListener.pause || RDC.auto) continue;
                     if (++count > 4) break;
                 }
 
@@ -183,20 +220,31 @@ namespace NoStopMod.InputFixer
         {
             public static bool Prefix(scrController __instance, ref int __result)
             {
-                if ((scrController.States) __instance.GetState() != scrController.States.PlayerControl)
-                {
-                    return true;
-                }
                 return false;
             }
 
             public static void Postfix(ref int __result)
             {
-                if ((scrController.States) scrController.instance.GetState() != scrController.States.PlayerControl)
-                {
-                    return;
-                }
-                __result = 0;
+                __result = InputFixerManager.countValidKeysPressed;
+            }
+        }
+        
+        [HarmonyPatch(typeof(scrController), "PlayerControl_Update")]
+        private static class scrController_PlayerControl_Update_Patch
+        {
+            public static bool Prefix(scrController __instance)
+            {
+                return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(scrController), "holding", MethodType.Getter)]
+        private static class scrController_holding_Patch
+        {
+            public static bool Prefix(scrController __instance, ref bool __result)
+            {
+                __result = InputFixerManager.holdKeys.Count != 0;
+                return false;
             }
         }
         
@@ -204,22 +252,17 @@ namespace NoStopMod.InputFixer
         private static class scrController_ValidInputWasTriggered_Patch
         {
             public static bool Prefix(scrController __instance, ref bool __result)
-            {               
-                if ((scrController.States) __instance.GetState() != scrController.States.PlayerControl)
-                {
-                    return true;
-                }
-                __result = false;
-                return false;
-            }
-
-            public static void Postfix(ref bool __result)
             {
-                if ((scrController.States) scrController.instance.GetState() != scrController.States.PlayerControl)
+                // __result = InputFixerManager.validKeyWasTriggered;
+                __result = InputFixerManager.ValidInputWasTriggered(__instance);
+                
+#if DEBUG
+                if (__result)
                 {
-                    return;
+                    NoStopMod.mod.Logger.Log($"[{Time.frameCount}] ValidInputWasTriggered!!!!");
                 }
-                __result = false;
+#endif
+                return false;
             }
         }
         
@@ -228,21 +271,8 @@ namespace NoStopMod.InputFixer
         {
             public static bool Prefix(scrController __instance, ref bool __result)
             {
-                if ((scrController.States) __instance.GetState() != scrController.States.PlayerControl)
-                {
-                    return true;
-                }
-                __result = false;
+                __result = InputFixerManager.ValidInputWasReleased(scrController.instance);
                 return false;
-            }
-
-            public static void Postfix(ref bool __result)
-            {
-                if ((scrController.States) scrController.instance.GetState() != scrController.States.PlayerControl)
-                {
-                    return;
-                }
-                __result = false;
             }
         }
 
@@ -266,6 +296,27 @@ namespace NoStopMod.InputFixer
                 }
 
                 return true;
+            }
+        }
+        
+        [HarmonyPatch(typeof(scrCreditsText), "Start")]
+        private static class scrCreditsText_Start_Patch
+        {
+            public static void Postfix(scrCreditsText __instance)
+            {
+                if (scnLevelSelectTaro.instance != null && scnLevelSelectTaro.instance.scene.creditsContentCopy == null)
+                {
+                    scnLevelSelectTaro.instance.scene.creditsContentCopy = __instance.contentCopy;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(scrController), "TogglePauseGame")]
+        private static class scrController_TogglePauseGame_Patch
+        {
+            public static void Postfix()
+            {
+                InputFixerManager.offsetTickUpdated = false;
             }
         }
         

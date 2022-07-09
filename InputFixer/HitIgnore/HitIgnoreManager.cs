@@ -20,7 +20,6 @@ namespace NoStopMod.InputFixer.HitIgnore
             HashSet<KeyCode> ignoreScnNewIntro = new HashSet<KeyCode>();
             _dictionary["scnNewIntro"] = ignoreScnNewIntro;
 
-            ignoreScnNewIntro.Add(KeyCode.VcQuote);
             ignoreScnNewIntro.Add(KeyCode.VcBackquote);
             ignoreScnNewIntro.Add(KeyCode.Vc0);
             ignoreScnNewIntro.Add(KeyCode.Vc1);
@@ -33,15 +32,17 @@ namespace NoStopMod.InputFixer.HitIgnore
 
             HashSet<KeyCode> ignoreScnCLS_ = new HashSet<KeyCode>();
             _dictionary["scnCLS"] = ignoreScnCLS_;
-            ignoreScnCLS_.Add(KeyCode.VcS);
-            ignoreScnCLS_.Add(KeyCode.VcDelete);
-            ignoreScnCLS_.Add(KeyCode.VcF);
-            ignoreScnCLS_.Add(KeyCode.VcO);
-            ignoreScnCLS_.Add(KeyCode.Vc7);
             ignoreScnCLS_.Add(KeyCode.VcUp);
             ignoreScnCLS_.Add(KeyCode.VcNumPadUp);
             ignoreScnCLS_.Add(KeyCode.VcDown);
             ignoreScnCLS_.Add(KeyCode.VcNumPadDown);
+            ignoreScnCLS_.Add(KeyCode.VcR);
+            ignoreScnCLS_.Add(KeyCode.VcS);
+            ignoreScnCLS_.Add(KeyCode.VcDelete);
+            ignoreScnCLS_.Add(KeyCode.VcI);
+            ignoreScnCLS_.Add(KeyCode.VcF);
+            ignoreScnCLS_.Add(KeyCode.VcO);
+            ignoreScnCLS_.Add(KeyCode.VcN);
 
             HashSet<KeyCode> ignoreScnTaroMenu0 = new HashSet<KeyCode>();
             _dictionary["scnTaroMenu0"] = ignoreScnTaroMenu0;
@@ -51,6 +52,15 @@ namespace NoStopMod.InputFixer.HitIgnore
             ignoreScnTaroMenu0.Add(KeyCode.Vc4);
             ignoreScnTaroMenu0.Add(KeyCode.Vc5);
             ignoreScnTaroMenu0.Add(KeyCode.Vc6);
+            
+            HashSet<KeyCode> ignoreScnTaroMenu3 = new HashSet<KeyCode>();
+            _dictionary["scnTaroMenu3"] = ignoreScnTaroMenu3;
+            ignoreScnTaroMenu3.Add(KeyCode.Vc0);
+            ignoreScnTaroMenu3.Add(KeyCode.Vc1);
+            ignoreScnTaroMenu3.Add(KeyCode.Vc2);
+            ignoreScnTaroMenu3.Add(KeyCode.Vc3);
+            ignoreScnTaroMenu3.Add(KeyCode.Vc4);
+            ignoreScnTaroMenu3.Add(KeyCode.Vc5);
 
             scnCLS_searchMode = false;
 
@@ -65,7 +75,7 @@ namespace NoStopMod.InputFixer.HitIgnore
         public static bool ShouldBeIgnored(KeyCode keyCode)
         {
 #if DEBUG
-            NoStopMod.mod.Logger.Log($"scene : {GCS.sceneToLoad}, keyCode: {keyCode}");
+            //NoStopMod.mod.Logger.Log($"scene : {GCS.sceneToLoad}, keyCode: {keyCode}");
 #endif
             
             if (keyCode == KeyCode.VcEscape) return true;
@@ -74,19 +84,29 @@ namespace NoStopMod.InputFixer.HitIgnore
                 KeyLimiterManager.UpdateKeyLimiter(keyCode);
                 return true;
             }
-
-            if (scrController_state != scrController.States.PlayerControl)
+            
+            if (scrController_state != scrController.States.PlayerControl && !scrController.instance.isEditingLevel && scrController.instance.uiController.difficultyUIMode != DifficultyUIMode.DontShow)
             {
-                return true;
-            }
-
-            HashSet<KeyCode> ignoreScnCLS;
-            if (_dictionary.TryGetValue(GCS.sceneToLoad, out ignoreScnCLS))
-            {
-                if (GCS.sceneToLoad == "scnCLS" && scnCLS_searchMode)
+                if (keyCode is KeyCode.VcNumPadLeft 
+                            or KeyCode.VcLeft)
                 {
                     return true;
                 }
+                if (keyCode is KeyCode.VcNumPadRight 
+                    or KeyCode.VcRight)
+                {
+                    return true;
+                }
+            }
+
+            if (GCS.sceneToLoad == "scnCLS" && scnCLS_searchMode)
+            {
+                return true;
+            }
+            
+            HashSet<KeyCode> ignoreScnCLS;
+            if (_dictionary.TryGetValue(GCS.sceneToLoad, out ignoreScnCLS))
+            {
                 if (ignoreScnCLS.Contains(keyCode))
                 {
                     return true;

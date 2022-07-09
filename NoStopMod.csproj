@@ -40,6 +40,7 @@
     <Compile Include="Helper\ControllerHelper.cs" />
     <Compile Include="Helper\EventListener.cs" />
     <Compile Include="Helper\JSONHelper.cs" />
+    <Compile Include="Helper\KeyCodeHelper.cs" />
     <Compile Include="Helper\ReflectionField.cs" />
     <Compile Include="InputFixer\HitIgnore\KeyLimiter\KeyLimiterManager.cs" />
     <Compile Include="InputFixer\HitIgnore\KeyLimiter\KeyLimiterSettings.cs" />
@@ -400,9 +401,6 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Exec Command="taskkill /f /im &quot;A Dance*&quot; || exit 0" />
-    <Exec Command="make_debug.bat 1.2.8" />
-    <Exec Command="del /f /q &quot;C:\Program Files (x86)\Steam\steamapps\common\A Dance of Fire and Ice\Mods\NoStopMod\NoStopMod.dll&quot; || exit 0" />
-    <Exec Command="ping -n 6 127.0.0.1 &gt; nul" />
-    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\A Dance of Fire and Ice\Mods\NoStopMod\NoStopMod.dll&quot;" />
+    <Exec Command="make_debug.bat 1.2.9" />
   </Target>
 </Project>
