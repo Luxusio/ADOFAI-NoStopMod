@@ -50,7 +50,11 @@ namespace NoStopMod.InputFixer
                 {
                     if (keyEvent.tick != rawKeyCodesTick)
                     {
-                        ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick);
+                        if (rawKeyCodesTick != 0)
+                        {
+                            ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick);
+                        }
+
                         rawKeyCodesTick = keyEvent.tick;
                         pressKeyCodes.Clear();
                         InputFixerManager.keyDownMask.Clear();
