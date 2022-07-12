@@ -401,6 +401,6 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Exec Command="taskkill /f /im &quot;A Dance*&quot; || exit 0" />
-    <Exec Command="make_debug.bat 1.2.9" />
+    <Exec Command="make_debug.bat 1.2.10" />
   </Target>
 </Project>
