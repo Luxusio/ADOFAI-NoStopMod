@@ -480,7 +480,7 @@ namespace NoStopMod.InputFixer
 					//alreadyHitHoldEnding = true;
 					controller.Hit();
 #if DEBUG
-					NoStopMod.mod.Logger.Log($"Taro Hit from update {controller.currFloor.seqID}th tile");
+					NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Taro Hit from update {controller.currFloor.seqID}th tile");
 #endif
 				}
 			});
@@ -552,7 +552,7 @@ namespace NoStopMod.InputFixer
 						controller.keyTimes.RemoveAt(0);
 						var didSwitch = controller.Hit();
 #if  DEBUG
-						NoStopMod.mod.Logger.Log($"Hit from update {controller.currFloor.seqID}th tile");
+						NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Hit from update {controller.currFloor.seqID}th tile");
 #endif
 						if (didSwitch && controller.chosenplanet.currfloor.holdLength > -1)
 						{
@@ -571,7 +571,7 @@ namespace NoStopMod.InputFixer
 						controller.keyTimes.RemoveAt(0); // Assume tile after midspin is always 1 tap
 						var didSwitch = controller.Hit();
 #if  DEBUG
-						NoStopMod.mod.Logger.Log($"midspinInfiniteMargin Hit from update {controller.currFloor.seqID}th tile");
+						NoStopMod.mod.Logger.Log($"[{Time.frameCount}] midspinInfiniteMargin Hit from update {controller.currFloor.seqID}th tile");
 #endif
 						if (didSwitch && controller.chosenplanet.currfloor.holdLength > -1)
 						{
