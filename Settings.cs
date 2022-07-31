@@ -8,7 +8,7 @@ using SimpleJSON;
 
 namespace NoStopMod
 {
-    class Settings
+    public class Settings
     {
 
         public const String path = "\\Mods\\NoStopMod\\settings.json";

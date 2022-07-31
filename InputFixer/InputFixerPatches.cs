@@ -15,7 +15,7 @@ namespace NoStopMod.InputFixer
     {
 
         [HarmonyPatch(typeof(scrConductor), "Update")]
-        private static class scrConductor_Update_Patch
+        public static class scrConductor_Update_Patch
         {
 
             public static void Postfix(scrConductor __instance, double ___dspTimeSong)
@@ -166,7 +166,7 @@ namespace NoStopMod.InputFixer
 
 
 
-            private static void ProcessKeyInputs([NotNull] IReadOnlyList<KeyCode> keyCodes, long eventTick)
+            public static void ProcessKeyInputs([NotNull] IReadOnlyList<KeyCode> keyCodes, long eventTick)
             {
 #if  DEBUG
                 {
@@ -218,9 +218,24 @@ namespace NoStopMod.InputFixer
             }
 
         }
+        
+        [HarmonyPatch(typeof(scrCamera), "Update")]
+        public static class scrCamera_Update_Patch
+        {
+            public static void Postfix(scrCamera __instance)
+            {
+                if (InputFixerManager.haveToReplaceCamyToPos)
+                {
+                    InputFixerManager.haveToReplaceCamyToPos = false;
+                    __instance.topos.x = InputFixerManager.overrideCamyToPos[0];
+                    __instance.topos.y = InputFixerManager.overrideCamyToPos[1];
+                    __instance.topos.z = InputFixerManager.overrideCamyToPos[2];
+                }
+            }
+        }
 
         [HarmonyPatch(typeof(scrController), "CountValidKeysPressed")]
-        private static class scrController_CountValidKeysPressed_Patch
+        public static class scrController_CountValidKeysPressed_Patch
         {
             public static bool Prefix(scrController __instance, ref int __result)
             {
@@ -234,7 +249,7 @@ namespace NoStopMod.InputFixer
         }
         
         [HarmonyPatch(typeof(scrController), "PlayerControl_Update")]
-        private static class scrController_PlayerControl_Update_Patch
+        public static class scrController_PlayerControl_Update_Patch
         {
             public static bool Prefix(scrController __instance)
             {
@@ -243,7 +258,7 @@ namespace NoStopMod.InputFixer
         }
 
         [HarmonyPatch(typeof(scrController), "holding", MethodType.Getter)]
-        private static class scrController_holding_Patch
+        public static class scrController_holding_Patch
         {
             public static bool Prefix(scrController __instance, ref bool __result)
             {
@@ -253,7 +268,7 @@ namespace NoStopMod.InputFixer
         }
         
         [HarmonyPatch(typeof(scrController), "ValidInputWasTriggered")]
-        private static class scrController_ValidInputWasTriggered_Patch
+        public static class scrController_ValidInputWasTriggered_Patch
         {
             public static bool Prefix(scrController __instance, ref bool __result)
             {
@@ -271,7 +286,7 @@ namespace NoStopMod.InputFixer
         }
         
         [HarmonyPatch(typeof(scrController), "ValidInputWasReleased")]
-        private static class scrController_ValidInputWasReleased_Patch
+        public static class scrController_ValidInputWasReleased_Patch
         {
             public static bool Prefix(scrController __instance, ref bool __result)
             {
@@ -281,7 +296,7 @@ namespace NoStopMod.InputFixer
         }
 
         [HarmonyPatch(typeof(scrPlanet), "Update_RefreshAngles")]
-        private static class scrPlanet_Update_RefreshAngles_Patch
+        public static class scrPlanet_Update_RefreshAngles_Patch
         {
             public static bool Prefix(scrPlanet __instance, ref double ___snappedLastAngle)
             {
@@ -304,7 +319,7 @@ namespace NoStopMod.InputFixer
         }
         
         [HarmonyPatch(typeof(scrCreditsText), "Start")]
-        private static class scrCreditsText_Start_Patch
+        public static class scrCreditsText_Start_Patch
         {
             public static void Postfix(scrCreditsText __instance)
             {
@@ -316,7 +331,7 @@ namespace NoStopMod.InputFixer
         }
 
         [HarmonyPatch(typeof(scrController), "TogglePauseGame")]
-        private static class scrController_TogglePauseGame_Patch
+        public static class scrController_TogglePauseGame_Patch
         {
             public static void Postfix()
             {

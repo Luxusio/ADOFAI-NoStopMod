@@ -19,6 +19,11 @@
       "Id": "NoStopMod",
       "Version": "1.2.10",
       "DownloadUrl": "https://github.com/Luxusio/ADOFAI-NoStopMod/releases/download/1.2.10/NoStopMod-1.2.10.zip"
+    },
+    {
+      "Id": "NoStopMod",
+      "Version": "1.2.11",
+      "DownloadUrl": "https://github.com/Luxusio/ADOFAI-NoStopMod/releases/download/1.2.11/NoStopMod-1.2.11.zip"
     }
   ]
 }

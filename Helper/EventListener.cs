@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace NoStopMod.Helper
 {
-    class EventListener<T>
+    public class EventListener<T>
     {
 
         public readonly List<Action<T>> listeners = new List<Action<T>>();

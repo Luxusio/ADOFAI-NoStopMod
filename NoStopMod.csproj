@@ -49,7 +49,6 @@
     <Compile Include="InputFixer\InputFixerSettings.cs" />
     <Compile Include="InputFixer\HitIgnore\HitIgnoreManager.cs" />
     <Compile Include="InputFixer\HitIgnore\HitIgnorePatches.cs" />
-    <Compile Include="Helper\SimpleGUI.cs" />
     <Compile Include="InputFixer\KeyEvent.cs" />
     <Compile Include="lib\SimpleJSON.cs" />
     <Compile Include="NoStopMod.cs" />
@@ -401,6 +400,6 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Exec Command="taskkill /f /im &quot;A Dance*&quot; || exit 0" />
-    <Exec Command="make_debug.bat 1.2.10" />
+    <Exec Command="make_debug.bat 1.2.11" />
   </Target>
 </Project>
