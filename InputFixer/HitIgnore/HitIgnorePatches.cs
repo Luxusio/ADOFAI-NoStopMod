@@ -12,18 +12,18 @@ namespace NoStopMod.InputFixer.HitIgnore
         [HarmonyPatch(typeof(scnCLS), "Refresh")]
         private static class scnCLS_Refresh_Patch
         {
-            public static void Postfix(scnCLS __instance, ref bool ___searchMode)
+            public static void Postfix(scnCLS __instance)
             {
-                HitIgnoreManager.scnCLS_searchMode = ___searchMode;
+                HitIgnoreManager.scnCLS_searchMode = __instance.searchMode;
             }
         }
 
         [HarmonyPatch(typeof(scnCLS), "ToggleSearchMode")]
         private static class scnCLS_ToggleSearchMode_Patch
         {
-            public static void Postfix(scnCLS __instance, ref bool ___searchMode)
+            public static void Postfix(scnCLS __instance)
             {
-                HitIgnoreManager.scnCLS_searchMode = ___searchMode;
+                HitIgnoreManager.scnCLS_searchMode = __instance.searchMode;
             }
         }
 

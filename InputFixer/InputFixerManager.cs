@@ -216,30 +216,35 @@ namespace NoStopMod.InputFixer
         
         public static void PlayerControl_Update(scrController controller, long targetTick)
         {
-           		//printe ($"paused {paused} || chosenplanet.currfloor == null {chosenplanet.currfloor == null} || isCutscene {isCutscene} == {paused || chosenplanet.currfloor == null || isCutscene}");
-	        
-			if (controller.paused || controller.chosenplanet.currfloor == null || controller.isCutscene)
+	        if (controller.paused || controller.chosenplanet.currfloor == null || controller.isCutscene)
 				return;
-			// 대부분의 변수 선언, 각도 계산 로직 등은 ExecuteUntilTileNotChange block안으로 들어갔습니다.
-			// block 안으로 들어가는건 함수로 빼주길 바람.
+			
+	        ValidInputWasReleasedThisFrameReflectionField.SetValue(controller, controller.ValidInputWasReleased());
 
-			ValidInputWasReleasedThisFrameReflectionField.SetValue(controller, controller.ValidInputWasReleased());
-#if DEBUG
-	        if (ValidInputWasReleasedThisFrameReflectionField.GetValue(controller))
-	        {
-		        NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Valid input was released this frame");
-	        }
-#endif
+			
+			bool nextTileIsHold = false;
+			if (controller.chosenplanet.currfloor.nextfloor)
+			{
+				var possibleConsecFloor = controller.chosenplanet.currfloor.nextfloor;
+					
+				// Skip past all midspins
+				while (possibleConsecFloor.midSpin && possibleConsecFloor.nextfloor)
+				{
+					possibleConsecFloor = possibleConsecFloor.nextfloor;
+				}
+
+				nextTileIsHold = possibleConsecFloor.holdLength > -1;
+			}
+
+
 
 			//Taro: fail if we let go before 45 degrees from the end.
 			//currfloor.holdCompletion and currfloor.angleLength vars are used for this.
-			//float marginScale = controller.chosenplanet.currfloor.nextfloor != null ? (float)controller.chosenplanet.currfloor.nextfloor.marginScale : 1;
-			//var holdMargin = 1.0f - ((minAngleMargin * marginScale) / controller.chosenplanet.currfloor.angleLength);
 
 			// Fail when past the max of 180 degrees or 2x the latest possible time to hit.
 			// At some BPMs, 180 degrees is smaller than the valid hit window.
-
-
+			
+			
 			ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
 			{
 				InputFixerManager.AdjustAngle(scrController.instance, targetTick);
@@ -249,7 +254,7 @@ namespace NoStopMod.InputFixer
 					(float)(controller.conductor.bpm * controller.speed),
 					controller.conductor.song.pitch) * Mathf.Deg2Rad;
 				
-				double extraRadiansBeforeDeath = Math.Max (Mathf.PI, minAngleMargin * 2);
+				double extraRadiansBeforeDeath = Math.Max(Mathf.PI, minAngleMargin * 2);
 				if (controller.noFail || controller.currFloor.isSafe)
 				{
 					// "Fail" very soon after hit window passes if no-fail is enabled
@@ -261,8 +266,9 @@ namespace NoStopMod.InputFixer
 				{
 					angleDiff *= -1;
 				}
-				
-				if (controller.gameworld
+
+				//Check for fail
+				if (scrController.isGameWorld
 				    && controller.lm.listFloors.Count > controller.currFloor.seqID + 1 // i.e. must be at least two higher
 				    && angleDiff > extraRadiansBeforeDeath)
 				{
@@ -272,7 +278,6 @@ namespace NoStopMod.InputFixer
 #endif
 				}
 			});
-			//Check for fail
 
 			ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
 			{
@@ -283,8 +288,9 @@ namespace NoStopMod.InputFixer
 				//check for d_autohit, and TRIGGER it
 				if ((RDC.auto || BenchmarkModeReflectionField.GetValue(controller) || nextTileIsAuto ||
 				     controller.chosenplanet.currfloor.holdLength > -1 && controller.chosenplanet.currfloor.auto) &&
-				    controller.gameworld) // changed if components
+				    scrController.isGameWorld) // changed if components
 				{
+					// Allow otto to hit multiple times per frame with new otto
 					if (controller.chosenplanet.AutoShouldHitNow())
 					{
 
@@ -311,22 +317,22 @@ namespace NoStopMod.InputFixer
 			// 	printe_frame("newPressCount: " + newPressCount);
 
 
-			// var floorTapCount = 1;
-			// scrFloor nextFloor = null;
-			// if (controller.currFloor != null && controller.currFloor.nextfloor != null)
-			// {
-			// 	nextFloor = controller.currFloor.nextfloor;
-			// 	floorTapCount = nextFloor.tapsNeeded;
-			// }
+			var floorTapCount = 1;
+			scrFloor nextFloor = null;
+			if (controller.currFloor != null && controller.currFloor.nextfloor != null)
+			{
+				nextFloor = controller.currFloor.nextfloor;
+				floorTapCount = nextFloor.tapsNeeded;
+			}
 
 			{
 				InputFixerManager.AdjustAngle(scrController.instance, targetTick);
-				bool nextTileIsAuto = controller.chosenplanet.currfloor.nextfloor != null &&
-				                      controller.chosenplanet.currfloor.nextfloor.auto;
-
-				if (controller.ValidInputWasTriggered() && (!nextTileIsAuto || (nextTileIsAuto && controller.chosenplanet.currfloor.freeroam)))
+				bool nextTileIsAuto = controller.chosenplanet.currfloor.nextfloor != null && controller.chosenplanet.currfloor.nextfloor.auto;
+				
+				if (controller.ValidInputWasTriggered() &&
+				    (!nextTileIsAuto || (nextTileIsAuto && controller.chosenplanet.currfloor.freeroam)))
 				{
-					int newPressCount = InputFixerManager.countValidKeysPressed;
+					int newPressCount = controller.CountValidKeysPressed();
 
 					for (var i = 0; i < newPressCount; i++)
 					{
@@ -339,24 +345,21 @@ namespace NoStopMod.InputFixer
 				}
 			}
 
-			// bool alreadyHitHoldEnding = false;
+			//bool alreadyHitHoldEnding = false;
 
-			{ // 홀드는 한 타이밍에 한개씩만 처리
+			{
 				InputFixerManager.AdjustAngle(scrController.instance, targetTick);
-				
-				
-				bool nextTileIsAuto = controller.chosenplanet.currfloor.nextfloor != null && controller.chosenplanet.currfloor.nextfloor.auto;
-				bool nextTileIsHold = controller.chosenplanet.currfloor.nextfloor && controller.chosenplanet.currfloor.nextfloor.holdLength > -1;
 
-				double minAngleMargin = scrMisc.GetAdjustedAngleBoundaryInDeg (
+				double minAngleMargin = scrMisc.GetAdjustedAngleBoundaryInDeg(
 					HitMarginGeneral.Counted,
-					(float)(controller.conductor.bpm * controller.speed),
+					(float) (controller.conductor.bpm * controller.speed),
 					controller.conductor.song.pitch) * Mathf.Deg2Rad;
 
-				float marginScale = controller.chosenplanet.currfloor.nextfloor != null ? (float)controller.chosenplanet.currfloor.nextfloor.marginScale : 1;
+				bool nextTileIsAuto = controller.chosenplanet.currfloor.nextfloor != null && controller.chosenplanet.currfloor.nextfloor.auto;
+
+				float marginScale = controller.chosenplanet.currfloor.nextfloor != null ? (float) controller.chosenplanet.currfloor.nextfloor.marginScale : 1;
 				var holdMargin = 1.0f - ((minAngleMargin * marginScale) / controller.chosenplanet.currfloor.angleLength);
-				
-				// for scene
+
 				if (!controller.gameworld && controller.chosenplanet.currfloor.holdLength > -1)
 				{
 					float holdAngleLength = Mathf.PI * (controller.chosenplanet.currfloor.holdLength * 2 + 1);
@@ -421,8 +424,7 @@ namespace NoStopMod.InputFixer
 						controller.LockInput(0.4f);
 					}
 				}
-				
-				// for in-game
+
 				if (controller.gameworld && ValidInputWasReleasedThisFrameReflectionField.GetValue(controller) && !nextTileIsAuto &&
 				    !controller.chosenplanet.currfloor.auto)
 				{
@@ -452,7 +454,7 @@ namespace NoStopMod.InputFixer
 							controller.chosenplanet.currfloor.holdRenderer.Hit();
 
 							controller.Hit();
-							// alreadyHitHoldEnding = true;
+							//alreadyHitHoldEnding = true;
 							//this would be used for making "release" timing be required for hitting the landing tile
 							
 #if  DEBUG
@@ -464,24 +466,20 @@ namespace NoStopMod.InputFixer
 				}
 			}
 
-			// execute only once
-			
-			//Taro: auto hit the next tile if we started the countdown on a hold...
-
 			ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
 			{
 				InputFixerManager.AdjustAngle(scrController.instance, targetTick);
-				
+				//Taro: auto hit the next tile if we started the countdown on a hold...
 				if (!RDC.auto && !BenchmarkModeReflectionField.GetValue(controller) &&
 				    controller.chosenplanet.AutoShouldHitNow() && controller.chosenplanet.currfloor.holdLength > -1
 				    && GCS.checkpointNum == controller.chosenplanet.currfloor.seqID
-				    // && !alreadyHitHoldEnding
+				    //&& !alreadyHitHoldEnding
 				    && (scrController.States) controller.GetState() != scrController.States.Fail
 				    && (scrController.States) controller.GetState() != scrController.States.Fail2)
 				{
-					// alreadyHitHoldEnding = true;
+					//alreadyHitHoldEnding = true;
 					controller.Hit();
-#if  DEBUG
+#if DEBUG
 					NoStopMod.mod.Logger.Log($"Taro Hit from update {controller.currFloor.seqID}th tile");
 #endif
 				}
@@ -491,18 +489,16 @@ namespace NoStopMod.InputFixer
 			{
 				InputFixerManager.AdjustAngle(scrController.instance, targetTick);
 				
-				bool nextTileIsAuto = controller.chosenplanet.currfloor.nextfloor != null && controller.chosenplanet.currfloor.nextfloor.auto;
-
-				double minAngleMargin = scrMisc.GetAdjustedAngleBoundaryInDeg (
+				double minAngleMargin = scrMisc.GetAdjustedAngleBoundaryInDeg(
 					HitMarginGeneral.Counted,
-					(float)(controller.conductor.bpm * controller.speed),
+					(float) (controller.conductor.bpm * controller.speed),
 					controller.conductor.song.pitch) * Mathf.Deg2Rad;
-
-				//Taro: fail if we let go before 45 degrees from the end.
-				//currfloor.holdCompletion and currfloor.angleLength vars are used for this.
-				float marginScale = controller.chosenplanet.currfloor.nextfloor != null ? (float)controller.chosenplanet.currfloor.nextfloor.marginScale : 1;
+				
+				float marginScale = controller.chosenplanet.currfloor.nextfloor != null ? (float) controller.chosenplanet.currfloor.nextfloor.marginScale : 1;
 				var holdMargin = 1.0f - ((minAngleMargin * marginScale) / controller.chosenplanet.currfloor.angleLength);
-
+				
+				bool nextTileIsAuto = controller.chosenplanet.currfloor.nextfloor != null && controller.chosenplanet.currfloor.nextfloor.auto;
+				
 				if (controller.gameworld && !nextTileIsAuto && !controller.chosenplanet.currfloor.auto)
 				{
 					if (controller.chosenplanet.currfloor.holdCompletion > holdMargin
@@ -514,32 +510,25 @@ namespace NoStopMod.InputFixer
 					    && controller.chosenplanet.currfloor.holdLength > -1)
 					{
 						controller.FailAction();
-#if  DEBUG
-						NoStopMod.mod.Logger.Log($"FailAction from update {controller.currFloor.seqID}th tile");
-#endif
 					}
 				}
 			});
 
-			bool consecHold = controller.chosenplanet.currfloor.nextfloor && (controller.strictHolds && controller.chosenplanet.currfloor.nextfloor.holdLength > -1);
-
+			// This isn't being used???
+			// bool consecHold = chosenplanet.currfloor.nextfloor && (strictHolds && chosenplanet.currfloor.nextfloor.holdLength > -1);
 
 			ControllerHelper.ExecuteUntilTileNotChange(controller, () =>
 			{
 				InputFixerManager.AdjustAngle(scrController.instance, targetTick);
-				
-				bool nextTileIsHold = controller.chosenplanet.currfloor.nextfloor && controller.chosenplanet.currfloor.nextfloor.holdLength > -1;
 
-				double minAngleMargin = scrMisc.GetAdjustedAngleBoundaryInDeg (
+				double minAngleMargin = scrMisc.GetAdjustedAngleBoundaryInDeg(
 					HitMarginGeneral.Counted,
-					(float)(controller.conductor.bpm * controller.speed),
+					(float) (controller.conductor.bpm * controller.speed),
 					controller.conductor.song.pitch) * Mathf.Deg2Rad;
 
-				//Taro: fail if we let go before 45 degrees from the end.
-				//currfloor.holdCompletion and currfloor.angleLength vars are used for this.
-				float marginScale = controller.chosenplanet.currfloor.nextfloor != null ? (float)controller.chosenplanet.currfloor.nextfloor.marginScale : 1;
-				var holdMargin = 1.0f - ((minAngleMargin * marginScale) / controller.chosenplanet.currfloor.angleLength);
-				
+				float marginScale = controller.chosenplanet.currfloor.nextfloor != null ? (float) controller.chosenplanet.currfloor.nextfloor.marginScale : 1;
+				var holdMargin =
+					1.0f - ((minAngleMargin * marginScale) / controller.chosenplanet.currfloor.angleLength);
 				if (controller.keyTimes.Count > 0
 				    && !GCS.d_stationary
 				    && !GCS.d_freeroam
@@ -547,16 +536,18 @@ namespace NoStopMod.InputFixer
 				        || nextTileIsHold
 				        || controller.chosenplanet.currfloor.holdLength == -1
 				        || controller.chosenplanet.currfloor.holdCompletion < holdMargin)
-				    && (!RDC.auto || !controller.gameworld)
+				    && (!RDC.auto || !scrController.isGameWorld)
 				    && (!controller.mobileMenu || (controller.mobileMenu &&
 				                                   scnMobileMenu.instance.mobileMenuPhase ==
 				                                   scnMobileMenu.MobileMenuPhase.Road))
-				    && (!controller.gameworld ||
+				    && (!scrController.isGameWorld ||
 				        controller.chosenplanet.currfloor.seqID < controller.lm.listFloors.Count - 1)
-				    // && !alreadyHitHoldEnding //don't use this input!
+				    //&& !alreadyHitHoldEnding //don't use this input!
 				    && !BenchmarkModeReflectionField.GetValue(controller))
 				{
+					// printe ("Hit()");
 
+					//if(floorTapCount > 1)
 					{
 						controller.keyTimes.RemoveAt(0);
 						var didSwitch = controller.Hit();
@@ -568,11 +559,8 @@ namespace NoStopMod.InputFixer
 							// Need to snapshot the currently held keys that must be released
 							// to complete the hold. Also need to clear out old keys for when
 							// we allow pressing to end a hold.
-
-							//holdKeys.Clear ();
-							//IterateValidKeysHeld ((k) => holdKeys.Add (k), (k) => holdKeys.Remove (k));
 							holdKeys.Clear();
-							IterateValidKeysHeld(controller, (k) => holdKeys.Add(k), (k) => holdKeys.Remove(k));
+							IterateValidKeysHeld((k) => holdKeys.Add(k), (k) => holdKeys.Remove(k));
 						}
 					}
 
@@ -590,11 +578,8 @@ namespace NoStopMod.InputFixer
 							// Need to snapshot the currently held keys that must be released
 							// to complete the hold. Also need to clear out old keys for when
 							// we allow pressing to end a hold.
-
-							//holdKeys.Clear ();
-							//IterateValidKeysHeld ((k) => holdKeys.Add (k), (k) => holdKeys.Remove (k));
 							holdKeys.Clear();
-							IterateValidKeysHeld(controller, (k) => holdKeys.Add(k), (k) => holdKeys.Remove(k));
+							IterateValidKeysHeld((k) => holdKeys.Add(k), (k) => holdKeys.Remove(k));
 						}
 					}
 				}
@@ -616,110 +601,26 @@ namespace NoStopMod.InputFixer
 			}
         }
         
-        public static void IterateValidKeysHeld(scrController controller, Action<ushort> foundHeld, Action<ushort> foundSpecial)
+        
+        private static void IterateValidKeysHeld(Action<ushort> foundHeld, Action<ushort> foundSpecial)
         {
-	        // Luxus가 막음 (여기부터)
-	        // TOUCH
 	        // if (ADOBase.isMobile)
 	        // {
-	        //     foreach (var t in Input.touches)
-	        //     {
-	        //         if (!controller.IsScreenPointInsideUIElements (t.position))
-	        //         {
-	        //             // Treat nulls as touches
-	        //             foundHeld (null);
-	        //         }
-	        //     }
+		       //  foreach (Touch touch in Input.touches)
+		       //  {
+			      //   if (!this.IsScreenPointInsideUIElements(touch.position))
+				     //    foundHeld((object) null);
+		       //  }
 	        // }
-
-	        // MOUSE
-	        // else
-	        // Luxus가 막음 (여기까지)
 	        
-	        // 이거 바뀜
-	        // {
-	        //     for (var i = 323; i <= 329; i++)
-	        //     {
-	        //         var keyCode = (KeyCode)i;
-	        //         if (Input.GetKey (keyCode))
-	        //         {
-	        //             foundHeld (keyCode);
-	        //         }
-	        //     }
-	        // }
-
-	        foreach (var @ushort in keyMask)
+	        foreach (var keyCode in keyMask)
 	        {
-		        foundHeld(@ushort);
+		        foundHeld(keyCode);
 	        }
-
-	        // KEYBOARD
-	        // {
-	        //     const int KeyCodeJustKeys = 320;
-				     //
-	        //     for (var i = 0; i < keyMask.Count; i++)
-	        //     {
-		       //      
-	        //     }
-	        //     
-	        //     for (var i = 0; i < KeyCodeJustKeys; i++)
-	        //     {
-	        //         var keyCode = (KeyCode)i;
-	        //         if (Input.GetKey (keyCode))
-	        //         {
-	        //             // printe ("keydown on: " + keyCode.ToString ());
-	        //
-	        //             //Letters have single-character length keycodes ('a','b',..)
-	        //             //and we only want to support multiple input in one frame for these
-	        //             //we cant just use the whole list of keycodes cause ctrl activates both leftCtrl and Ctrl, for example, so double input
-	        //
-	        //             //TEMP: test disabling this, see if any problems
-	        //
-	        //             // if (keyCode.ToString ().Length == 1 || //a clever way to say 'only letters'
-	        //             // keyCode.ToString ().Contains ("Arrow"))
-	        //             // {
-	        //
-	        //             //     keyCount++;
-	        //             // }
-	        //             // else
-	        //             // {
-	        //             //     //for non-letters, only increase to 1 at max.
-	        //             //     if (keyCount == 0) keyCount++;
-	        //             // }
-	        //
-	        //             foundHeld (keyCode);
-	        //         }
-	        //     }
-	        //
-	        //     // Normally we would check for special keys here, but since held keys are only
-	        //     // used to snapshot for hold notes, it's likely that the special keys will be
-	        //     // released for the holds.
-	        // }
-
-	        //JOYSTICK
-	        //problem: hitting one button triggers both Joystick0Button1 and JoystickButton1
-	        //hence just check only these keys
-
-	        // var joystickButtons = GCS.joystickButtons;
-	        // for (int i = 0; i < joystickButtons.Length; i++)
-	        // {
-	        //     if (Input.GetKey (joystickButtons[i]))
-	        //         foundHeld (joystickButtons[i]);
-	        // }
-
-	        // Use extremely-unlikely-to-be-used buttons for dpad inputs
-	        // Luxus가 막음 (여기부터)
-	        // if (controller.dpadInputChecker.holdingX)
-	        // {
-	        //     foundHeld (KeyCode.Joystick8Button0);
-	        // }
-	        // if (controller.dpadInputChecker.holdingY)
-	        // {
-	        //     foundHeld (KeyCode.Joystick8Button1);
-	        // }
-	        // Luxus가 막음 (여기까지)
+	        // foreach (object mainHeldKey in RDInput.GetMainHeldKeys())
+		       //  foundHeld(mainHeldKey);
         }
-
+        
         public static bool ValidInputWasReleased(scrController controller)
         {
 	        // if (ADOBase.isMobile)
@@ -733,45 +634,31 @@ namespace NoStopMod.InputFixer
 	        // else
 	        {
 		        bool holding = controller.holding;
-
+		        
+		        
 		        List<ushort> list = new();
 		        foreach (var holdKey in InputFixerManager.holdKeys)
 		        {
-			        
-			        
-				        // if (key == KeyCode.Joystick8Button0 && !controller.dpadInputChecker.holdingX || key == KeyCode.Joystick8Button1 && !controller.dpadInputChecker.holdingY || !Input.GetKey(key))
-					       //  InputFixerManager.holdKeys.RemoveAt(index);
-
-						       //InputFixerManager.holdKeys.Remove(holdKey);
-					       
-					if (!InputFixerManager.keyMask.Contains(holdKey))
-					{
-						list.Add(holdKey);
-					}
-			        
+			        if (!InputFixerManager.keyMask.Contains(holdKey))
+			        {
+				        list.Add(holdKey);
+			        }
 		        }
 		        foreach (var removeKey in list)
 		        {
 			        InputFixerManager.holdKeys.Remove(removeKey);
 		        }
 		        
-		        // for (int index = InputFixerManager.holdKeys.Count - 1; index >= 0; --index)
-		        // {
-			       //  ushort? holdKey = InputFixerManager.holdKeys[index];
-			       //  if (!holdKey.HasValue)
-			       //  {
-				      //   InputFixerManager.holdKeys.RemoveAt(index);
-			       //  }
-			       //  else
-			       //  {
-				      //   holdKey = InputFixerManager.holdKeys[index];
-				      //   KeyCode key = holdKey.Value;
-				      //   if (key == KeyCode.Joystick8Button0 && !controller.dpadInputChecker.holdingX || key == KeyCode.Joystick8Button1 && !controller.dpadInputChecker.holdingY || !Input.GetKey(key))
-					     //    InputFixerManager.holdKeys.RemoveAt(index);
-			       //  }
-		        // }
 		        
-		        if (holding && InputFixerManager.holdKeys.Count == 0)
+		        // List<object> mainHeldKeys = RDInput.GetMainHeldKeys();
+		        // for (int index = controller.holdKeys.Count - 1; index >= 0; --index)
+		        // {
+			       //  if (controller.holdKeys[index] == null) // null이면 제거
+				      //   controller.holdKeys.RemoveAt(index);
+			       //  else if (mainHeldKeys.IndexOf(controller.holdKeys[index]) == -1) // 눌린상태가 아니면 제거
+				      //   controller.holdKeys.RemoveAt(index);
+		        // }
+		        if (holding && holdKeys.Count == 0)
 			        return true;
 	        }
 	        return false;
@@ -793,26 +680,20 @@ namespace NoStopMod.InputFixer
 			      //   }
 		       //  }
 	        // }
-
 	        bool flag2;
 	        // if (ADOBase.isMobile)
 	        // {
-		       //  flag2 = ((!Input.anyKeyDown || Input.GetKeyDown(KeyCode.Mouse0)
-			      //   ? 0
-			      //   : (!Input.GetKeyDown(KeyCode.Mouse1) ? 1 : 0)) | (flag1 ? 1 : 0)) != 0;
+		       //  flag2 = ((!Input.anyKeyDown || Input.GetKeyDown(KeyCode.Mouse0) ? 0 : (!Input.GetKeyDown(KeyCode.Mouse1) ? 1 : 0)) | (flag1 ? 1 : 0)) != 0;
 	        // }
 	        // else
 	        {
 		        bool flag3 = false;
-		        //if (Input.GetKeyDown(KeyCode.Mouse0) || Input.GetKeyDown(KeyCode.Mouse1))
 		        if (keyDownMask.Contains((ushort) (1000 + SharpHook.Native.MouseButton.Button1)) || keyDownMask.Contains((ushort) (1000 + SharpHook.Native.MouseButton.Button2)))
 			        flag3 = EventSystem.current.IsPointerOverGameObject();
 		        if (controller.isCutscene)
 			        flag3 = false;
-		        //flag2 = (Input.anyKeyDown || controller.dpadInputChecker.anyDirDown) && !flag3 && !controller.paused;
-		        flag2 = keyDownMask.Count > 0 && !flag3 && !controller.paused;
+		        flag2 = (keyDownMask.Count > 0) && !flag3 && !controller.paused;
 	        }
-
 	        return flag2 && controller.CountValidKeysPressed() > 0;
         }
 

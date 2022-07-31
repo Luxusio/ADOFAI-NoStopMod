@@ -1,7 +1,6 @@
 ﻿using NoStopMod.InputFixer.HitIgnore.KeyLimiter;
 using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 using KeyCode = SharpHook.Native.KeyCode;
 
 namespace NoStopMod.InputFixer.HitIgnore
