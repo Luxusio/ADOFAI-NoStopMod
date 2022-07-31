@@ -224,8 +224,9 @@ namespace NoStopMod.InputFixer
         {
             public static void Postfix(scrCamera __instance)
             {
-                if (InputFixerManager.camyToPosChanged)
+                if (InputFixerManager.haveToReplaceCamyToPos)
                 {
+                    InputFixerManager.haveToReplaceCamyToPos = false;
                     __instance.topos.x = InputFixerManager.overrideCamyToPos[0];
                     __instance.topos.y = InputFixerManager.overrideCamyToPos[1];
                     __instance.topos.z = InputFixerManager.overrideCamyToPos[2];
