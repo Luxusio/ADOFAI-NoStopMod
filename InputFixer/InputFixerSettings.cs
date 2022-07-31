@@ -4,7 +4,7 @@ using SimpleJSON;
 
 namespace NoStopMod.InputFixer
 {
-    class InputFixerSettings : SettingsBase
+    public class InputFixerSettings : SettingsBase
     {
         public bool insertKeyOnWindowFocus = true;
         //public bool enableAsync = false;

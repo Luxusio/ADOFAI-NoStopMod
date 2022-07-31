@@ -49,7 +49,6 @@
     <Compile Include="InputFixer\InputFixerSettings.cs" />
     <Compile Include="InputFixer\HitIgnore\HitIgnoreManager.cs" />
     <Compile Include="InputFixer\HitIgnore\HitIgnorePatches.cs" />
-    <Compile Include="Helper\SimpleGUI.cs" />
     <Compile Include="InputFixer\KeyEvent.cs" />
     <Compile Include="lib\SimpleJSON.cs" />
     <Compile Include="NoStopMod.cs" />

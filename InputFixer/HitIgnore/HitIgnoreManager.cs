@@ -5,7 +5,7 @@ using KeyCode = SharpHook.Native.KeyCode;
 
 namespace NoStopMod.InputFixer.HitIgnore
 {
-    class HitIgnoreManager
+    public class HitIgnoreManager
     {
         private static readonly Dictionary<String, HashSet<KeyCode>> _dictionary = new Dictionary<string, HashSet<KeyCode>>();
 

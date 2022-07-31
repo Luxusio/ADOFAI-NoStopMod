@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace NoStopMod.Helper
 {
-    class JSONHelper
+    public class JSONHelper
     {
 
         public static JSONNode CreateEmptyNode()

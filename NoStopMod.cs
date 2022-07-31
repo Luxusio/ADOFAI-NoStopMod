@@ -9,7 +9,7 @@ using System.IO;
 
 namespace NoStopMod
 {
-    class NoStopMod
+    public class NoStopMod
     {
 
         public static UnityModManager.ModEntry mod;

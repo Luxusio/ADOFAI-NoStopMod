@@ -16,7 +16,7 @@ using UnityEngine.EventSystems;
 
 namespace NoStopMod.InputFixer
 {
-    class InputFixerManager
+    public class InputFixerManager
     {
         public static InputFixerSettings settings;
 

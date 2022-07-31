@@ -7,7 +7,7 @@ using SimpleJSON;
 
 namespace NoStopMod.Helper.Abstraction
 {
-    interface SettingsBase
+    public interface SettingsBase
     {
         void Load(ref JSONNode json);
 

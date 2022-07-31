@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 
 namespace NoStopMod.InputFixer.HitIgnore
 {
-    class HitIgnorePatches
+    public class HitIgnorePatches
     {
         
         // scnCLS_serachMode ////////////////////////////////////
