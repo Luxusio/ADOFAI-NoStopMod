@@ -54,7 +54,7 @@ namespace NoStopMod.InputFixer
         public static readonly HashSet<ushort> holdKeys = new();
         public static int countValidKeysPressed;
 
-        public static bool camyToPosChanged = false;
+        public static bool haveToReplaceCamyToPos = false;
         public static float[] overrideCamyToPos;
 		
         //
@@ -611,12 +611,8 @@ namespace NoStopMod.InputFixer
 			    originalCamyToPosPosition[1] != finalCamyToPosRef.y ||
 			    originalCamyToPosPosition[2] != finalCamyToPosRef.z)
 			{
-				camyToPosChanged = true;
+				haveToReplaceCamyToPos = true;
 				overrideCamyToPos = new[] {finalCamyToPosRef.x, finalCamyToPosRef.y, finalCamyToPosRef.z};
-			}
-			else
-			{
-				camyToPosChanged = false;
 			}
         }
         
