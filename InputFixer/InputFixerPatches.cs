@@ -218,6 +218,20 @@ namespace NoStopMod.InputFixer
             }
 
         }
+        
+        [HarmonyPatch(typeof(scrCamera), "Update")]
+        private static class scrCamera_Update_Patch
+        {
+            public static void Postfix(scrCamera __instance)
+            {
+                if (InputFixerManager.camyToPosChanged)
+                {
+                    __instance.topos.x = InputFixerManager.overrideCamyToPos[0];
+                    __instance.topos.y = InputFixerManager.overrideCamyToPos[1];
+                    __instance.topos.z = InputFixerManager.overrideCamyToPos[2];
+                }
+            }
+        }
 
         [HarmonyPatch(typeof(scrController), "CountValidKeysPressed")]
         private static class scrController_CountValidKeysPressed_Patch

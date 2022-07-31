@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using SharpHook;
 using DG.Tweening;
@@ -52,6 +53,9 @@ namespace NoStopMod.InputFixer
         public static readonly HashSet<ushort> keyDownMask = new();
         public static readonly HashSet<ushort> holdKeys = new();
         public static int countValidKeysPressed;
+
+        public static bool camyToPosChanged = false;
+        public static float[] overrideCamyToPos;
 		
         //
         //////////////////////////////////////////////////////////
@@ -221,8 +225,10 @@ namespace NoStopMod.InputFixer
 			
 	        ValidInputWasReleasedThisFrameReflectionField.SetValue(controller, controller.ValidInputWasReleased());
 
-			
-			bool nextTileIsHold = false;
+	        var originalCamyToPosRef = controller.camy.topos;
+	        var originalCamyToPosPosition = new[] { originalCamyToPosRef.x, originalCamyToPosRef.y, originalCamyToPosRef.z };
+
+	        bool nextTileIsHold = false;
 			if (controller.chosenplanet.currfloor.nextfloor)
 			{
 				var possibleConsecFloor = controller.chosenplanet.currfloor.nextfloor;
@@ -598,6 +604,19 @@ namespace NoStopMod.InputFixer
 					controller.chosenplanet.transform.position.y,
 					controller.camy.transform.position.z);
 				// camy.timer = 0;
+			}
+
+			var finalCamyToPosRef = controller.camy.topos;
+			if (originalCamyToPosPosition[0] != finalCamyToPosRef.x ||
+			    originalCamyToPosPosition[1] != finalCamyToPosRef.y ||
+			    originalCamyToPosPosition[2] != finalCamyToPosRef.z)
+			{
+				camyToPosChanged = true;
+				overrideCamyToPos = new[] {finalCamyToPosRef.x, finalCamyToPosRef.y, finalCamyToPosRef.z};
+			}
+			else
+			{
+				camyToPosChanged = false;
 			}
         }
         
