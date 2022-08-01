@@ -54,8 +54,8 @@ namespace NoStopMod.InputFixer
         public static readonly HashSet<ushort> holdKeys = new();
         public static int countValidKeysPressed;
 
-        public static bool haveToReplaceCamyToPos = false;
-        public static float[] overrideCamyToPos;
+        public static bool shouldReplaceCamyToPos;
+        public static Vector3 overrideCamyToPos;
 		
         //
         //////////////////////////////////////////////////////////
@@ -225,8 +225,7 @@ namespace NoStopMod.InputFixer
 			
 	        ValidInputWasReleasedThisFrameReflectionField.SetValue(controller, controller.ValidInputWasReleased());
 
-	        var originalCamyToPosRef = controller.camy.topos;
-	        var originalCamyToPosPosition = new[] { originalCamyToPosRef.x, originalCamyToPosRef.y, originalCamyToPosRef.z };
+	        var cachedToPos = controller.camy.topos;
 
 	        bool nextTileIsHold = false;
 			if (controller.chosenplanet.currfloor.nextfloor)
@@ -599,20 +598,19 @@ namespace NoStopMod.InputFixer
 			if (controller.camy.followMode && controller.camy.followMovingPlatforms)
 			{
 				// camy.frompos = camy.transform.localPosition;
+				var position = controller.chosenplanet.transform.position;
 				controller.camy.topos = new Vector3 (
-					controller.chosenplanet.transform.position.x,
-					controller.chosenplanet.transform.position.y,
+					position.x,
+					position.y,
 					controller.camy.transform.position.z);
 				// camy.timer = 0;
 			}
 
-			var finalCamyToPosRef = controller.camy.topos;
-			if (originalCamyToPosPosition[0] != finalCamyToPosRef.x ||
-			    originalCamyToPosPosition[1] != finalCamyToPosRef.y ||
-			    originalCamyToPosPosition[2] != finalCamyToPosRef.z)
+			var toPos = controller.camy.topos;
+			if (cachedToPos != toPos)
 			{
-				haveToReplaceCamyToPos = true;
-				overrideCamyToPos = new[] {finalCamyToPosRef.x, finalCamyToPosRef.y, finalCamyToPosRef.z};
+				shouldReplaceCamyToPos = true;
+				overrideCamyToPos = toPos;
 			}
         }
         
