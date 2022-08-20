@@ -187,8 +187,8 @@ namespace NoStopMod.InputFixer
                 var targetTick = eventTick != 0 ? eventTick : InputFixerManager.currFrameTick;
 
                 
-                scrController.States state = (scrController.States) controller.GetState();
-                scrController.States targetState = (scrController.States) InputFixerManager.DestinationStateReflectionField.GetValue(controller.stateMachine).state;
+                States state = (States) controller.currentState;
+                States targetState = (States) InputFixerManager.DestinationStateReflectionField.GetValue(controller.stateMachine).state;
                 
 #if  DEBUG
                 // if (InputFixerManager.countValidKeysPressed > 0 || InputFixerManager.validKeyWasReleased)
@@ -196,8 +196,8 @@ namespace NoStopMod.InputFixer
                 //     NoStopMod.mod.Logger.Log($"PlayerControl before ({state}, {targetState}, {InputFixerManager.validKeyWasReleased}, {InputFixerManager.countValidKeysPressed}, {targetTick}), {controller.currFloor.seqID}th tile");
                 // }
 #endif
-                if (state == scrController.States.PlayerControl &&
-                    targetState == scrController.States.PlayerControl)
+                if (state == States.PlayerControl &&
+                    targetState == States.PlayerControl)
                 {
                     InputFixerManager.PlayerControl_Update(controller, targetTick);
                 }

@@ -9,8 +9,7 @@ namespace NoStopMod.InputFixer.HitIgnore
     {
         private static readonly Dictionary<String, HashSet<KeyCode>> _dictionary = new Dictionary<string, HashSet<KeyCode>>();
 
-        public static bool scnCLS_searchMode;
-        public static scrController.States scrController_state;
+        public static States scrController_state;
 
         public static void Init()
         {
@@ -61,11 +60,9 @@ namespace NoStopMod.InputFixer.HitIgnore
             ignoreScnTaroMenu3.Add(KeyCode.Vc4);
             ignoreScnTaroMenu3.Add(KeyCode.Vc5);
 
-            scnCLS_searchMode = false;
-
             if (scrController.instance != null)
             {
-                scrController_state = (scrController.States) scrController.instance.GetState();
+                scrController_state = (States) scrController.instance.currentState;
             }
 
             KeyLimiterManager.Init();
@@ -84,7 +81,7 @@ namespace NoStopMod.InputFixer.HitIgnore
                 return true;
             }
             
-            if (scrController_state != scrController.States.PlayerControl && !scrController.instance.isEditingLevel && scrController.instance.uiController.difficultyUIMode != DifficultyUIMode.DontShow)
+            if (scrController_state != States.PlayerControl && !ADOBase.isEditingLevel && ADOBase.uiController.difficultyUIMode != DifficultyUIMode.DontShow)
             {
                 if (keyCode is KeyCode.VcNumPadLeft 
                             or KeyCode.VcLeft)
@@ -98,7 +95,7 @@ namespace NoStopMod.InputFixer.HitIgnore
                 }
             }
 
-            if (GCS.sceneToLoad == "scnCLS" && scnCLS_searchMode)
+            if (GCS.sceneToLoad == "scnCLS" && ADOBase.cls.optionsPanels.searchMode)
             {
                 return true;
             }

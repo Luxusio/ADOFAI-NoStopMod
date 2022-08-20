@@ -7,25 +7,6 @@ namespace NoStopMod.InputFixer.HitIgnore
 {
     public class HitIgnorePatches
     {
-        
-        // scnCLS_serachMode ////////////////////////////////////
-        [HarmonyPatch(typeof(scnCLS), "Refresh")]
-        private static class scnCLS_Refresh_Patch
-        {
-            public static void Postfix(scnCLS __instance)
-            {
-                HitIgnoreManager.scnCLS_searchMode = __instance.searchMode;
-            }
-        }
-
-        [HarmonyPatch(typeof(scnCLS), "ToggleSearchMode")]
-        private static class scnCLS_ToggleSearchMode_Patch
-        {
-            public static void Postfix(scnCLS __instance)
-            {
-                HitIgnoreManager.scnCLS_searchMode = __instance.searchMode;
-            }
-        }
 
         // scrController_state //////////////////////////
         [HarmonyPatch(typeof(StateEngine), "ChangeState")]
@@ -33,7 +14,7 @@ namespace NoStopMod.InputFixer.HitIgnore
         {
             public static void Postfix([NotNull] StateEngine __instance, Enum newState, StateTransition transition)
             {
-                HitIgnoreManager.scrController_state = (scrController.States) newState;
+                HitIgnoreManager.scrController_state = (States) newState;
             }
         }
 
@@ -42,7 +23,7 @@ namespace NoStopMod.InputFixer.HitIgnore
         {
             public static void Postfix(scrController __instance)
             {
-                HitIgnoreManager.scrController_state = scrController.States.Won;
+                HitIgnoreManager.scrController_state = States.Won;
             }
         }
 

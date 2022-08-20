@@ -256,8 +256,8 @@ namespace NoStopMod.InputFixer
 				
 				double minAngleMargin = scrMisc.GetAdjustedAngleBoundaryInDeg (
 					HitMarginGeneral.Counted,
-					(float)(controller.conductor.bpm * controller.speed),
-					controller.conductor.song.pitch) * Mathf.Deg2Rad;
+					(float)(ADOBase.conductor.bpm * controller.speed),
+					ADOBase.conductor.song.pitch) * Mathf.Deg2Rad;
 				
 				double extraRadiansBeforeDeath = Math.Max(Mathf.PI, minAngleMargin * 2);
 				if (controller.noFail || controller.currFloor.isSafe)
@@ -274,7 +274,7 @@ namespace NoStopMod.InputFixer
 
 				//Check for fail
 				if (scrController.isGameWorld
-				    && controller.lm.listFloors.Count > controller.currFloor.seqID + 1 // i.e. must be at least two higher
+				    && ADOBase.lm.listFloors.Count > controller.currFloor.seqID + 1 // i.e. must be at least two higher
 				    && angleDiff > extraRadiansBeforeDeath)
 				{
 					controller.FailAction();
@@ -357,8 +357,8 @@ namespace NoStopMod.InputFixer
 
 				double minAngleMargin = scrMisc.GetAdjustedAngleBoundaryInDeg(
 					HitMarginGeneral.Counted,
-					(float) (controller.conductor.bpm * controller.speed),
-					controller.conductor.song.pitch) * Mathf.Deg2Rad;
+					(float) (ADOBase.conductor.bpm * controller.speed),
+					ADOBase.conductor.song.pitch) * Mathf.Deg2Rad;
 
 				bool nextTileIsAuto = controller.chosenplanet.currfloor.nextfloor != null && controller.chosenplanet.currfloor.nextfloor.auto;
 
@@ -479,8 +479,8 @@ namespace NoStopMod.InputFixer
 				    controller.chosenplanet.AutoShouldHitNow() && controller.chosenplanet.currfloor.holdLength > -1
 				    && GCS.checkpointNum == controller.chosenplanet.currfloor.seqID
 				    //&& !alreadyHitHoldEnding
-				    && (scrController.States) controller.GetState() != scrController.States.Fail
-				    && (scrController.States) controller.GetState() != scrController.States.Fail2)
+				    && controller.currentState != States.Fail
+				    && controller.currentState != States.Fail2)
 				{
 					//alreadyHitHoldEnding = true;
 					controller.Hit();
@@ -496,8 +496,8 @@ namespace NoStopMod.InputFixer
 				
 				double minAngleMargin = scrMisc.GetAdjustedAngleBoundaryInDeg(
 					HitMarginGeneral.Counted,
-					(float) (controller.conductor.bpm * controller.speed),
-					controller.conductor.song.pitch) * Mathf.Deg2Rad;
+					(float) (ADOBase.conductor.bpm * controller.speed),
+					ADOBase.conductor.song.pitch) * Mathf.Deg2Rad;
 				
 				float marginScale = controller.chosenplanet.currfloor.nextfloor != null ? (float) controller.chosenplanet.currfloor.nextfloor.marginScale : 1;
 				var holdMargin = 1.0f - ((minAngleMargin * marginScale) / controller.chosenplanet.currfloor.angleLength);
@@ -528,8 +528,8 @@ namespace NoStopMod.InputFixer
 
 				double minAngleMargin = scrMisc.GetAdjustedAngleBoundaryInDeg(
 					HitMarginGeneral.Counted,
-					(float) (controller.conductor.bpm * controller.speed),
-					controller.conductor.song.pitch) * Mathf.Deg2Rad;
+					(float) (ADOBase.conductor.bpm * controller.speed),
+					ADOBase.conductor.song.pitch) * Mathf.Deg2Rad;
 
 				float marginScale = controller.chosenplanet.currfloor.nextfloor != null ? (float) controller.chosenplanet.currfloor.nextfloor.marginScale : 1;
 				var holdMargin =
@@ -542,11 +542,11 @@ namespace NoStopMod.InputFixer
 				        || controller.chosenplanet.currfloor.holdLength == -1
 				        || controller.chosenplanet.currfloor.holdCompletion < holdMargin)
 				    && (!RDC.auto || !scrController.isGameWorld)
-				    && (!controller.mobileMenu || (controller.mobileMenu &&
-				                                   scnMobileMenu.instance.mobileMenuPhase ==
-				                                   scnMobileMenu.MobileMenuPhase.Road))
+				    && (!ADOBase.mobileMenu || (ADOBase.mobileMenu &&
+				                                scnMobileMenu.instance.mobileMenuPhase ==
+				                                scnMobileMenu.MobileMenuPhase.Road))
 				    && (!scrController.isGameWorld ||
-				        controller.chosenplanet.currfloor.seqID < controller.lm.listFloors.Count - 1)
+				        controller.chosenplanet.currfloor.seqID < ADOBase.lm.listFloors.Count - 1)
 				    //&& !alreadyHitHoldEnding //don't use this input!
 				    && !BenchmarkModeReflectionField.GetValue(controller))
 				{
