@@ -30,8 +30,8 @@ namespace NoStopMod
             NoStopMod.harmony = new Harmony(modEntry.Info.Id);
             NoStopMod.mod = modEntry;
 
-            LoadSharpHookLib();
-            
+            //LoadSharpHookLib();
+            LoadDll("Mods/NoStopMod/SharpHook.dll");
 
             InputFixerManager.Init();
 
@@ -126,14 +126,18 @@ namespace NoStopMod
                 return;
             }
 
-            FileStream fs = new FileStream(dllPath, FileMode.Open);
+            LoadDll(dllPath);
+        }
+
+        private static void LoadDll(String path)
+        {
+            FileStream fs = new FileStream(path, FileMode.Open);
             byte[] buffer = new byte[(int)fs.Length];
             fs.Read(buffer, 0, buffer.Length);
             fs.Close();
 
             AppDomain.CurrentDomain.Load(buffer);
-            NoStopMod.mod.Logger.Log("Dll load : " + dllPath);
-
+            NoStopMod.mod.Logger.Log("Dll load : " + path);
         }
 
     }

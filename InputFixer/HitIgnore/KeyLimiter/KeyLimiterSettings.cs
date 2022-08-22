@@ -2,7 +2,7 @@
 using NoStopMod.Helper.Abstraction;
 using SimpleJSON;
 using System.Collections.Generic;
-using KeyCode = SharpHook.Native.KeyCode;
+using KeyCode = SharpHook.Native.NativeKeyCode;
 
 namespace NoStopMod.InputFixer.HitIgnore.KeyLimiter
 {

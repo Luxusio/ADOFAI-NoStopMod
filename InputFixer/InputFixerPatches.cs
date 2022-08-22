@@ -6,7 +6,7 @@ using System.Linq;
 using JetBrains.Annotations;
 using NoStopMod.Helper;
 using UnityEngine;
-using KeyCode = SharpHook.Native.KeyCode;
+using KeyCode = SharpHook.Native.NativeKeyCode;
 
 namespace NoStopMod.InputFixer
 {
@@ -98,68 +98,68 @@ namespace NoStopMod.InputFixer
                 }
 
                 // 키 씹힘 안정화
-                LinkedList<ushort> ignoredPressKeys = new(); // 씹힌 키 목록
-                LinkedList<ushort> ignoredReleaseKeys = new(); // 씹힌 키 목록
-
-                for (int i = 0; i < KeyCodeHelper.UnityNativeKeyCodeList.Count; i++)
-                {
-                    var tuple = KeyCodeHelper.UnityNativeKeyCodeList[i];
-                    if (Input.GetKeyUp(tuple.Item1))
-                    {
-                        if (InputFixerManager.keyMask.Contains(tuple.Item2))
-                        {
-#if DEBUG
-                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Fix troll release key {(KeyCode) tuple.Item2}, {tuple.Item1}");
-#endif
-                            ignoredReleaseKeys.AddLast(tuple.Item2);
-                        }
-#if DEBUG
-                        else
-                        {
-                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Just release key {(KeyCode) tuple.Item2}, {tuple.Item1}");
-                        }
-#endif
-                    }
-                    else if (Input.GetKeyDown(tuple.Item1))
-                    {
-                        if (!InputFixerManager.keyMask.Contains(tuple.Item2))
-                        {
-#if DEBUG
-                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Fix troll press key {(KeyCode) tuple.Item2}, {tuple.Item1}");
-#endif
-                            ignoredPressKeys.AddLast(tuple.Item2);
-                        }
-#if DEBUG
-                        else
-                        {
-                            NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Just press key {(KeyCode) tuple.Item2}, {tuple.Item1}");
-                        }
-#endif
-                    }
-                }
-
-                if (ignoredPressKeys.Count > 0 || ignoredReleaseKeys.Count > 0)
-                {
-                    if (rawKeyCodesTick != InputFixerManager.currFrameTick)
-                    {
-                        ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick);
-                        rawKeyCodesTick = InputFixerManager.currFrameTick;
-                        pressKeyCodes.Clear();
-                        InputFixerManager.keyDownMask.Clear();
-                    }
-
-                    foreach (var ignoredPressKey in ignoredPressKeys)
-                    {
-                        pressKeyCodes.Add((KeyCode) ignoredPressKey);
-                        InputFixerManager.keyMask.Add(ignoredPressKey);
-                        InputFixerManager.keyDownMask.Add(ignoredPressKey);
-                    }
-                    
-                    foreach (var ignoredReleaseKey in ignoredReleaseKeys)
-                    {
-                        InputFixerManager.keyMask.Remove(ignoredReleaseKey);
-                    }
-                }
+//                 LinkedList<ushort> ignoredPressKeys = new(); // 씹힌 키 목록
+//                 LinkedList<ushort> ignoredReleaseKeys = new(); // 씹힌 키 목록
+//
+//                 for (int i = 0; i < KeyCodeHelper.UnityNativeKeyCodeList.Count; i++)
+//                 {
+//                     var tuple = KeyCodeHelper.UnityNativeKeyCodeList[i];
+//                     if (Input.GetKeyUp(tuple.Item1))
+//                     {
+//                         if (InputFixerManager.keyMask.Contains(tuple.Item2))
+//                         {
+// #if DEBUG
+//                             NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Fix troll release key {(KeyCode) tuple.Item2}, {tuple.Item1}");
+// #endif
+//                             ignoredReleaseKeys.AddLast(tuple.Item2);
+//                         }
+// #if DEBUG
+//                         else
+//                         {
+//                             NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Just release key {(KeyCode) tuple.Item2}, {tuple.Item1}");
+//                         }
+// #endif
+//                     }
+//                     else if (Input.GetKeyDown(tuple.Item1))
+//                     {
+//                         if (!InputFixerManager.keyMask.Contains(tuple.Item2))
+//                         {
+// #if DEBUG
+//                             NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Fix troll press key {(KeyCode) tuple.Item2}, {tuple.Item1}");
+// #endif
+//                             ignoredPressKeys.AddLast(tuple.Item2);
+//                         }
+// #if DEBUG
+//                         else
+//                         {
+//                             NoStopMod.mod.Logger.Log($"[{Time.frameCount}] Just press key {(KeyCode) tuple.Item2}, {tuple.Item1}");
+//                         }
+// #endif
+//                     }
+//                 }
+//
+//                 if (ignoredPressKeys.Count > 0 || ignoredReleaseKeys.Count > 0)
+//                 {
+//                     if (rawKeyCodesTick != InputFixerManager.currFrameTick)
+//                     {
+//                         ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick);
+//                         rawKeyCodesTick = InputFixerManager.currFrameTick;
+//                         pressKeyCodes.Clear();
+//                         InputFixerManager.keyDownMask.Clear();
+//                     }
+//
+//                     foreach (var ignoredPressKey in ignoredPressKeys)
+//                     {
+//                         pressKeyCodes.Add((KeyCode) ignoredPressKey);
+//                         InputFixerManager.keyMask.Add(ignoredPressKey);
+//                         InputFixerManager.keyDownMask.Add(ignoredPressKey);
+//                     }
+//                     
+//                     foreach (var ignoredReleaseKey in ignoredReleaseKeys)
+//                     {
+//                         InputFixerManager.keyMask.Remove(ignoredReleaseKey);
+//                     }
+//                 }
                 
                 ProcessKeyInputs(pressKeyCodes, rawKeyCodesTick);
             }

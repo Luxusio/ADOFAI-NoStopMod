@@ -66,14 +66,15 @@ namespace NoStopMod.InputFixer
 
         public static void Init()
         {
-            IGlobalHook mHook = new SimpleGlobalHook();
+	        SimpleGlobalHook mHook = new SimpleGlobalHook();
             mHook.KeyPressed += HookOnKeyPressed;
             mHook.KeyReleased += HookOnKeyReleased;
             mHook.MousePressed += HookOnMousePressed;
             mHook.MouseReleased += HookOnMouseReleased;
+            mHook.RunAsync();
             hook_ = mHook;
 
-            NoStopMod.onToggleListener.Add(OnToggle);
+            //NoStopMod.onToggleListener.Add(OnToggle);
             NoStopMod.onGUIListener.Add(OnGUI);
             NoStopMod.onApplicationQuitListener.Add(OnApplicationQuit);
 
@@ -121,7 +122,7 @@ namespace NoStopMod.InputFixer
                 bool stopHook = false;
                 try
                 {
-                    IGlobalHook mHook = new SimpleGlobalHook();
+	                SimpleGlobalHook mHook = new SimpleGlobalHook();
                     mHook.KeyPressed += HookOnKeyPressed;
                     mHook.KeyReleased += HookOnKeyReleased;
                     mHook.MousePressed += HookOnMousePressed;
@@ -179,24 +180,28 @@ namespace NoStopMod.InputFixer
         {
             ushort keyCode = (ushort) e.Data.KeyCode;
             keyQueue.Enqueue(new KeyEvent(DateTime.Now.Ticks, keyCode, true));
+            NoStopMod.mod.Logger.Error($"[{Time.frameCount}] kp {e.Data.KeyCode}");
         }
 
         private static void HookOnKeyReleased(object sender, KeyboardHookEventArgs e)
         {
             ushort keyCode = (ushort) e.Data.KeyCode;
             keyQueue.Enqueue(new KeyEvent(DateTime.Now.Ticks, keyCode, false));
+            NoStopMod.mod.Logger.Error($"[{Time.frameCount}] kr {e.Data.KeyCode}");
         }
 
         private static void HookOnMousePressed(object sender, MouseHookEventArgs e)
         {
             var keyCode = (ushort) (e.Data.Button + 1000);
             keyQueue.Enqueue(new KeyEvent(DateTime.Now.Ticks, keyCode, true));
+            NoStopMod.mod.Logger.Error($"[{Time.frameCount}] mp {e.Data.Button}");
         }
         
         private static void HookOnMouseReleased(object sender, MouseHookEventArgs e)
         {
             var keyCode = (ushort) (e.Data.Button + 1000);
             keyQueue.Enqueue(new KeyEvent(DateTime.Now.Ticks, keyCode, false));
+            NoStopMod.mod.Logger.Error($"[{Time.frameCount}] mr {e.Data.Button}");
         }
 
         public static double GetSongPosition(scrConductor __instance, long nowTick)

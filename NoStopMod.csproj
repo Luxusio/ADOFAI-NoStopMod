@@ -42,6 +42,7 @@
     <Compile Include="Helper\JSONHelper.cs" />
     <Compile Include="Helper\KeyCodeHelper.cs" />
     <Compile Include="Helper\ReflectionField.cs" />
+    <Compile Include="InputFixer\CustomGlobalHook.cs" />
     <Compile Include="InputFixer\HitIgnore\KeyLimiter\KeyLimiterManager.cs" />
     <Compile Include="InputFixer\HitIgnore\KeyLimiter\KeyLimiterSettings.cs" />
     <Compile Include="InputFixer\InputFixerManager.cs" />
@@ -130,6 +131,9 @@
     </Reference>
     <Reference Include="Rewired_Windows_Functions, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\lib\Rewired_Windows_Functions.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpHook">
+      <HintPath>..\lib\common\SharpHook.dll</HintPath>
     </Reference>
     <Reference Include="SharpHook, Version=3.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\lib\common\SharpHook.dll</HintPath>

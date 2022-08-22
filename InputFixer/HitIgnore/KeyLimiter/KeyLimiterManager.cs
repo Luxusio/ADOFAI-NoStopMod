@@ -4,7 +4,7 @@ using System.Linq;
 using SharpHook.Native;
 using UnityEngine;
 using UnityModManagerNet;
-using KeyCode = SharpHook.Native.KeyCode;
+using KeyCode = SharpHook.Native.NativeKeyCode;
 
 namespace NoStopMod.InputFixer.HitIgnore.KeyLimiter
 {
@@ -59,7 +59,8 @@ namespace NoStopMod.InputFixer.HitIgnore.KeyLimiter
                     }
                     else
                     {
-                        GUILayout.Label(settings.limitKeys[i].ToString(), Array.Empty<GUILayoutOption>());
+                        string str = settings.limitKeys[i].ToString();
+                        GUILayout.Label(str, Array.Empty<GUILayoutOption>());
                     }
                     GUILayout.Space(8f);
                 }
